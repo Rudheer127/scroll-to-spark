@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* Design tokens. Every color, font and radius used in the UI comes from here. */
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: #fafafa;
+  --color-surface: #ffffff;
+  --color-border: #dbdbdb;
+  --color-ink: #262626;
+  --color-muted: #737373;
+  --color-chip: #efefef;
+  --color-action: #0095f6;
+  --color-danger: #ed4956;
+
+  --color-brand-orange: #f58529;
+  --color-brand-pink: #dd2a7b;
+  --color-brand-purple: #8134af;
+  --color-brand-indigo: #515bd4;
+
+  --radius-card: 16px;
+  --radius-control: 10px;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* The brand gradient is only for the logo, story rings and one main action per screen. */
+.text-brand-gradient {
+  background: linear-gradient(
+    90deg,
+    var(--color-brand-orange),
+    var(--color-brand-pink),
+    var(--color-brand-purple),
+    var(--color-brand-indigo)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-action);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
