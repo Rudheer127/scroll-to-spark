@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+out/
+dist/
+
+# environment and secrets
+.env
+.env.*
+!.env.example
+
+# tooling and local files
+.vercel/
+.supabase/
+.claude/
+.agents/
+.hallmark/
+.DS_Store
+*.log
+
+# only README.md and docs/*.md are committed as Markdown
