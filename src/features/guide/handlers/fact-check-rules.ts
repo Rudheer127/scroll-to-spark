@@ -1,3 +1,4 @@
+import { affirmedMatch } from "../guard/rules/negation";
 import { claimsVerification } from "../guard/rules/verification";
 import type { GuideResponse } from "../schemas";
 import type { EvidenceRow, Violation } from "../types";
@@ -70,13 +71,14 @@ export function mentionsCaveat(rows: EvidenceRow[]) {
     const tokens = caveatTokens(top?.caveat ?? "");
     if (tokens.length === 0) return null;
     const text = res.message.toLowerCase();
-    const hits = tokens.filter((t) => text.includes(t)).length;
+    const hits = tokens.filter((t) => new RegExp(String.raw`\b${t}\b`).test(text)).length;
     return hits >= Math.min(NEEDED_OVERLAP, tokens.length) ? null : "missing_caveat";
   };
 }
 
 const QUOTED = /["\u201C\u201D][^"\u201C\u201D]*["\u201C\u201D]/g;
-const AFFIRM = /\b(indeed|true|correct|accurate|holds|confirmed|right|proven|yes|factual|valid)\b/i;
+const AFFIRM =
+  /\b(indeed|true|correct|accurate|holds|confirmed|right|proven|yes|factual|valid)\b/gi;
 
 /**
  * A number found only in the user's message may appear only inside quotation marks, as their own
@@ -92,7 +94,7 @@ export function echoOnly(userText: string, rows: EvidenceRow[]) {
       const quotes = s.match(QUOTED) ?? [];
       const outside = s.replace(QUOTED, " ");
       if (userOnly(outside)) return true;
-      return quotes.some(userOnly) && AFFIRM.test(outside);
+      return quotes.some(userOnly) && affirmedMatch(outside, AFFIRM);
     });
     return bad ? "ungrounded_number" : null;
   };
@@ -102,4 +104,23 @@ export function echoOnly(userText: string, rows: EvidenceRow[]) {
 export function verifiedOnlyIfChecked(rows: EvidenceRow[]) {
   return (res: GuideResponse): Violation | null =>
     rows.some((r) => r.verified_at !== null) ? null : claimsVerification(res);
+}
+
+/** A fact check always ends in a verdict, even if it is not_enough_evidence. */
+export function requiresVerdict(res: GuideResponse): Violation | null {
+  return res.verdict === null ? "missing_verdict" : null;
+}
+
+const AGREEING = [
+  /\b(?:that|this|it)(?:'s|\s+is)\s+(?:true|correct|right|accurate)\b/gi,
+  /\baccurate\b/gi,
+  /\byes\b/gi,
+];
+
+/** Agreeing words ("that is true", "yes") need a supported or partly_supported verdict. */
+export function affirmsOnlyWithSupport(res: GuideResponse): Violation | null {
+  if (res.verdict === "supported" || res.verdict === "partly_supported") return null;
+  const texts = textsOf(res).map((t) => t.replace(/\u2019/g, "'"));
+  const agrees = texts.some((t) => AGREEING.some((re) => affirmedMatch(t, re)));
+  return agrees ? "affirms_without_support" : null;
 }

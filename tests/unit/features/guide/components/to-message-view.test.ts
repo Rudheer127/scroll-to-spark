@@ -102,3 +102,38 @@ describe("waitNote", () => {
     expect(waitNote(undefined)).toBe("You can try again in a minute.");
   });
 });
+
+describe("toMessageView next step and verdict (I4)", () => {
+  const withFields = (over: Partial<GuideTurnResult["response"]>) =>
+    base({ response: { ...fixedResponse("Here is what I found.", "fact_check"), ...over } });
+
+  it("exposes next_step and a fixed label per verdict", () => {
+    const v = toMessageView(withFields({ next_step: "Read the source.", verdict: "supported" }));
+    expect(v.nextStep).toBe("Read the source.");
+    expect(v.verdict).toBe("supported");
+    expect(v.verdictLabel).toBe("Supported by our evidence");
+    expect(toMessageView(withFields({ verdict: "partly_supported" })).verdictLabel).toBe(
+      "Partly supported",
+    );
+    expect(toMessageView(withFields({ verdict: "unsupported" })).verdictLabel).toBe(
+      "Not supported",
+    );
+    expect(toMessageView(withFields({ verdict: "not_enough_evidence" })).verdictLabel).toBe(
+      "Not enough evidence on file",
+    );
+  });
+
+  it("is null when absent and on fixed crisis, rate limited and unavailable answers", () => {
+    const none = toMessageView(withFields({}));
+    expect(none.nextStep).toBeNull();
+    expect(none.verdictLabel).toBeNull();
+    const fixed = toMessageView(
+      base({
+        outcome: "unavailable",
+        response: { ...fixedResponse("x"), next_step: "y", verdict: "supported" },
+      }),
+    );
+    expect(fixed.nextStep).toBeNull();
+    expect(fixed.verdictLabel).toBeNull();
+  });
+});

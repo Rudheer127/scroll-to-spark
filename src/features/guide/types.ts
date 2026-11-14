@@ -27,7 +27,9 @@ export type Violation =
   | "claims_verification"
   | "missing_unverified_note"
   | "missing_caveat"
-  | "missing_evidence_card";
+  | "missing_evidence_card"
+  | "missing_verdict"
+  | "affirms_without_support";
 
 /** Reports a failed helper model call by stage name. Never receives user text. */
 export type ReportStageFailure = (stage: "router" | "filters") => Promise<void>;

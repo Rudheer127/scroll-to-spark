@@ -6,6 +6,7 @@ import { LoggedCard } from "./logged-card";
 import { MessageBubble } from "./message-bubble";
 import { OpportunityCard } from "./opportunity-card";
 import type { MessageView } from "./to-message-view";
+import { VerdictChip } from "./verdict-chip";
 
 /** One answer: the labeled text first, then only the cards the server built from database rows. */
 export function AssistantMessage({
@@ -22,10 +23,19 @@ export function AssistantMessage({
     <div className="flex flex-col gap-3">
       <MessageBubble role="assistant" label={view.label}>
         {view.text}
+        {view.nextStep ? (
+          <span className="mt-2 block">
+            <span className="font-semibold">Next step: </span>
+            {view.nextStep}
+          </span>
+        ) : null}
         {view.waitNote ? (
           <span className="mt-2 block text-sm text-muted">{view.waitNote}</span>
         ) : null}
       </MessageBubble>
+      {view.verdict && view.verdictLabel ? (
+        <VerdictChip verdict={view.verdict} label={view.verdictLabel} />
+      ) : null}
       {view.canRetry ? (
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="outline" disabled={retryDisabled} onClick={onRetry}>

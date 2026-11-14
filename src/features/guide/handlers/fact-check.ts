@@ -6,12 +6,14 @@ import { evidenceKeywords } from "../tools/evidence-keywords";
 import { lookupEvidence } from "../tools/lookup-evidence";
 import type { EvidenceRow, Violation } from "../types";
 import {
+  affirmsOnlyWithSupport,
   capVerdict,
   citesEvidenceNumbers,
   echoOnly,
   evidenceNumbers,
   mentionsCaveat,
   mentionsUnverified,
+  requiresVerdict,
   verifiedOnlyIfChecked,
 } from "./fact-check-rules";
 import { answerWithModel, numbersIn, staticOutput, wrapUser } from "./shared";
@@ -82,6 +84,8 @@ export async function handleFactCheck(ctx: HandlerContext): Promise<HandlerOutpu
     mentionsCaveat(rows),
     echoOnly(ctx.text, rows),
     verifiedOnlyIfChecked(rows),
+    requiresVerdict,
+    affirmsOnlyWithSupport,
   ];
   return {
     ...out,
