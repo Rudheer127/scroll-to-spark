@@ -26,6 +26,7 @@ Center alignment is allowed only here:
 - A loading spinner shown alone.
 - A small text label inside a round or square control, for example initials in an avatar, or an icon inside a button.
 - An empty state for a list that has no items, where a short message and one action replace the list.
+- The Spark Guide chat view only (popup, maximised window and `/guide` page). It follows the familiar AI chat pattern: while empty, a headline, the composer and suggestion pills sit centered; after the first message the thread and the composer share one centered reading column (about 48rem) with the composer at the bottom. Nothing outside the chat view uses this.
 
 Everything else is left-aligned. Sign-in and sign-up screens use a full-width split layout, not a centered card.
 
