@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS, isActive } from "@/components/layout/sidebar";
+import { NAV_ITEMS, isActive } from "@/components/layout/nav-items";
 import { cn } from "@/lib/cn";
 
 /** Navigation for windows narrower than the large breakpoint: a bar pinned to the bottom edge. */

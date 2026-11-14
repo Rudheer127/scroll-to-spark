@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatMinutes, formatRelativeTime } from "@/lib/format-time";
+import { formatMinutes, formatRelativeTime, formatShortRelativeTime } from "@/lib/format-time";
 
 const NOW = new Date("2026-11-14T12:00:00Z");
 
@@ -24,5 +24,19 @@ describe("formatMinutes", () => {
     expect(formatMinutes(5)).toBe("5 min");
     expect(formatMinutes(120)).toBe("2 hr");
     expect(formatMinutes(90)).toBe("1.5 hr");
+  });
+});
+
+describe("formatShortRelativeTime", () => {
+  it("uses short units", () => {
+    expect(formatShortRelativeTime("2026-11-14T11:59:40Z", NOW)).toBe("now");
+    expect(formatShortRelativeTime("2026-11-14T11:55:00Z", NOW)).toBe("5m ago");
+    expect(formatShortRelativeTime("2026-11-14T10:00:00Z", NOW)).toBe("2h ago");
+    expect(formatShortRelativeTime("2026-11-11T12:00:00Z", NOW)).toBe("3d ago");
+  });
+
+  it("falls back to a short date after a month, and never goes negative", () => {
+    expect(formatShortRelativeTime("2026-09-01T12:00:00Z", NOW)).toBe("Sep 1");
+    expect(formatShortRelativeTime("2026-11-14T12:05:00Z", NOW)).toBe("now");
   });
 });

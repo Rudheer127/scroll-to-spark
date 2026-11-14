@@ -158,3 +158,67 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * The collapsible sidebar. `data-sidebar="collapsed"` on <html> is set before first paint by the
+ * head script in app/layout.tsx and kept in step by the toggle. The grid column always has the
+ * pinned width, so a collapsed rail opened by hover floats over the page without moving it.
+ */
+:root {
+  --sidebar-expanded: 15.25rem;
+  --sidebar-collapsed: 4.5rem;
+  --sidebar-width: var(--sidebar-expanded);
+}
+
+:root[data-sidebar="collapsed"] {
+  --sidebar-width: var(--sidebar-collapsed);
+}
+
+[data-sidebar-panel] {
+  width: var(--sidebar-width);
+  transition:
+    width 180ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 180ms ease;
+}
+
+[data-sidebar-panel][data-overlay="open"] {
+  width: var(--sidebar-expanded);
+  box-shadow: var(--shadow-pop);
+}
+
+[data-sidebar-label] {
+  white-space: nowrap;
+  transition: opacity 150ms ease;
+}
+
+/* Collapsed and not opened by hover: icons only. */
+:root[data-sidebar="collapsed"] [data-sidebar-panel]:not([data-overlay="open"]) {
+  [data-sidebar-label] {
+    opacity: 0;
+  }
+
+  [data-sidebar-expanded-only] {
+    display: none;
+  }
+
+  [data-sidebar-header] {
+    justify-content: center;
+  }
+
+  [data-sidebar-account] {
+    flex-direction: column;
+  }
+}
+
+/* The chat history icon is only for the icon rail. */
+:root:not([data-sidebar="collapsed"]) [data-sidebar-collapsed-only],
+[data-sidebar-panel][data-overlay="open"] [data-sidebar-collapsed-only] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-sidebar-panel],
+  [data-sidebar-label] {
+    transition: none;
+  }
+}

@@ -66,7 +66,7 @@ src/
           page.tsx          one group
           not-found.tsx     shown for a group that does not exist
           [threadId]/page.tsx   one thread with nested comments
-      guide/page.tsx        full-page Spark Guide (the popup is hidden here)
+      guide/page.tsx        full-page Spark Guide; ?chat=<id> opens a saved chat (the popup is hidden here)
       messages/page.tsx
       notifications/page.tsx
       profile/page.tsx
@@ -84,7 +84,9 @@ src/
   components/
     ui/                     generic pieces: button, dialog, menu, input, avatar, icon-button,
                             prompt-box (chat composer card), prompt-send-button, suggestion-pills
-    layout/                 app-shell, sidebar, top-bar, right-column
+    layout/                 app-shell, sidebar (collapsible: sidebar-panel, sidebar-nav-link,
+                            sidebar-toggle, use-sidebar, sidebar-state pure hover rules),
+                            nav-items, account-row and user-block, mobile-header, mobile-nav
     shared/                 pieces used by several features: empty-state, error-state
 
   features/                 one folder per product feature
@@ -116,25 +118,38 @@ src/
       components/           thank-you-card, thank-you-composer
       actions.ts  queries.ts  types.ts
     guide/
-      components/           guide-provider (one conversation for popup, window and page),
-                            guide-popup (the floating entry), guide-window (maximised modal),
-                            guide-page, guide-chat (centered empty state, then thread with the
-                            composer at the bottom), guide-thread, guide-composer,
-                            composer-status, mic-button, attach-button, image-chip,
-                            new-chat-button, ai-chip, message-bubble, assistant-message,
-                            opportunity-card, evidence-card, logged-card,
+      components/           guide-provider (one conversation for the popup and the page),
+                            guide-popup (the floating launcher), popup-chat (the mini chat: header,
+                            messages, composer pinned to the bottom), guide-page, guide-chat (full
+                            page: centered empty state, then thread with the composer at the bottom),
+                            guide-chat-loader (opens /guide?chat=<id>, keeps the address in step),
+                            guide-chat-sync and guide-chat-sync-slot (remembers the open chat per
+                            account, follows other tabs), chat-sync-state (pure sync rules),
+                            stored-message-view (saved rows to text only messages),
+                            guide-thread, guide-composer, composer-status, mic-button,
+                            attach-button, image-chip, new-chat-button, message-bubble,
+                            assistant-message, opportunity-card, evidence-card, logged-card,
                             confirm-contribution-card, crisis-card, starter-prompts,
                             verdict-chip, user-image-note, use-guide-conversation,
                             use-image-attachment, send-guide-turn, retry-target,
                             to-message-view (pure view model), chat-input-state (pure helpers),
                             chat-layout-mode (empty or conversation), guide-copy (screen words)
+        history/            the sidebar Chats section: chat-history-section, chat-history (server
+                            list), chat-history-list, chat-history-row, delete-chat-dialog,
+                            new-chat-link, chat-history-skeleton, chat-history-error
       speech/               use-speech-input (browser Web Speech API), speech-input-state
                             (pure state machine and transcript merging)
       vision/               image checks (check-image-file in the browser, image-data-url
                             and check-image-request on the server), downscale-image,
                             describe-image (one vision call), fold-description, image-turn,
                             image-input-enabled (the one on or off switch), constants
-      actions.ts            sendGuideMessage and confirmContribution Server Actions
+      actions.ts            sendGuideMessage, confirmContribution, loadGuideChat and
+                            deleteConversation Server Actions
+      queries.ts            listConversations, getConversationMessages (user session, RLS)
+      load-chat.ts          the signed-in person's chat for the page and the load action
+      admit.ts              rate limit, find or create the chat, save the user row
+      conversation-store.ts resolveConversation (never trusts the id), touchConversation
+      chat-title.ts         chat title from the first message, no model call
       pipeline.ts           one guide turn: crisis first, rate limit, screen, route, handle
       guarded-result.ts     output guard, one repair, fixed fallback results
       handlers/ tools/ guard/ llm/ prompts/   the model side, all server only
@@ -160,7 +175,7 @@ src/
     format-time.ts          example of a single-purpose helper file
     cn.ts                   class name helper
 
-  hooks/                    shared React hooks, one per file, for example use-auto-grow
+  hooks/                    shared React hooks, one per file: use-auto-grow, use-now (minute clock)
   types/
     database.ts             generated by the Supabase CLI, never edited by hand
 ```
