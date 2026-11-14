@@ -51,6 +51,8 @@ const fixedResult = (message: string): GuideTurnResult => ({
   source: "fallback",
 });
 
+const crisisResult = (): GuideTurnResult => ({ ...fixedResult(CRISIS_MESSAGE), outcome: "crisis" });
+
 const unavailableResult = (): GuideTurnResult => ({
   ...fixedResult(UNAVAILABLE_MESSAGE),
   outcome: "unavailable",
@@ -113,7 +115,7 @@ async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnRes
   const route = await routeIntent(input.llm, text, nonce);
   if (route.safety === "crisis") {
     await logGuideEvent(input.admin, input.userId, "crisis", { source: "router" });
-    return fixedResult(CRISIS_MESSAGE);
+    return crisisResult();
   }
   const ctx: HandlerContext = {
     text,
@@ -160,7 +162,7 @@ async function screen(input: GuideTurnInput, text: string): Promise<GuideTurnRes
   const { userId, admin } = input;
   if (detectCrisis(text)) {
     await logGuideEvent(admin, userId, "crisis", { source: "input" });
-    return fixedResult(CRISIS_MESSAGE);
+    return crisisResult();
   }
   const signals = detectInjectionSignals(text);
   if (signals.length === 0) return null;

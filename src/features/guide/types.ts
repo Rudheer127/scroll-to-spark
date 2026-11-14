@@ -87,8 +87,11 @@ export type GuideTurnResult = {
   source: "ai" | "fallback";
   /** Set on AI answers so the UI can show where the words came from. */
   label?: typeof AI_LABEL;
-  /** Set only on the fixed rate-limit and unavailable paths so the route can pick a status. */
-  outcome?: "ok" | "rate_limited" | "unavailable";
+  /**
+   * Set on the fixed rate-limit, unavailable and crisis paths. The route maps rate_limited to 429
+   * and unavailable to 503. Crisis is a normal 200 answer that the UI shows as a help card.
+   */
+  outcome?: "ok" | "rate_limited" | "unavailable" | "crisis";
   /** Seconds to wait, set with outcome "rate_limited". */
   retryAfterSec?: number;
 };

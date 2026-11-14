@@ -88,6 +88,13 @@ describe("POST /api/guide", () => {
     expect(mocks.serviceCreated).toBe(1);
   });
 
+  it("crisis text returns 200 with outcome crisis", async () => {
+    arrange({ user: { id: "u1" }, script: chat });
+    const res = await POST(json("I want to die"));
+    expect(res.status).toBe(200);
+    expect((await res.json()).outcome).toBe("crisis");
+  });
+
   it("429 carries Retry-After", async () => {
     arrange({ user: { id: "u1" }, script: chat, db: { minuteCount: 6 } });
     const res = await POST(json("hello"));

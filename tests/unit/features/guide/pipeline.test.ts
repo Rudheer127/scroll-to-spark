@@ -21,6 +21,7 @@ describe("runGuideTurn: fixed paths", () => {
     const t = setup({});
     const res = await t.run("I want to die");
     expect(res.response.message).toBe(CRISIS_MESSAGE);
+    expect(res.outcome).toBe("crisis");
     expect(res.source).toBe("fallback");
     expect(t.llm.calls).toHaveLength(0);
     expect(t.events()).toContain("crisis");

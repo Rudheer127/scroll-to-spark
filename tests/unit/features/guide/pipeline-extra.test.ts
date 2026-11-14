@@ -82,6 +82,7 @@ describe("runGuideTurn: more behavior", () => {
     const t = setup({ router_output: [routerReply("chitchat", "crisis")], guide_response: [] });
     const res = await t.run("everything feels pointless lately");
     expect(res.response.message).toBe(CRISIS_MESSAGE);
+    expect(res.outcome).toBe("crisis");
     expect(t.llm.callsFor("guide_response")).toHaveLength(0);
     expect(t.events()).toContain("crisis");
   });
