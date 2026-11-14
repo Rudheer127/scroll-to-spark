@@ -33,7 +33,7 @@ describe("STARTER_PROMPTS", () => {
     ]);
     for (const s of STARTER_PROMPTS) {
       expect(s.message.length).toBeLessThanOrEqual(MAX_INPUT_CHARS);
-      expect(s.message).not.toContain("—");
+      expect(s.message).not.toContain(String.fromCharCode(8212));
     }
   });
 });
