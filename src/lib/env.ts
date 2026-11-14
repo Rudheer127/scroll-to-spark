@@ -24,32 +24,40 @@ export const OPENROUTER_DEFAULTS = {
 const modelId = (fallback: string) =>
   z.preprocess(blankToUndefined, z.string().min(1).default(fallback));
 
+/** The guide's AI settings. Parsed on their own so a missing database key never hides them. */
+const llmShape = {
+  // Unset means openrouter when an OpenRouter key exists, otherwise cerebras.
+  LLM_PROVIDER: z.preprocess(blankToUndefined, provider.optional()),
+  OPENROUTER_API_KEY: optionalText,
+  OPENROUTER_MODEL_MAIN: modelId(OPENROUTER_DEFAULTS.main),
+  OPENROUTER_MODEL_FAST: modelId(OPENROUTER_DEFAULTS.fast),
+  OPENROUTER_MODEL_FALLBACK: modelId(OPENROUTER_DEFAULTS.fallback),
+  CEREBRAS_API_KEY: optionalText,
+  GROQ_API_KEY: optionalText,
+  // Image reading. On OpenRouter it defaults to a free vision model; elsewhere it is off unless set.
+  GUIDE_VISION_MODEL: optionalText,
+  GUIDE_VISION_PROVIDER: z.preprocess(blankToUndefined, provider.optional()),
+};
+
+type KeyFields = { OPENROUTER_API_KEY?: string; CEREBRAS_API_KEY?: string; GROQ_API_KEY?: string };
+const hasAnyKey = (env: KeyFields) =>
+  env.OPENROUTER_API_KEY !== undefined ||
+  env.CEREBRAS_API_KEY !== undefined ||
+  env.GROQ_API_KEY !== undefined;
+const KEY_RULE = {
+  message: "Set OPENROUTER_API_KEY, CEREBRAS_API_KEY or GROQ_API_KEY",
+  path: ["OPENROUTER_API_KEY"],
+};
+
+const llmSchema = z.object(llmShape).refine(hasAnyKey, KEY_RULE);
+
 const serverSchema = publicSchema
   .extend({
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-    // Unset means openrouter when an OpenRouter key exists, otherwise cerebras.
-    LLM_PROVIDER: z.preprocess(blankToUndefined, provider.optional()),
-    OPENROUTER_API_KEY: optionalText,
-    OPENROUTER_MODEL_MAIN: modelId(OPENROUTER_DEFAULTS.main),
-    OPENROUTER_MODEL_FAST: modelId(OPENROUTER_DEFAULTS.fast),
-    OPENROUTER_MODEL_FALLBACK: modelId(OPENROUTER_DEFAULTS.fallback),
-    CEREBRAS_API_KEY: optionalText,
-    GROQ_API_KEY: optionalText,
-    // Image reading. On OpenRouter it defaults to the fast model; elsewhere it is off unless set.
-    GUIDE_VISION_MODEL: optionalText,
-    GUIDE_VISION_PROVIDER: z.preprocess(blankToUndefined, provider.optional()),
+    ...llmShape,
     GIF_API_KEY: z.string().min(1).optional(),
   })
-  .refine(
-    (env) =>
-      env.OPENROUTER_API_KEY !== undefined ||
-      env.CEREBRAS_API_KEY !== undefined ||
-      env.GROQ_API_KEY !== undefined,
-    {
-      message: "Set OPENROUTER_API_KEY, CEREBRAS_API_KEY or GROQ_API_KEY",
-      path: ["OPENROUTER_API_KEY"],
-    },
-  );
+  .refine(hasAnyKey, KEY_RULE);
 
 /**
  * Variables that are safe to expose to the browser.
@@ -62,14 +70,8 @@ export function getPublicEnv() {
   });
 }
 
-/** All variables. Call this only in server code. This is the only file that reads process.env. */
-export type ServerEnv = z.infer<typeof serverSchema>;
-
-export function getServerEnv(): ServerEnv {
-  return serverSchema.parse({
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+function llmValues() {
+  return {
     LLM_PROVIDER: process.env.LLM_PROVIDER,
     OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
     OPENROUTER_MODEL_MAIN: process.env.OPENROUTER_MODEL_MAIN,
@@ -79,6 +81,24 @@ export function getServerEnv(): ServerEnv {
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     GUIDE_VISION_MODEL: process.env.GUIDE_VISION_MODEL,
     GUIDE_VISION_PROVIDER: process.env.GUIDE_VISION_PROVIDER,
+  };
+}
+
+export type ServerEnv = z.infer<typeof serverSchema>;
+export type LlmServerEnv = z.infer<typeof llmSchema>;
+
+/** All variables. Call this only in server code. This is the only file that reads process.env. */
+export function getServerEnv(): ServerEnv {
+  return serverSchema.parse({
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    ...llmValues(),
     GIF_API_KEY: process.env.GIF_API_KEY,
   });
+}
+
+/** Only the guide's AI settings. Server code only. */
+export function getLlmEnv(): LlmServerEnv {
+  return llmSchema.parse(llmValues());
 }

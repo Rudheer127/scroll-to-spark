@@ -1,4 +1,4 @@
-import { getServerEnv, OPENROUTER_DEFAULTS } from "@/lib/env";
+import { getLlmEnv, OPENROUTER_DEFAULTS } from "@/lib/env";
 import { MODELS } from "../constants";
 import { createLlmClient } from "./client";
 import type { LlmClient, LlmConfig, ProviderModels, ProviderName } from "./types";
@@ -72,5 +72,5 @@ export function hasVision(config: LlmConfig): boolean {
 
 /** Builds the real client from server env. Call only in server code. */
 export function createGuideLlm(): LlmClient {
-  return createLlmClient(buildLlmConfig(getServerEnv()));
+  return createLlmClient(buildLlmConfig(getLlmEnv()));
 }

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getServerEnv } from "@/lib/env";
+import { getLlmEnv, getServerEnv } from "@/lib/env";
 
 function baseEnv() {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
@@ -68,5 +68,20 @@ describe("getServerEnv", () => {
       GUIDE_VISION_MODEL: "a/eyes",
       GUIDE_VISION_PROVIDER: "openrouter",
     });
+  });
+});
+
+describe("getLlmEnv", () => {
+  it("reads the AI settings even when the database key is missing", () => {
+    baseEnv();
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+    vi.stubEnv("OPENROUTER_API_KEY", "or-test");
+    expect(() => getServerEnv()).toThrow();
+    expect(getLlmEnv().OPENROUTER_MODEL_MAIN).toBe("nvidia/nemotron-3.5-super-vl:free");
+  });
+
+  it("still requires one AI key", () => {
+    baseEnv();
+    expect(() => getLlmEnv()).toThrow();
   });
 });

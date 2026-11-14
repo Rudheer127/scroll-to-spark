@@ -1,4 +1,4 @@
-import { getServerEnv } from "@/lib/env";
+import { getLlmEnv } from "@/lib/env";
 import { buildLlmConfig, hasVision } from "../llm/from-env";
 
 /**
@@ -7,7 +7,7 @@ import { buildLlmConfig, hasVision } from "../llm/from-env";
  */
 export function isImageInputEnabled(): boolean {
   try {
-    return hasVision(buildLlmConfig(getServerEnv()));
+    return hasVision(buildLlmConfig(getLlmEnv()));
   } catch {
     return false;
   }
