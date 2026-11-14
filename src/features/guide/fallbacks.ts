@@ -8,3 +8,9 @@ export const UNAVAILABLE_MESSAGE = "I can't answer right now. Please try again i
 
 export const RATE_LIMIT_MESSAGE =
   "Let's take a breather. You can try again soon, and there's no rush at all.";
+
+export const EMPTY_MESSAGE =
+  "I'm here whenever you're ready. Tell me a little more, like how much time you have or something you already did.";
+
+export const NO_MATCH_MESSAGE =
+  "I couldn't find an open step that fits right now. Try widening the time or the topic, and I'll look again.";

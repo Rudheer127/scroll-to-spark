@@ -1,6 +1,7 @@
 import type { Effort, Place } from "@/features/steps/constants";
 import type { Tables } from "@/types/database";
 import type { INTENTS } from "./constants";
+import type { GuideResponse } from "./schemas";
 
 export type Intent = (typeof INTENTS)[number];
 
@@ -62,4 +63,13 @@ export type ContributionSummary = {
   totalHours: number;
   firstDate: string | null;
   titles: string[];
+};
+
+/** An opportunity card built from a database row fetched this turn, never from model text. */
+export type HydratedCard = { kind: "opportunity" } & OpportunityRow;
+
+export type GuideTurnResult = {
+  response: GuideResponse;
+  cards: HydratedCard[];
+  source: "ai" | "fallback";
 };
