@@ -5,9 +5,6 @@ export const GUIDE_HEADLINE = "What small thing can we do for your community tod
 /** The popup is small, so it gets a shorter headline. */
 export const GUIDE_HEADLINE_COMPACT = "What can we do today?";
 
-export const GUIDE_SUBTITLE =
-  "Find one small step, get thanked for what you already did, or check a claim.";
-
 export const COMPOSER_LABEL = "Message the Spark Guide";
 
 export const COMPOSER_PLACEHOLDER = "Tell me how you feel, what you did, or a claim to check";

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Maximize2, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AiChip } from "./ai-chip";
 import { GuideChat } from "./guide-chat";
 import { useGuide } from "./guide-provider";
 import { GuideWindow } from "./guide-window";
@@ -44,7 +43,6 @@ export function GuidePopup() {
           <header className="flex items-center gap-1.5 border-b border-border pb-2 pl-1">
             <Sparkles aria-hidden className="size-5 text-lavender-ink" />
             <h2 className="text-base font-bold">Spark Guide</h2>
-            <AiChip />
             <div className="ml-auto flex items-center">
               <NewChatButton compact />
               <Button variant="ghost" onClick={maximise} className="px-3">

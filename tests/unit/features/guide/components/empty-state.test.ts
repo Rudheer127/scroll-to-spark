@@ -86,14 +86,13 @@ describe("guide composer card", () => {
 });
 
 describe("guide page", () => {
-  it("has a small title row with the AI chip, the subtitle and New chat", () => {
+  it("has a title row with only the name and New chat, and the AI disclosure stays under the composer", () => {
     const html = render(createElement(GuidePage));
     expect(html).toMatch(/<h1[^>]*>Spark Guide<\/h1>/);
-    expect(html).toContain(">AI</span>");
-    expect(html).toContain(
-      "Find one small step, get thanked for what you already did, or check a claim.",
-    );
     expect(html).toContain("New chat");
+    expect(html).not.toContain(">AI</span>");
+    expect(html).not.toContain("Find one small step, get thanked");
     expect(html).not.toContain("An AI helper.");
+    expect(html).toContain("is an AI");
   });
 });

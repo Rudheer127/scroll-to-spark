@@ -1,6 +1,4 @@
-import { AiChip } from "./ai-chip";
 import { GuideChat } from "./guide-chat";
-import { GUIDE_SUBTITLE } from "./guide-copy";
 import { NewChatButton } from "./new-chat-button";
 
 /**
@@ -10,14 +8,8 @@ import { NewChatButton } from "./new-chat-button";
 export function GuidePage() {
   return (
     <div className="flex h-[calc(100dvh-8rem)] min-h-[28rem] flex-col gap-2">
-      <header className="flex items-start gap-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold">Spark Guide</h1>
-            <AiChip />
-          </div>
-          <p className="text-sm text-muted">{GUIDE_SUBTITLE}</p>
-        </div>
+      <header className="flex items-center gap-4">
+        <h1 className="min-w-0 flex-1 text-lg font-bold">Spark Guide</h1>
         <div className="shrink-0">
           <NewChatButton />
         </div>

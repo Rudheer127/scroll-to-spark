@@ -3,9 +3,7 @@
 import { useEffect, useId, useRef } from "react";
 import { Minimize2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AiChip } from "./ai-chip";
 import { GuideChat } from "./guide-chat";
-import { GUIDE_SUBTITLE } from "./guide-copy";
 import { useGuide } from "./guide-provider";
 import { NewChatButton } from "./new-chat-button";
 
@@ -51,8 +49,6 @@ export function GuideWindow() {
           <h2 id={titleId} className="text-base font-bold">
             Spark Guide
           </h2>
-          <AiChip />
-          <span className="hidden text-sm text-muted md:inline">{GUIDE_SUBTITLE}</span>
           <div className="ml-auto flex items-center gap-1">
             <NewChatButton />
             <Button variant="ghost" onClick={openPopup}>

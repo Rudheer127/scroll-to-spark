@@ -15,9 +15,6 @@ describe("guide copy", () => {
       "Tell me how you feel, what you did, or a claim to check",
     );
     expect(copy.MOOD_LEAD).toBe("Or start from how you feel");
-    expect(copy.GUIDE_SUBTITLE).toBe(
-      "Find one small step, get thanked for what you already did, or check a claim.",
-    );
   });
 
   it("still says the guide is an AI that can be wrong", () => {

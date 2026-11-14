@@ -78,6 +78,8 @@ describe("maximised window", () => {
     expect(html).toContain(`id="${labelledBy}"`);
     expect(html).toContain("Minimize");
     expect(html).toContain('aria-label="Close Spark Guide"');
-    expect(html).toContain(">AI</span>");
+    // The header carries only the name; the AI disclosure sits under the composer.
+    expect(html).not.toContain(">AI</span>");
+    expect(html).toContain("is an AI");
   });
 });
