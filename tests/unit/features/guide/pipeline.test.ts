@@ -50,6 +50,8 @@ describe("runGuideTurn: fixed paths", () => {
     expect(res.response.message).toBe(RATE_LIMIT_MESSAGE);
     expect(t.llm.calls).toHaveLength(0);
     expect(t.events()).toContain("rate_limited");
+    expect(res.outcome).toBe("rate_limited");
+    expect(res.retryAfterSec).toBe(60);
   });
 });
 
@@ -140,6 +142,7 @@ describe("runGuideTurn: model paths", () => {
     });
     const res = await t.run("hello there");
     expect(res.response.message).toBe(UNAVAILABLE_MESSAGE);
+    expect(res.outcome).toBe("unavailable");
     expect(res.source).toBe("fallback");
     expect(t.events()).toContain("provider_failure");
   });

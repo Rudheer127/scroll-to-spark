@@ -13,6 +13,10 @@ export async function proxy(request: NextRequest) {
   const { response, user } = await updateSession(request);
   const { pathname } = request.nextUrl;
 
+  if (!user && pathname.startsWith("/api/")) {
+    return NextResponse.json({ error: "Please sign in." }, { status: 401 });
+  }
+
   const target =
     !user && !matches(pathname, PUBLIC_PATHS)
       ? "/login"

@@ -51,6 +51,11 @@ const fixedResult = (message: string): GuideTurnResult => ({
   source: "fallback",
 });
 
+const unavailableResult = (): GuideTurnResult => ({
+  ...fixedResult(UNAVAILABLE_MESSAGE),
+  outcome: "unavailable",
+});
+
 /** Every intent has its own handler. */
 export function dispatchHandler(intent: Intent, ctx: HandlerContext): Promise<HandlerOutput> {
   switch (intent) {
@@ -124,7 +129,7 @@ async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnRes
     if (error instanceof ProviderFailure) {
       await logGuideEvent(input.admin, input.userId, "provider_failure", { reason: error.reason });
     }
-    return fixedResult(UNAVAILABLE_MESSAGE);
+    return unavailableResult();
   }
 }
 
@@ -138,11 +143,15 @@ async function admit(input: GuideTurnInput, text: string): Promise<GuideTurnResu
     const rate = await checkRateLimit(db, userId);
     if (!rate.allowed) {
       await logGuideEvent(admin, userId, "rate_limited", { retryAfterSec: rate.retryAfterSec });
-      return fixedResult(RATE_LIMIT_MESSAGE);
+      return {
+        ...fixedResult(RATE_LIMIT_MESSAGE),
+        outcome: "rate_limited",
+        retryAfterSec: rate.retryAfterSec,
+      };
     }
     if (await insertUserTurn(db, userId, text)) return null;
     await logGuideEvent(admin, userId, "provider_failure", { reason: "user_row_insert" });
-    return fixedResult(UNAVAILABLE_MESSAGE);
+    return unavailableResult();
   });
 }
 
@@ -167,13 +176,13 @@ export async function runGuideTurn(input: GuideTurnInput): Promise<GuideTurnResu
     const blocked = await admit(input, clean.text);
     if (blocked) return blocked;
   } catch {
-    return fixedResult(UNAVAILABLE_MESSAGE);
+    return unavailableResult();
   }
   let result: GuideTurnResult;
   try {
     result = (await screen(input, clean.text)) ?? (await answer(input, clean.text));
   } catch {
-    result = fixedResult(UNAVAILABLE_MESSAGE);
+    result = unavailableResult();
   }
   await persistAssistantTurn(input.admin, input.userId, result.response);
   return result;

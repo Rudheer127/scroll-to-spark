@@ -69,7 +69,13 @@ export function fakeSupabase(opts: FakeDbOptions) {
       insert: (row: Record<string, unknown>) => {
         opts.log.push({ client: opts.label, table, row });
         const error = opts.insertError ? { message: "denied" } : null;
-        return Promise.resolve({ data: null, error });
+        const settled = { data: error ? null : { id: "new-id" }, error };
+        const chain: Record<string, unknown> = {
+          then: (resolve: (v: unknown) => unknown) => resolve(settled),
+        };
+        chain.select = () => chain;
+        chain.single = () => chain;
+        return chain;
       },
     };
     builder.eq = (col: string, value: unknown) => {

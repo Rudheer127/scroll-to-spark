@@ -87,4 +87,8 @@ export type GuideTurnResult = {
   source: "ai" | "fallback";
   /** Set on AI answers so the UI can show where the words came from. */
   label?: typeof AI_LABEL;
+  /** Set only on the fixed rate-limit and unavailable paths so the route can pick a status. */
+  outcome?: "ok" | "rate_limited" | "unavailable";
+  /** Seconds to wait, set with outcome "rate_limited". */
+  retryAfterSec?: number;
 };
