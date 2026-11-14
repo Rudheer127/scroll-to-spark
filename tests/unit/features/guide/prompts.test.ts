@@ -114,6 +114,24 @@ describe("system prompt", () => {
     }
   });
 
+  it("example dates are not in the future and match a named weekday", () => {
+    const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    for (const intent of INTENTS) {
+      for (const ex of EXAMPLES[intent]) {
+        const on = ex.response.proposed_contribution?.occurred_on;
+        if (!on) continue;
+        expect(ex.today, "example with a date needs a today anchor").toBeDefined();
+        const date = new Date(`${on}T00:00:00Z`);
+        expect(Number.isNaN(date.getTime())).toBe(false);
+        expect(on <= (ex.today ?? "")).toBe(true);
+        const named = days.find((d) => ex.user.toLowerCase().includes(d));
+        if (named) expect(days[date.getUTCDay()]).toBe(named);
+      }
+    }
+    const shown = sys("recognize_contribution");
+    expect(shown).toContain("today=2026-11-14");
+  });
+
   it("contains no em or en dash in any prompt", () => {
     for (const intent of INTENTS) expect(sys(intent)).not.toMatch(DASHES);
     expect(router()).not.toMatch(DASHES);

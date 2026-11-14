@@ -31,7 +31,8 @@ const TASKS: Record<Intent, string> = {
 };
 
 function renderExample(ex: PromptExample, n: number): string {
-  const data = [`user_message: ${ex.user}`, ...ex.data].join("\n");
+  const today = ex.today ? [`today=${ex.today}`] : [];
+  const data = [...today, `user_message: ${ex.user}`, ...ex.data].join("\n");
   return `Example ${n} (for style only, not real data)
 DATA:
 ${data}

@@ -8,6 +8,8 @@ export type PromptExample = {
   data: string[];
   /** Card ids that exist in this example's own DATA. */
   ids: string[];
+  /** ISO date the example treats as today, shown as a DATA line when set. */
+  today?: string;
   response: GuideResponse;
 };
 
@@ -55,9 +57,10 @@ export const EXAMPLES: Record<Intent, PromptExample[]> = {
   ],
   recognize_contribution: [
     {
-      user: "Last Saturday I spent 2 hours sorting cans at the food bank.",
+      user: "Last Sunday I spent 2 hours sorting cans at the food bank.",
       data: [],
       ids: [],
+      today: "2026-11-14",
       response: {
         ...base,
         intent: "recognize_contribution",
