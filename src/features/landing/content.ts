@@ -20,7 +20,6 @@ export const HERO = {
   primaryCta: "Find one small thing to do",
   secondaryCta: "See how it works",
   tagline: "Small steps. Real thank-yous.",
-  note: "No points. No streaks. No guilt.",
 } as const;
 
 /** Stock photos from Unsplash (free to use, no attribution required). Files live in public/images/landing. */

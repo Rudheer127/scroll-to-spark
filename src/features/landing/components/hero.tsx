@@ -73,9 +73,6 @@ export function Hero() {
               {HERO.secondaryCta}
             </a>
           </div>
-          <p className="landing-rise text-sm text-ink/75" style={step(words.length + 3)}>
-            {HERO.note}
-          </p>
         </div>
         <HeroScene />
       </div>
