@@ -38,6 +38,8 @@ export function GuideWindow() {
       aria-labelledby={titleId}
       aria-modal="true"
       onCancel={(event) => {
+        // A nested dialog (the New chat confirmation) handles its own Escape.
+        if (event.target !== ref.current) return;
         event.preventDefault();
         close();
       }}

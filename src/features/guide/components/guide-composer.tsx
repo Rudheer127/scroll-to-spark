@@ -37,12 +37,16 @@ export function GuideComposer({ inputId, size }: ComposerProps) {
     imageBusy: image.status === "processing",
   });
 
-  useLayoutEffect(() => {
+  function fitHeight() {
     const field = textareaRef.current;
     if (!field) return;
     field.style.height = "auto";
+    // A box inside a dialog that is not open yet measures 0; keep the rows height until focus.
+    if (field.scrollHeight === 0) return;
     field.style.height = `${Math.min(field.scrollHeight, MAX_HEIGHT[size])}px`;
-  }, [draft, size]);
+  }
+
+  useLayoutEffect(fitHeight, [draft, size]);
 
   const wasSending = useRef(sending);
   useEffect(() => {
@@ -72,7 +76,6 @@ export function GuideComposer({ inputId, size }: ComposerProps) {
       className={cn(
         "flex flex-col gap-2 rounded-(--radius-card) border bg-surface p-2 shadow-card",
         dragging ? "border-action" : "border-control",
-        "focus-within:border-action focus-within:ring-1 focus-within:ring-action",
       )}
       onSubmit={(event) => {
         event.preventDefault();
@@ -102,6 +105,7 @@ export function GuideComposer({ inputId, size }: ComposerProps) {
         placeholder="Message the Spark Guide"
         aria-describedby={showCount ? `${hintId} ${counterId}` : hintId}
         onChange={(event) => setDraft(event.target.value)}
+        onFocus={fitHeight}
         onPaste={(event) => {
           if (takeImage(firstImage(event.clipboardData.files))) event.preventDefault();
         }}
@@ -112,7 +116,7 @@ export function GuideComposer({ inputId, size }: ComposerProps) {
           }
         }}
         className={cn(
-          "w-full resize-none overflow-y-auto bg-transparent px-2 py-1.5 text-ink placeholder:text-muted focus:outline-none",
+          "w-full resize-none overflow-y-auto bg-transparent px-2 py-1.5 text-ink placeholder:text-muted",
           size === "large" ? "text-base" : "text-sm",
         )}
       />

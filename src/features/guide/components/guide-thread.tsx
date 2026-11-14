@@ -16,11 +16,12 @@ export function GuideThread() {
   const { items, sending, error, send, retryBubble, retryError } = useGuide();
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
-  }, [items, sending, error]);
-
   const empty = items.length === 0 && !sending && !error;
+
+  useEffect(() => {
+    // The empty state reads from the top, so only a real conversation scrolls to the end.
+    if (!empty) endRef.current?.scrollIntoView({ block: "end" });
+  }, [items, sending, error, empty]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-1 py-2">
