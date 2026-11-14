@@ -49,8 +49,10 @@ Everything else is left-aligned. Sign-in and sign-up screens use a full-width sp
 | Page background | Very light grey (`#FAFAFA`) |
 | Surface | White cards with a 1 pixel light border |
 | Text | Near-black (`#262626`) and a mid-grey for secondary text |
-| Action color | Blue for standard actions, red for destructive actions |
-| Gradient | The orange-to-pink-to-purple Instagram gradient only for the logo, story rings on group avatars and one primary call to action per screen |
+| Action color | A darker blue for links, focus and standard actions (white text on it passes contrast), red for destructive actions |
+| Main action | One filled pink button per screen (`brand` variant). White text on it must pass 4.5:1 |
+| Gradient | An orange-to-pink gradient only on the story ring around group avatars. No purple or indigo gradients anywhere, and no gradient on text. The logo is solid ink |
+| Control edges | Inputs and other controls use the control border token so their edge is at least 3:1 against the page |
 | Radius | 12 to 16 pixels on cards, full round on pills and avatars |
 | Shadows | Only on floating layers: menus, popovers, dialogs |
 | Motion | Short and subtle. Never animate width, height or position of layout. Honor reduced motion |

@@ -48,7 +48,7 @@ export function SignupForm() {
           {state.message}
         </p>
       ) : null}
-      <Button type="submit" variant="gradient" disabled={pending}>
+      <Button type="submit" variant="brand" disabled={pending}>
         {pending ? "Creating account" : "Create account"}
       </Button>
       <p className="text-sm text-muted">

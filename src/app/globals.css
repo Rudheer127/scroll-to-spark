@@ -1,3 +1,6 @@
+/* Hallmark · checked: 2026-11-14 · genre: playful (inferred)
+ * floor: 0 FAIL · fixed: 2a, 7b, 20, 26b, 40 · structural: none printed
+ * built: the project · redesign: polish · v2.0.0 */
 @import "tailwindcss";
 
 /* Design tokens. Every color, font and radius used in the UI comes from here. */
@@ -5,17 +8,22 @@
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
 
   --color-background: #fafafa;
-  --color-surface: #ffffff;
+  --color-surface: #fffdfd;
   --color-border: #dbdbdb;
+  /* Edge of inputs and other controls. 3:1 against the page, so a field can be found. */
+  --color-control: #8e8e8e;
   --color-ink: #262626;
   --color-muted: #737373;
   --color-chip: #efefef;
-  --color-action: #0095f6;
+  /* Blue for links, focus and the main action. 4.5:1 or better on the page and with white text. */
+  --color-action: #0064c8;
   --color-danger: #ed4956;
   --color-success: #2fbf9b;
 
   --color-brand-orange: #f58529;
   --color-brand-pink: #dd2a7b;
+  /* The pink for filled buttons. White text on it passes 4.5:1. */
+  --color-brand-cta: #c71f6a;
   --color-brand-purple: #8134af;
   --color-brand-indigo: #515bd4;
 
@@ -32,20 +40,6 @@ body {
   background: var(--color-background);
   color: var(--color-ink);
   font-family: var(--font-sans);
-}
-
-/* The brand gradient is only for the logo, story rings and one main action per screen. */
-.text-brand-gradient {
-  background: linear-gradient(
-    90deg,
-    var(--color-brand-orange),
-    var(--color-brand-pink),
-    var(--color-brand-purple),
-    var(--color-brand-indigo)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 :focus-visible {

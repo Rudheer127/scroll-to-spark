@@ -25,8 +25,8 @@ export function Sidebar({ footer }: { footer: React.ReactNode }) {
       aria-label="Main"
       className="sticky top-0 flex h-screen flex-col gap-1 border-r border-border bg-surface px-3 py-7"
     >
-      <Link href="/" className="mb-6 px-3 py-2 text-3xl font-bold">
-        <span className="text-brand-gradient">Spark</span>
+      <Link href="/" className="mb-6 px-3 py-2 text-3xl font-bold active:opacity-75">
+        Spark
       </Link>
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const active = isActive(pathname, href);
@@ -36,7 +36,7 @@ export function Sidebar({ footer }: { footer: React.ReactNode }) {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-4 rounded-xl px-3 py-3 text-base",
+              "flex items-center gap-4 rounded-xl px-3 py-3 text-base active:opacity-75",
               active ? "bg-chip font-bold" : "hover:bg-background",
             )}
           >

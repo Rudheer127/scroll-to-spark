@@ -2,7 +2,7 @@ import { cn } from "@/lib/cn";
 
 /** Shared look for text inputs and text areas. */
 export const inputClass =
-  "w-full rounded-(--radius-control) border border-border bg-background px-3.5 py-2.5 text-sm";
+  "w-full rounded-(--radius-control) border border-control bg-background px-3.5 py-2.5 text-sm";
 
 type FieldProps = {
   label: string;
