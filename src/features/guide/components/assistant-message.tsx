@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { CrisisCard } from "./crisis-card";
 import { ConfirmContributionCard } from "./confirm-contribution-card";
 import { EvidenceCard } from "./evidence-card";
@@ -7,7 +8,15 @@ import { OpportunityCard } from "./opportunity-card";
 import type { MessageView } from "./to-message-view";
 
 /** One answer: the labeled text first, then only the cards the server built from database rows. */
-export function AssistantMessage({ view }: { view: MessageView }) {
+export function AssistantMessage({
+  view,
+  onRetry,
+  retryDisabled,
+}: {
+  view: MessageView;
+  onRetry: () => void;
+  retryDisabled: boolean;
+}) {
   const hasExtras = view.kind === "crisis" || view.cards.length > 0 || view.proposal !== null;
   return (
     <div className="flex flex-col gap-3">
@@ -17,6 +26,16 @@ export function AssistantMessage({ view }: { view: MessageView }) {
           <span className="mt-2 block text-sm text-muted">{view.waitNote}</span>
         ) : null}
       </MessageBubble>
+      {view.canRetry ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="outline" disabled={retryDisabled} onClick={onRetry}>
+            Try again
+          </Button>
+          {retryDisabled ? (
+            <span className="text-sm text-muted">Waiting for the guide to answer.</span>
+          ) : null}
+        </div>
+      ) : null}
       {hasExtras ? (
         <div className="flex max-w-[70ch] flex-col gap-3">
           {view.kind === "crisis" ? <CrisisCard /> : null}

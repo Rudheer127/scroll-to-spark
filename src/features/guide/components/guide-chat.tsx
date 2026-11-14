@@ -9,6 +9,7 @@ import { sendGuideMessage } from "../actions";
 import { MAX_INPUT_CHARS } from "../constants";
 import { AssistantMessage } from "./assistant-message";
 import { characterCount, sendBlockReason } from "./chat-input-state";
+import { retryTarget } from "./retry-target";
 import { MessageBubble, MessageBubblePending } from "./message-bubble";
 import { StarterPrompts } from "./starter-prompts";
 import { toMessageView, type MessageView } from "./to-message-view";
@@ -43,7 +44,7 @@ export function GuideChat({ variant, inputId }: { variant: "popup" | "page"; inp
   const append = (item: NewItem) =>
     setItems((prev) => [...prev, { ...item, id: nextId.current++ }]);
 
-  async function send(raw: string, isRetry = false) {
+  async function send(raw: string, isRetry = false, replaceId?: number) {
     const text = raw.trim();
     if (sendBlockReason(text, sending) !== null) return;
     hasSent.current = true;
@@ -57,13 +58,24 @@ export function GuideChat({ variant, inputId }: { variant: "popup" | "page"; inp
       const formData = new FormData();
       formData.set("message", text);
       const result = await sendGuideMessage(formData);
-      if (result.ok) append({ role: "assistant", view: toMessageView(result.data) });
-      else setError({ text: result.error, retryWith: text });
+      if (result.ok) {
+        const view = toMessageView(result.data);
+        if (replaceId === undefined) append({ role: "assistant", view });
+        else
+          setItems((prev) =>
+            prev.map((i) => (i.id === replaceId ? { id: i.id, role: "assistant", view } : i)),
+          );
+      } else setError({ text: result.error, retryWith: text });
     } catch {
       setError({ text: SEND_ERROR, retryWith: text });
     } finally {
       setSending(false);
     }
+  }
+
+  function retryBubble(id: number) {
+    const target = retryTarget(items, id);
+    if (target) void send(target.text, true, target.replaceId);
   }
 
   const blockReason = sendBlockReason(input, sending);
@@ -85,7 +97,12 @@ export function GuideChat({ variant, inputId }: { variant: "popup" | "page"; inp
                 {item.text}
               </MessageBubble>
             ) : (
-              <AssistantMessage key={item.id} view={item.view} />
+              <AssistantMessage
+                key={item.id}
+                view={item.view}
+                onRetry={() => retryBubble(item.id)}
+                retryDisabled={sending}
+              />
             ),
           )}
         </div>
