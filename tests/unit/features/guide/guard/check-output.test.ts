@@ -97,6 +97,22 @@ describe("checkOutput", () => {
     expect(violations(res({ message: "token CANARY-xyz123 here" }))).toContain("canary_leak");
   });
 
+  it("rejects a lowercased, split or zero-width canary with canary_leak alone", () => {
+    const c = { ...ctx, canary: "CANARY-xyz" };
+    expect(violations(res({ message: "see canary-xyz ok" }), c)).toEqual(["canary_leak"]);
+    expect(violations(res({ message: "see CAN ARY-x y z ok" }), c)).toEqual(["canary_leak"]);
+    expect(violations(res({ message: "see CAN\u200bARY xyz ok" }), c)).toEqual(["canary_leak"]);
+  });
+
+  it("rejects fullwidth digits and plural magnitude words", () => {
+    expect(violations(res({ message: "\uff19\uff19 people" }))).toContain("ungrounded_number");
+    expect(violations(res({ message: "\uff15 minutes" }))).toEqual([]);
+    for (const w of ["Hundreds of people", "thousands join", "millions", "dozens"]) {
+      expect(violations(res({ message: w }))).toContain("ungrounded_number");
+    }
+    expect(violations(res({ message: "5 minutes" }))).toEqual([]);
+  });
+
   it("rejects a message over 600 chars", () => {
     expect(violations(res({ message: "a".repeat(601) }))).toContain("too_long");
   });

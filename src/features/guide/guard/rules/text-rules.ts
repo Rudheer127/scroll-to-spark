@@ -38,9 +38,17 @@ export function emDash(res: GuideResponse): Violation | null {
     : null;
 }
 
+/** Lowercase, NFKC, and drop whitespace, hyphens and zero-width characters. */
+const squash = (s: string) =>
+  s
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\s\-\u200b-\u200d\u2060\ufeff]/g, "");
+
 export function canaryLeak(res: GuideResponse, ctx: OutputContext): Violation | null {
-  if (!ctx.canary) return null;
-  return allTexts(res).some((t) => t.includes(ctx.canary)) ? "canary_leak" : null;
+  const canary = squash(ctx.canary);
+  if (!canary) return null;
+  return allTexts(res).some((t) => squash(t).includes(canary)) ? "canary_leak" : null;
 }
 
 export function tooLong(res: GuideResponse): Violation | null {
