@@ -39,14 +39,17 @@ describe("guide composer", () => {
     for (const variant of ["popup", "window", "page"] as const) {
       const html = render(chat(variant));
       expect(html).toMatch(/<label[^>]*for="f"[^>]*>Message the Spark Guide<\/label>/);
-      expect(html).toMatch(/<textarea[^>]*placeholder="Message the Spark Guide"/);
+      expect(html).toMatch(
+        /<textarea[^>]*placeholder="Tell me how you feel, what you did, or a claim to check"/,
+      );
       expect(html).toMatch(/<textarea[^>]*maxLength="1000"/);
     }
   });
 
-  it("offers the mood chips under How are you feeling? in the empty state", () => {
+  it("offers the mood pills under Or start from how you feel in the empty state", () => {
     const html = render(chat("popup"));
-    expect(html).toContain("How are you feeling?");
+    expect(html).toContain("Or start from how you feel");
+    expect(html).not.toContain("How are you feeling?");
     for (const label of ["Overwhelmed", "Angry", "Sad", "Restless", "Ready for more"]) {
       expect(html).toContain(`>${label}</button>`);
     }
@@ -60,7 +63,9 @@ describe("guide composer", () => {
     expect(render(chat("window"))).not.toContain("Attach an image");
     const on = render(chat("window"), true);
     expect(on).toContain("Attach an image");
-    expect(on).toContain("PNG, JPEG or WebP, up to 5 MB");
+    // The limits are on the button itself (name and tooltip), before anything is picked.
+    expect(on).toMatch(/<button[^>]*aria-label="Attach an image. PNG, JPEG or WebP, up to 5 MB/);
+    expect(on).toMatch(/<button[^>]*title="PNG, JPEG or WebP, up to 5 MB/);
   });
 });
 

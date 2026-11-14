@@ -1,10 +1,14 @@
 import { MAX_INPUT_CHARS } from "../constants";
 
+/** The task suggestions under the composer. Picking one sends its label as the first message. */
 export const STARTER_PROMPTS = [
-  { label: "Find something small to do", message: "Find something small to do" },
-  { label: "I did something and want to log it", message: "I did something and want to log it" },
-  { label: "Check a claim", message: "Check a claim" },
+  { id: "find", label: "Find something small to do", message: "Find something small to do" },
+  { id: "log", label: "Log something I did", message: "Log something I did" },
+  { id: "progress", label: "What have I done so far?", message: "What have I done so far?" },
+  { id: "claim", label: "Check a claim", message: "Check a claim" },
 ] as const;
+
+export type StarterId = (typeof STARTER_PROMPTS)[number]["id"];
 
 /** The character counter shows from this many characters, so it is there before the limit. */
 export const COUNTER_THRESHOLD = 800;

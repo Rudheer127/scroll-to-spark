@@ -1,6 +1,7 @@
 "use client";
 
 import { Mic, Square } from "lucide-react";
+import { IconButton } from "@/components/ui/icon-button";
 import type { SpeechInput } from "../speech/use-speech-input";
 
 export const SPEECH_SERVICE_NOTE = "Speech recognition uses your browser's speech service.";
@@ -17,25 +18,23 @@ export function MicButton({ speech, disabled }: { speech: SpeechInput; disabled:
         type="button"
         onClick={speech.stop}
         title={SPEECH_SERVICE_NOTE}
-        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-control bg-chip px-3 text-sm font-semibold text-ink hover:opacity-90 active:opacity-75 md:min-h-10"
+        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-chip px-3 text-sm font-medium text-ink hover:opacity-90 active:opacity-75 md:min-h-9"
       >
         <span aria-hidden className="size-2 rounded-full bg-danger motion-safe:animate-pulse" />
         <span>Listening</span>
-        <Square aria-hidden className="size-4" />
+        <Square aria-hidden className="size-3.5 fill-current" />
         <span className="sr-only">, stop voice input</span>
       </button>
     );
   }
   return (
-    <button
-      type="button"
+    <IconButton
+      label="Start voice input"
+      title={SPEECH_SERVICE_NOTE}
       onClick={speech.start}
       disabled={disabled}
-      aria-label="Start voice input"
-      title={SPEECH_SERVICE_NOTE}
-      className="inline-flex size-11 items-center justify-center rounded-full text-ink hover:bg-chip active:opacity-75 disabled:cursor-not-allowed disabled:opacity-50 md:size-10"
     >
       <Mic aria-hidden className="size-5" />
-    </button>
+    </IconButton>
   );
 }

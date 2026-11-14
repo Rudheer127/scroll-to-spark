@@ -3,46 +3,39 @@ import { IMAGE_LIMITS_NOTE } from "../vision/constants";
 import { SPEECH_SERVICE_NOTE } from "./mic-button";
 
 type ComposerStatusProps = {
-  hintId: string;
-  blockReason: string | null;
   speech: SpeechInput;
   attachmentError: string | null;
-  imageInputEnabled: boolean;
+  /** True while the attach button is hovered or focused, or a file is dragged over the box. */
+  showImageLimits: boolean;
 };
 
-const SEND_HINT = "Enter sends. Shift and Enter adds a line.";
-
 /**
- * The line under the composer: why Send is off, or how to send, plus any problem with voice or
- * an image in plain words. Image limits are shown up front, before anything is picked.
+ * The small line inside the composer, shown only when it has something to say: a problem with
+ * voice or an image, the speech service note while listening, or the image limits before upload.
  */
-export function ComposerStatus({
-  hintId,
-  blockReason,
-  speech,
-  attachmentError,
-  imageInputEnabled,
-}: ComposerStatusProps) {
+export function ComposerStatus({ speech, attachmentError, showImageLimits }: ComposerStatusProps) {
   const listening = speech.state.status === "listening" || speech.state.status === "starting";
   const problem = speech.errorMessage ?? attachmentError;
+  const limits = showImageLimits || attachmentError !== null;
   return (
-    <div className="flex flex-col gap-1 px-2 pb-1">
+    <div className="flex flex-col gap-0.5" aria-live="polite">
       {problem ? (
         <p role="alert" className="text-sm text-danger">
           {problem}
         </p>
       ) : null}
-      <p id={hintId} className="text-xs text-muted">
-        {blockReason ?? SEND_HINT}
-      </p>
-      {listening ? (
-        <p className="text-xs text-muted" aria-live="polite">
-          {SPEECH_SERVICE_NOTE}
-        </p>
-      ) : null}
-      {imageInputEnabled && !listening ? (
-        <p className="text-xs text-muted">Images: {IMAGE_LIMITS_NOTE}</p>
-      ) : null}
+      {listening ? <p className="text-xs text-muted">{SPEECH_SERVICE_NOTE}</p> : null}
+      {limits ? <p className="text-xs text-muted">Images: {IMAGE_LIMITS_NOTE}</p> : null}
     </div>
   );
+}
+
+/** Whether the status line has anything to show, so the composer can leave it out entirely. */
+export function hasComposerStatus({
+  speech,
+  attachmentError,
+  showImageLimits,
+}: ComposerStatusProps): boolean {
+  const listening = speech.state.status === "listening" || speech.state.status === "starting";
+  return listening || speech.errorMessage !== null || attachmentError !== null || showImageLimits;
 }

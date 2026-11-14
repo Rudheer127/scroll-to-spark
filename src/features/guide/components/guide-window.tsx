@@ -5,6 +5,7 @@ import { Minimize2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AiChip } from "./ai-chip";
 import { GuideChat } from "./guide-chat";
+import { GUIDE_SUBTITLE } from "./guide-copy";
 import { useGuide } from "./guide-provider";
 import { NewChatButton } from "./new-chat-button";
 
@@ -43,17 +44,15 @@ export function GuideWindow() {
         event.preventDefault();
         close();
       }}
-      className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none overflow-hidden border-0 bg-surface p-0 text-ink shadow-pop backdrop:bg-black/50 sm:m-auto sm:h-[calc(100dvh-3rem)] sm:w-[calc(100vw-3rem)] sm:rounded-2xl sm:border sm:border-border"
+      className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none overflow-hidden border-0 bg-background p-0 text-ink shadow-pop backdrop:bg-black/50 sm:m-auto sm:h-[calc(100dvh-3rem)] sm:w-[calc(100vw-3rem)] sm:rounded-2xl sm:border sm:border-border"
     >
       <div className="flex h-full min-h-0 flex-col">
-        <header className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3 sm:px-6">
-          <h2 id={titleId} className="text-lg font-bold">
+        <header className="flex flex-wrap items-center gap-2 px-4 py-2 sm:px-6">
+          <h2 id={titleId} className="text-base font-bold">
             Spark Guide
           </h2>
           <AiChip />
-          <span className="hidden text-sm text-muted md:inline">
-            An AI helper. It can be wrong, and it never replaces a real person.
-          </span>
+          <span className="hidden text-sm text-muted md:inline">{GUIDE_SUBTITLE}</span>
           <div className="ml-auto flex items-center gap-1">
             <NewChatButton />
             <Button variant="ghost" onClick={openPopup}>
@@ -65,7 +64,7 @@ export function GuideWindow() {
             </Button>
           </div>
         </header>
-        <div className="min-h-0 flex-1 px-4 pt-2 pb-4 sm:px-8 lg:px-12">
+        <div className="min-h-0 flex-1 px-4 pb-4 sm:px-8 lg:px-12">
           <GuideChat variant="window" inputId={WINDOW_INPUT_ID} />
         </div>
       </div>

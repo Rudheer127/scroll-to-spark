@@ -2,16 +2,18 @@
 
 import { useRef } from "react";
 import { Paperclip } from "lucide-react";
+import { IconButton } from "@/components/ui/icon-button";
 import { ACCEPTED_IMAGE_TYPES, IMAGE_LIMITS_NOTE } from "../vision/constants";
 
-/** Opens the file picker for one image. Rendered only when image reading is on. */
-export function AttachButton({
-  onPick,
-  disabled,
-}: {
+type AttachButtonProps = {
   onPick: (file: File) => void;
   disabled: boolean;
-}) {
+  /** True while the button is hovered or focused, so the composer can show the image limits. */
+  onHintChange: (showing: boolean) => void;
+};
+
+/** Opens the file picker for one image. Rendered only when image reading is on. */
+export function AttachButton({ onPick, disabled, onHintChange }: AttachButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   return (
     <>
@@ -28,16 +30,18 @@ export function AttachButton({
           event.target.value = "";
         }}
       />
-      <button
-        type="button"
+      <IconButton
+        label={`Attach an image. ${IMAGE_LIMITS_NOTE}`}
+        title={IMAGE_LIMITS_NOTE}
         onClick={() => inputRef.current?.click()}
         disabled={disabled}
-        aria-label={`Attach an image. ${IMAGE_LIMITS_NOTE}`}
-        title={IMAGE_LIMITS_NOTE}
-        className="inline-flex size-11 items-center justify-center rounded-full text-ink hover:bg-chip active:opacity-75 disabled:cursor-not-allowed disabled:opacity-50 md:size-10"
+        onMouseEnter={() => onHintChange(true)}
+        onMouseLeave={() => onHintChange(false)}
+        onFocus={() => onHintChange(true)}
+        onBlur={() => onHintChange(false)}
       >
         <Paperclip aria-hidden className="size-5" />
-      </button>
+      </IconButton>
     </>
   );
 }

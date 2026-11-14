@@ -27,16 +27,21 @@ describe("characterCount", () => {
 });
 
 describe("STARTER_PROMPTS", () => {
-  it("has the three starters, each within the limit and free of em dashes", () => {
+  it("has the four task starters, each within the limit and free of em dashes", () => {
     expect(STARTER_PROMPTS.map((s) => s.label)).toEqual([
       "Find something small to do",
-      "I did something and want to log it",
+      "Log something I did",
+      "What have I done so far?",
       "Check a claim",
     ]);
     for (const s of STARTER_PROMPTS) {
       expect(s.message.length).toBeLessThanOrEqual(MAX_INPUT_CHARS);
       expect(s.message).not.toContain(String.fromCharCode(8212));
+      expect(s.label.trim().length).toBeGreaterThan(0);
+      // Each pill sends exactly its own words, like the person typed them.
+      expect(s.message).toBe(s.label);
     }
+    expect(new Set(STARTER_PROMPTS.map((s) => s.id)).size).toBe(STARTER_PROMPTS.length);
   });
 });
 

@@ -1,22 +1,24 @@
 import { AiChip } from "./ai-chip";
 import { GuideChat } from "./guide-chat";
+import { GUIDE_SUBTITLE } from "./guide-copy";
 import { NewChatButton } from "./new-chat-button";
 
-/** The full page view. It uses the whole width and the same conversation as the popup. */
+/**
+ * The full page view: a small, quiet title row, then the chat filling the rest of the height.
+ * It shows the same conversation as the popup.
+ */
 export function GuidePage() {
   return (
-    <div className="flex h-[calc(100dvh-8rem)] min-h-[28rem] flex-col gap-6">
-      <header className="flex flex-wrap items-start gap-4">
-        <div className="flex flex-col gap-1">
+    <div className="flex h-[calc(100dvh-8rem)] min-h-[28rem] flex-col gap-2">
+      <header className="flex items-start gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold">Spark Guide</h1>
+            <h1 className="text-lg font-bold">Spark Guide</h1>
             <AiChip />
           </div>
-          <p className="text-muted">
-            An AI helper. It can be wrong, and it never replaces a real person.
-          </p>
+          <p className="text-sm text-muted">{GUIDE_SUBTITLE}</p>
         </div>
-        <div className="ml-auto">
+        <div className="shrink-0">
           <NewChatButton />
         </div>
       </header>

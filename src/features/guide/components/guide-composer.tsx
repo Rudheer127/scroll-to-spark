@@ -1,33 +1,35 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from "react";
+import { PromptBox } from "@/components/ui/prompt-box";
+import { PromptSendButton } from "@/components/ui/prompt-send-button";
 import { cn } from "@/lib/cn";
 import { MAX_INPUT_CHARS } from "../constants";
 import { useSpeechInput } from "../speech/use-speech-input";
 import { AttachButton } from "./attach-button";
 import { characterCount, sendBlockReason, shouldShowCount } from "./chat-input-state";
-import { ComposerStatus } from "./composer-status";
+import { ComposerStatus, hasComposerStatus } from "./composer-status";
+import { COMPOSER_LABEL, COMPOSER_PLACEHOLDER } from "./guide-copy";
 import { useGuide } from "./guide-provider";
 import { ImageChip } from "./image-chip";
 import { MicButton } from "./mic-button";
 
-type ComposerProps = { inputId: string; size: "compact" | "large" };
+type ComposerProps = { inputId: string; size: "compact" | "large"; className?: string };
 
-const MAX_HEIGHT = { compact: 160, large: 320 } as const;
+const SEND_HINT = "Enter sends. Shift and Enter adds a line.";
 
 function firstImage(list: FileList | null | undefined): File | null {
   return Array.from(list ?? []).find((file) => file.type.startsWith("image/")) ?? null;
 }
 
 /** The message box: grows with the text, Enter sends, Shift and Enter adds a line. */
-export function GuideComposer({ inputId, size }: ComposerProps) {
+export function GuideComposer({ inputId, size, className }: ComposerProps) {
   const guide = useGuide();
   const { draft, setDraft, attachment, imageInputEnabled, sending } = guide;
   const speech = useSpeechInput(draft, setDraft);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [attachHint, setAttachHint] = useState(false);
   const hintId = `${inputId}-hint`;
   const counterId = `${inputId}-count`;
 
@@ -36,17 +38,6 @@ export function GuideComposer({ inputId, size }: ComposerProps) {
     hasImage: image.status === "ready",
     imageBusy: image.status === "processing",
   });
-
-  function fitHeight() {
-    const field = textareaRef.current;
-    if (!field) return;
-    field.style.height = "auto";
-    // A box inside a dialog that is not open yet measures 0; keep the rows height until focus.
-    if (field.scrollHeight === 0) return;
-    field.style.height = `${Math.min(field.scrollHeight, MAX_HEIGHT[size])}px`;
-  }
-
-  useLayoutEffect(fitHeight, [draft, size]);
 
   const wasSending = useRef(sending);
   useEffect(() => {
@@ -71,12 +62,17 @@ export function GuideComposer({ inputId, size }: ComposerProps) {
   }
 
   const showCount = shouldShowCount(draft);
+  const status = {
+    speech,
+    attachmentError: image.status === "error" ? image.message : null,
+    showImageLimits: imageInputEnabled && (attachHint || dragging),
+  };
   return (
-    <form
-      className={cn(
-        "flex flex-col gap-2 rounded-(--radius-card) border bg-surface p-2 shadow-card",
-        dragging ? "border-action" : "border-control",
-      )}
+    <PromptBox
+      label={COMPOSER_LABEL}
+      size={size}
+      highlighted={dragging}
+      className={className}
       onSubmit={(event) => {
         event.preventDefault();
         submit();
@@ -91,62 +87,69 @@ export function GuideComposer({ inputId, size }: ComposerProps) {
         setDragging(false);
         if (takeImage(firstImage(event.dataTransfer.files))) event.preventDefault();
       }}
-    >
-      <label htmlFor={inputId} className="sr-only">
-        Message the Spark Guide
-      </label>
-      <ImageChip state={image} onRemove={attachment.clear} />
-      <textarea
-        id={inputId}
-        ref={textareaRef}
-        rows={size === "large" ? 2 : 1}
-        value={draft}
-        maxLength={MAX_INPUT_CHARS}
-        placeholder="Message the Spark Guide"
-        aria-describedby={showCount ? `${hintId} ${counterId}` : hintId}
-        onChange={(event) => setDraft(event.target.value)}
-        onFocus={fitHeight}
-        onPaste={(event) => {
+      textarea={{
+        id: inputId,
+        ref: textareaRef,
+        value: draft,
+        maxLength: MAX_INPUT_CHARS,
+        placeholder: COMPOSER_PLACEHOLDER,
+        "aria-describedby": showCount ? `${hintId} ${counterId}` : hintId,
+        onChange: (event) => setDraft(event.target.value),
+        onPaste: (event) => {
           if (takeImage(firstImage(event.clipboardData.files))) event.preventDefault();
-        }}
-        onKeyDown={(event) => {
+        },
+        onKeyDown: (event) => {
           if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
             event.preventDefault();
             submit();
           }
-        }}
-        className={cn(
-          "w-full resize-none overflow-y-auto bg-transparent px-2 py-1.5 text-ink placeholder:text-muted",
-          size === "large" ? "text-base" : "text-sm",
-        )}
-      />
-      <div className="flex flex-wrap items-center gap-1">
-        {imageInputEnabled ? (
-          <AttachButton onPick={(file) => takeImage(file)} disabled={sending} />
-        ) : null}
-        {speech.supported ? <MicButton speech={speech} disabled={sending} /> : null}
-        {showCount ? (
-          <p id={counterId} className="ml-auto px-2 text-xs text-muted" aria-live="polite">
-            {characterCount(draft)}
+        },
+      }}
+      attachments={
+        image.status === "ready" || image.status === "processing" ? (
+          <ImageChip state={image} onRemove={attachment.clear} />
+        ) : null
+      }
+      tools={
+        <>
+          {imageInputEnabled ? (
+            <AttachButton
+              onPick={(file) => takeImage(file)}
+              disabled={sending}
+              onHintChange={setAttachHint}
+            />
+          ) : null}
+          {speech.supported ? <MicButton speech={speech} disabled={sending} /> : null}
+        </>
+      }
+      meta={
+        <>
+          <p id={hintId} className="sr-only">
+            {blockReason ?? SEND_HINT}
           </p>
-        ) : null}
-        <Button
-          type="submit"
+          {showCount ? (
+            <p
+              id={counterId}
+              aria-live="polite"
+              className={cn(
+                "text-xs tabular-nums",
+                draft.length >= MAX_INPUT_CHARS ? "text-danger" : "text-muted",
+              )}
+            >
+              {characterCount(draft)}
+            </p>
+          ) : null}
+        </>
+      }
+      send={
+        <PromptSendButton
+          busy={sending}
           disabled={blockReason !== null}
           aria-describedby={hintId}
-          className={showCount ? "" : "ml-auto"}
-        >
-          <Send aria-hidden className="size-4" />
-          Send
-        </Button>
-      </div>
-      <ComposerStatus
-        hintId={hintId}
-        blockReason={blockReason}
-        speech={speech}
-        attachmentError={image.status === "error" ? image.message : null}
-        imageInputEnabled={imageInputEnabled}
-      />
-    </form>
+          title={blockReason ?? undefined}
+        />
+      }
+      caption={hasComposerStatus(status) ? <ComposerStatus {...status} /> : null}
+    />
   );
 }
