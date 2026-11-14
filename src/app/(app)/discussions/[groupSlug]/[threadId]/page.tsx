@@ -27,7 +27,7 @@ export default async function ThreadPage({
           { label: "Thread" },
         ]}
       />
-      <article className="flex flex-col gap-3 rounded-(--radius-card) border border-border bg-surface p-6">
+      <article className="flex flex-col gap-3 rounded-(--radius-card) shadow-card border border-border bg-surface p-6">
         <p className="text-sm text-muted">
           <span className="font-semibold text-ink">{thread.authorName}</span> in {group.name},{" "}
           {formatRelativeTime(thread.createdAt)}

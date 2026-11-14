@@ -23,7 +23,7 @@ export default async function GroupPage({ params }: PageProps<"/discussions/[gro
           {canParticipate ? (
             <ThreadComposer groupId={group.id} groupName={group.name} />
           ) : (
-            <p className="rounded-(--radius-card) border border-border bg-surface p-5 text-muted">
+            <p className="rounded-(--radius-card) shadow-card border border-border bg-surface p-5 text-muted">
               Join this group to start threads, vote and comment.
             </p>
           )}
@@ -32,17 +32,12 @@ export default async function GroupPage({ params }: PageProps<"/discussions/[gro
             <p className="text-muted">No threads yet.</p>
           ) : (
             threads.map((thread) => (
-              <ThreadCard
-                key={thread.id}
-                thread={thread}
-                groupSlug={group.slug}
-                canVote={canParticipate}
-              />
+              <ThreadCard key={thread.id} thread={thread} canVote={canParticipate} />
             ))
           )}
         </section>
         {group.description ? (
-          <aside className="flex h-fit flex-col gap-2 rounded-(--radius-card) border border-border bg-surface p-6">
+          <aside className="flex h-fit flex-col gap-2 rounded-(--radius-card) shadow-card border border-border bg-surface p-6">
             <h2 className="text-lg font-bold">About this group</h2>
             <p className="text-muted">{group.description}</p>
           </aside>

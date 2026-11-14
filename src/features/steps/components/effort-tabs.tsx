@@ -2,34 +2,26 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { EFFORTS, EFFORT_LABELS, type Effort } from "@/features/steps/constants";
 
-/** Lets a person say how much they want to give. It reloads the page with ?effort= in the address. */
+/** Lets a person say how much they want to give. Pick a size again to go back to any size. */
 export function EffortTabs({ current }: { current?: Effort }) {
-  const options: { href: string; label: string; active: boolean }[] = [
-    { href: "/", label: "Any size", active: !current },
-    ...EFFORTS.map((effort) => ({
-      href: `/?effort=${effort}`,
-      label: EFFORT_LABELS[effort].label,
-      active: current === effort,
-    })),
-  ];
-
   return (
     <nav aria-label="How much do you want to give?" className="flex flex-wrap gap-2">
-      {options.map(({ href, label, active }) => (
-        <Link
-          key={label}
-          href={href}
-          aria-current={active ? "true" : undefined}
-          className={cn(
-            "inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold active:opacity-75 md:min-h-10",
-            active
-              ? "border-ink bg-ink text-white"
-              : "border-control bg-surface hover:bg-background",
-          )}
-        >
-          {label}
-        </Link>
-      ))}
+      {EFFORTS.map((effort) => {
+        const active = current === effort;
+        return (
+          <Link
+            key={effort}
+            href={active ? "/" : `/?effort=${effort}`}
+            aria-current={active ? "true" : undefined}
+            className={cn(
+              "inline-flex min-h-11 items-center rounded-full border px-5 text-sm font-extrabold active:opacity-75 md:min-h-10",
+              active ? "border-sun bg-sun" : "border-border bg-background hover:bg-chip",
+            )}
+          >
+            {EFFORT_LABELS[effort].label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

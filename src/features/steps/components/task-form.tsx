@@ -113,7 +113,7 @@ export function TaskForm({ groups }: { groups: OwnedGroup[] }) {
           ))}
         </div>
       </fieldset>
-      <p className="rounded-(--radius-control) bg-chip p-4 text-sm">
+      <p className="rounded-(--radius-input) bg-chip p-4 text-sm">
         By posting this, a real person from your group promises to reply to everyone who does it
         within {REPLY_PROMISE_HOURS} hours.
       </p>

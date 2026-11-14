@@ -1,6 +1,6 @@
 # UI and UX rules
 
-These rules apply to every screen. The look is Warm Civic: a warm paper-like page, crisp white cards with a thin warm border, navy text and one terracotta action. It borrows familiar social patterns for conversations, which are Reddit-style threads with nested replies. It is calm and trustworthy first, and friendly through plain words and real photos.
+These rules apply to every screen. The look comes from the Figma mockups: a warm cream page, white rounded cards, deep navy text, a coral step card, and yellow, teal and lavender as supporting colors. Discussions borrow the Instagram feel (round group stories with a sunset ring, pill tabs) and Reddit-style threads with nested replies. It stays kind and unpressured through plain words.
 
 ## Hard rules
 
@@ -45,17 +45,18 @@ Everything else is left-aligned. Sign-in and sign-up screens use a full-width sp
 
 | Item | Rule |
 |---|---|
-| Font | Inter |
-| Page background | Warm off-white (`#F9F8F6`) |
-| Surface | White cards with a 1 pixel warm border (`#E2E0D8`) and no shadow |
-| Text | Navy ink (`#1F2A44`) and a warm grey for secondary text that passes 4.5:1 |
-| Links and focus | Deep blue. Red for destructive actions |
-| Standard action | A solid navy button (`primary` variant) |
-| Main action | One filled terracotta button per screen (`brand` variant). White text on it must pass 4.5:1 |
-| Gradient | None. No gradients, no glass and no purple. The logo is solid ink and avatars are plain colored circles |
+| Font | Fredoka for headings and numbers, Nunito for everything else |
+| Page background | Warm cream (`#FFF8EF`) |
+| Surface | White cards with a 1 pixel cream border (`#F0E3D0`), 24 pixel corners and a soft shadow |
+| Text | Navy ink (`#2B2A4C`) and a muted violet-grey (`#6E6C8A`) for secondary text |
+| Links and focus | Deep lavender (`#5B4BD6`). Red for destructive actions |
+| Standard action | A solid navy pill button (`primary` variant) |
+| Main action | The coral step card on Home, and one filled `brand` pill button where a page has none |
+| Supporting colors | Yellow `#FFC93C` for selected sizes and progress, teal `#2FBF9B` for done and good news, lavender `#8B7CF6` for the account card and quiet chips |
+| Gradient | One sunset blend (`--gradient-spark`) for group story rings and the Create group button. Nowhere else |
 | Control edges | Inputs and other controls use the control border token so their edge is at least 3:1 against the page |
-| Radius | 12 to 16 pixels on cards, full round on pills and avatars |
-| Shadows | Only on floating layers: menus, popovers, dialogs |
+| Radius | 24 pixels on cards, 16 on inputs, full round on buttons, pills and avatars |
+| Shadows | A soft card shadow (`shadow-card`) on cards and a stronger one on floating layers |
 | Motion | Short and subtle. Never animate width, height or position of layout. Honor reduced motion |
 
 All colors, fonts and spacing come from design tokens defined once in the Tailwind theme. No raw hex color or font name inside a component.

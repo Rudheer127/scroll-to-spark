@@ -1,39 +1,61 @@
-/* Hallmark · checked: 2026-11-14 · genre: playful (inferred) · surface: absolute
- * floor: 0 FAIL · fixed: 2a, 20, 26b, 40 · structural: none printed
- * built: the project · redesign: polish · v2.0.0 */
-/* Hallmark · waive 7b · white cards on a warm off-white page · the Warm Civic direction asks for crisp white cards with a 1px border */
 @import "tailwindcss";
 
-/* Design tokens. Every color, font and radius used in the UI comes from here. */
+/* Design tokens: the Spark mockups. Every color, font, radius and shadow used in the UI comes from here. */
 @theme {
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fredoka Variable", "Nunito Variable", ui-sans-serif, system-ui, sans-serif;
 
-  /* Warm Civic: a paper-like page, crisp white cards, navy ink, and one terracotta action. */
-  --color-background: #f9f8f6;
+  /* Warm cream page, white cards, deep navy ink. */
+  --color-background: #fff8ef;
   --color-surface: #ffffff;
-  --color-border: #e2e0d8;
-  /* Edge of inputs and other controls. 3:1 against the page, so a field can be found. */
-  --color-control: #8a877d;
-  --color-ink: #1f2a44;
-  --color-muted: #5f5d58;
-  --color-chip: #efede7;
-  /* Deep blue for links and focus. */
-  --color-action: #1d4e89;
-  /* Terracotta for the one main action on a screen. White text on it passes 4.5:1. */
-  --color-cta: #b4441a;
-  --color-danger: #b3261e;
-  --color-success: #2e7d5b;
+  --color-border: #f0e3d0;
+  /* Edge of inputs. Darker than a card border so a field can be found. */
+  --color-control: #b8a687;
+  --color-ink: #2b2a4c;
+  --color-muted: #6e6c8a;
+  --color-chip: #f6ebd9;
 
-  /* Group colors. White initials on each pass 4.5:1. */
-  --color-group-orange: #b4551a;
-  --color-group-pink: #b03060;
-  --color-group-purple: #6b4fa0;
-  --color-group-indigo: #3f51a3;
-  --color-group-blue: #1d6fa5;
-  --color-group-green: #2e7d5b;
+  /* Coral for the big step card and the active nav item. */
+  --color-coral: #f96a45;
+  /* Yellow, teal and lavender are the supporting colors. */
+  --color-sun: #ffc93c;
+  --color-teal: #2fbf9b;
+  --color-teal-soft: #d5f5ec;
+  --color-teal-ink: #17806a;
+  --color-lavender: #8b7cf6;
+  --color-lavender-soft: #e8e4ff;
+  --color-lavender-ink: #5b4bd6;
 
-  --radius-card: 16px;
-  --radius-control: 10px;
+  /* Links and focus. Deep enough to read on white. */
+  --color-action: #5b4bd6;
+  /* The main action button. White text on it passes 4.5:1. */
+  --color-cta: #d4461f;
+  --color-join: #0873c4;
+  --color-danger: #c0392b;
+  --color-success: #17806a;
+
+  /* Group colors, the same set as the Discussions mockup. */
+  --color-group-orange: #f58529;
+  --color-group-pink: #dd2a7b;
+  --color-group-purple: #8134af;
+  --color-group-indigo: #515bd4;
+  --color-group-blue: #0095f6;
+  --color-group-green: #2fbf9b;
+
+  --radius-card: 24px;
+  --radius-control: 999px;
+  --radius-input: 16px;
+
+  --shadow-card: 0 6px 20px rgb(43 42 76 / 0.07);
+  --shadow-pop: 0 10px 24px rgb(139 124 246 / 0.45);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
 }
 
 html,
@@ -45,6 +67,11 @@ body {
   background: var(--color-background);
   color: var(--color-ink);
   font-family: var(--font-sans);
+}
+
+/* The ring around a group story and the Create group button use this sunset blend. */
+:root {
+  --gradient-spark: linear-gradient(90deg, #f58529 0%, #dd2a7b 35%, #8134af 70%, #515bd4 100%);
 }
 
 :focus-visible {

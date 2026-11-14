@@ -10,7 +10,7 @@ export function StepList({ completions }: { completions: CompletionSummary[] }) 
       {completions.map((item) => (
         <li
           key={item.id}
-          className="flex flex-col gap-2 rounded-(--radius-card) border border-border bg-surface p-5"
+          className="flex flex-col gap-2 rounded-(--radius-card) shadow-card border border-border bg-surface p-5"
         >
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-lg font-bold">{item.taskTitle}</h2>
@@ -27,7 +27,7 @@ export function StepList({ completions }: { completions: CompletionSummary[] }) 
           </p>
           {item.note ? <p className="max-w-3xl">{item.note}</p> : null}
           {item.thankYou ? (
-            <p className="rounded-(--radius-control) bg-chip p-3 text-sm">
+            <p className="rounded-(--radius-input) bg-chip p-3 text-sm">
               <span className="font-semibold">From a real group:</span>{" "}
               {item.thankYou.kind === "written" && item.thankYou.body
                 ? item.thankYou.body

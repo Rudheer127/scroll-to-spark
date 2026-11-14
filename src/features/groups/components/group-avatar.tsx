@@ -3,7 +3,9 @@ import { getInitials } from "@/lib/initials";
 import { swatchClass } from "@/features/groups/constants";
 
 const SIZES = {
+  sm: "size-9 text-xs",
   md: "size-12 text-base",
+  story: "size-16 text-xl",
   lg: "size-20 text-2xl",
 } as const;
 
@@ -15,7 +17,7 @@ export function GroupAvatar({ name, color, size = "md" }: GroupAvatarProps) {
     <span
       aria-hidden
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full font-bold text-white",
+        "inline-flex shrink-0 items-center justify-center rounded-full font-display font-bold text-white",
         swatchClass(color),
         SIZES[size],
       )}

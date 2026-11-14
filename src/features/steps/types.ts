@@ -26,6 +26,7 @@ export type CompletionSummary = {
   id: string;
   taskId: string;
   taskTitle: string;
+  minutes: number;
   groupName: string;
   groupSlug: string;
   groupColor: string;

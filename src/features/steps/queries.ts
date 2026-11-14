@@ -98,7 +98,7 @@ type CompletionRow = {
   task_id: string;
   note: string | null;
   created_at: string;
-  tasks: { title: string; groups: GroupEmbed };
+  tasks: { title: string; minutes: number; groups: GroupEmbed };
   thank_yous: {
     kind: "tap" | "written";
     body: string | null;
@@ -116,7 +116,7 @@ export async function getMyCompletions(): Promise<CompletionSummary[]> {
   const { data, error } = await supabase
     .from("task_completions")
     .select(
-      "id, task_id, note, created_at, tasks(title, groups(name, slug, color, is_demo)), thank_yous(kind, body, created_at, profiles!thank_yous_from_user_id_fkey(username))",
+      "id, task_id, note, created_at, tasks(title, minutes, groups(name, slug, color, is_demo)), thank_yous(kind, body, created_at, profiles!thank_yous_from_user_id_fkey(username))",
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
@@ -126,6 +126,7 @@ export async function getMyCompletions(): Promise<CompletionSummary[]> {
     id: row.id,
     taskId: row.task_id,
     taskTitle: row.tasks.title,
+    minutes: row.tasks.minutes,
     groupName: row.tasks.groups.name,
     groupSlug: row.tasks.groups.slug,
     groupColor: row.tasks.groups.color,

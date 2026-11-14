@@ -8,7 +8,7 @@ export function PageSkeleton() {
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-5">
         {Array.from({ length: 6 }, (_, index) => (
-          <div key={index} className="h-40 rounded-(--radius-card) bg-chip" />
+          <div key={index} className="h-40 rounded-(--radius-card) shadow-card bg-chip" />
         ))}
       </div>
     </div>

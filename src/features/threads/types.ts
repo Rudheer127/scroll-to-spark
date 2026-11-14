@@ -1,6 +1,9 @@
 export type ThreadSummary = {
   id: string;
   groupId: string;
+  groupName: string;
+  groupSlug: string;
+  groupColor: string;
   title: string;
   body: string | null;
   createdAt: string;

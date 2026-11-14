@@ -26,10 +26,16 @@ export function Sidebar({ footer }: { footer: React.ReactNode }) {
   return (
     <nav
       aria-label="Main"
-      className="sticky top-0 flex h-screen flex-col gap-1 border-r border-border bg-surface px-3 py-7"
+      className="sticky top-0 flex h-screen flex-col gap-2 border-r border-border bg-surface p-6"
     >
-      <Link href="/" className="mb-6 px-3 py-2 text-3xl font-bold active:opacity-75">
-        Spark
+      <Link href="/" className="mb-4 flex items-center gap-2.5 active:opacity-75">
+        <span
+          aria-hidden
+          className="flex size-10 items-center justify-center rounded-full bg-sun font-display text-xl font-bold"
+        >
+          S
+        </span>
+        <span className="font-display text-2xl font-bold">Spark</span>
       </Link>
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const active = isActive(pathname, href);
@@ -39,11 +45,11 @@ export function Sidebar({ footer }: { footer: React.ReactNode }) {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-4 rounded-xl px-3 py-3 text-base active:opacity-75",
-              active ? "bg-chip font-bold" : "hover:bg-background",
+              "flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-bold active:opacity-75",
+              active ? "bg-coral text-white" : "hover:bg-chip",
             )}
           >
-            <Icon aria-hidden className="size-6" />
+            <Icon aria-hidden className="size-5" />
             {label}
           </Link>
         );

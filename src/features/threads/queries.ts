@@ -9,18 +9,22 @@ type ThreadRow = {
   body: string | null;
   created_at: string;
   profiles: { username: string };
+  groups: { name: string; slug: string; color: string };
   thread_votes: { value: number; user_id: string }[];
   comments: { count: number }[];
 };
 
 const THREAD_COLUMNS =
-  "id, group_id, title, body, created_at, profiles!threads_author_id_fkey(username), thread_votes(value, user_id), comments(count)";
+  "id, group_id, title, body, created_at, profiles!threads_author_id_fkey(username), groups(name, slug, color), thread_votes(value, user_id), comments(count)";
 
 function toThread(row: ThreadRow, userId: string): ThreadSummary {
   const mine = row.thread_votes.find((vote) => vote.user_id === userId)?.value ?? 0;
   return {
     id: row.id,
     groupId: row.group_id,
+    groupName: row.groups.name,
+    groupSlug: row.groups.slug,
+    groupColor: row.groups.color,
     title: row.title,
     body: row.body,
     createdAt: row.created_at,
@@ -62,4 +66,30 @@ export async function getThread(threadId: string): Promise<ThreadSummary | null>
     .maybeSingle();
   if (error) throw new Error(`Could not load the thread: ${error.message}`);
   return data ? toThread(data as unknown as ThreadRow, user.id) : null;
+}
+
+export type FeedTab = "trending" | "new" | "following";
+
+export function isFeedTab(value: unknown): value is FeedTab {
+  return value === "trending" || value === "new" || value === "following";
+}
+
+/** Threads from every group you can see. Following keeps only the groups you joined. */
+export async function getFeed(tab: FeedTab, joinedGroupIds: Set<string>): Promise<ThreadSummary[]> {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("threads")
+    .select(THREAD_COLUMNS)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`Could not load threads: ${error.message}`);
+
+  const threads = (data as unknown as ThreadRow[]).map((row) => toThread(row, user.id));
+  const shown =
+    tab === "following" ? threads.filter((t) => joinedGroupIds.has(t.groupId)) : threads;
+  return tab === "trending"
+    ? shown.sort((a, b) => b.voteScore - a.voteScore || b.createdAt.localeCompare(a.createdAt))
+    : shown;
 }

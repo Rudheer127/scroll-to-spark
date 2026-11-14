@@ -89,7 +89,7 @@ export function CreateGroupDialog() {
 
   return (
     <>
-      <Button variant="brand" onClick={() => setOpen(true)}>
+      <Button variant="spark" onClick={() => setOpen(true)}>
         <Plus aria-hidden className="size-4" />
         Create group
       </Button>

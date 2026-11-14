@@ -20,7 +20,7 @@ export function ThreadComposer({ groupId, groupName }: { groupId: string; groupN
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-4 rounded-(--radius-card) border border-border bg-surface p-5"
+      className="flex flex-col gap-4 rounded-(--radius-card) shadow-card border border-border bg-surface p-5"
     >
       <input type="hidden" name="groupId" value={groupId} />
       <h2 className="text-lg font-bold">Start a thread in {groupName}</h2>

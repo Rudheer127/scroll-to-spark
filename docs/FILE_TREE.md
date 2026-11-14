@@ -88,7 +88,7 @@ src/
 
   features/                 one folder per product feature
     groups/
-      components/           group-card, group-header, create-group-dialog, delete-group-dialog
+      components/           group-story, discover-row, group-header, create-group-dialog, delete-group-dialog
       actions.ts            createGroup, joinGroup, leaveGroup, deleteGroup
       queries.ts            getGroups, getGroupBySlug
       schemas.ts            Zod schemas

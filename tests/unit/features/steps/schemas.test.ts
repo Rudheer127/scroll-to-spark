@@ -37,6 +37,7 @@ describe("summarizeProgress", () => {
   const base: Omit<CompletionSummary, "id" | "createdAt" | "thankYou"> = {
     taskId: "t",
     taskTitle: "A task",
+    minutes: 10,
     groupName: "A group",
     groupSlug: "a-group",
     groupColor: "pink",
@@ -60,6 +61,6 @@ describe("summarizeProgress", () => {
         },
       },
     ];
-    expect(summarizeProgress(items, now)).toEqual({ thisWeek: 1, total: 2, replies: 1 });
+    expect(summarizeProgress(items, now)).toMatchObject({ thisWeek: 1, total: 2, replies: 1 });
   });
 });

@@ -17,7 +17,7 @@ export function WaitingList({ items }: { items: WaitingCompletion[] }) {
       {items.map((item) => (
         <li
           key={item.id}
-          className="flex flex-col gap-3 rounded-(--radius-card) border border-border bg-surface p-5"
+          className="flex flex-col gap-3 rounded-(--radius-card) shadow-card border border-border bg-surface p-5"
         >
           <div className="flex flex-col gap-1">
             <h3 className="text-base font-bold">

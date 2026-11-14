@@ -13,7 +13,7 @@ export function OwnedTaskList({ tasks }: { tasks: OwnedTask[] }) {
       {tasks.map((task) => (
         <li
           key={task.id}
-          className="flex flex-col gap-1 rounded-(--radius-card) border border-border bg-surface p-5"
+          className="flex flex-col gap-1 rounded-(--radius-card) shadow-card border border-border bg-surface p-5"
         >
           <h3 className="text-base font-bold">{task.title}</h3>
           <p className="text-sm text-muted">
