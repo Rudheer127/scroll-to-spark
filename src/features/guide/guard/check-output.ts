@@ -8,6 +8,7 @@ import {
   claimsHuman,
   emDash,
   markup,
+  promptEcho,
   tooLong,
   urlInText,
 } from "./rules/text-rules";
@@ -22,6 +23,7 @@ const RULES: Rule[] = [
   bannedPhrase,
   emDash,
   canaryLeak,
+  promptEcho,
   tooLong,
   claimsHuman,
   unsupportedVerdict,

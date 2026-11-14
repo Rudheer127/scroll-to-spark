@@ -1,3 +1,4 @@
+import { INTENTS } from "../constants";
 import type { Intent } from "../types";
 import { intentBlock } from "./intent-blocks";
 
@@ -49,4 +50,12 @@ export function buildSystemPrompt({ intent, canary, nonce, today }: Args): strin
     OUTPUT,
     intentBlock(intent),
   ].join("\n\n");
+}
+
+/** The fixed rules of every prompt, without examples, with per request values blanked. */
+export function staticPromptText(): string {
+  return INTENTS.map(
+    (intent) =>
+      buildSystemPrompt({ intent, canary: "", nonce: "", today: "" }).split("\n\nEXAMPLES FOR")[0],
+  ).join("\n");
 }

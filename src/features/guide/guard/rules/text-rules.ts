@@ -1,6 +1,7 @@
 import { BANNED_PHRASES, MAX_MESSAGE_CHARS } from "../../constants";
 import type { GuideResponse } from "../../schemas";
 import type { OutputContext, Violation } from "../../types";
+import { staticPromptText } from "../../prompts/system";
 import { allTexts } from "./text-of";
 
 const URL_SCHEME = /https?:\/\/|www\./i;
@@ -59,4 +60,26 @@ export function claimsHuman(res: GuideResponse): Violation | null {
   return allTexts(res).some((t) => HUMAN_CLAIMS.some((re) => re.test(normalize(t))))
     ? "claims_human"
     : null;
+}
+
+const ECHO_WINDOW = 40;
+const lettersOnly = (s: string) =>
+  s
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]/gu, "");
+let promptLetters: string | null = null;
+
+/** The output repeats 40 or more letters in a row of the fixed system prompt. */
+export function promptEcho(res: GuideResponse): Violation | null {
+  promptLetters ??= lettersOnly(staticPromptText());
+  const source = promptLetters;
+  const echoed = allTexts(res).some((t) => {
+    const flat = lettersOnly(t);
+    for (let i = 0; i + ECHO_WINDOW <= flat.length; i += 1) {
+      if (source.includes(flat.slice(i, i + ECHO_WINDOW))) return true;
+    }
+    return false;
+  });
+  return echoed ? "prompt_leak" : null;
 }

@@ -1,3 +1,4 @@
+import { claimsVerification } from "../guard/rules/verification";
 import type { GuideResponse } from "../schemas";
 import type { EvidenceRow, Violation } from "../types";
 import { numbersIn } from "./shared";
@@ -95,4 +96,10 @@ export function echoOnly(userText: string, rows: EvidenceRow[]) {
     });
     return bad ? "ungrounded_number" : null;
   };
+}
+
+/** Only evidence our team has re-checked may be called verified. Otherwise those words are out. */
+export function verifiedOnlyIfChecked(rows: EvidenceRow[]) {
+  return (res: GuideResponse): Violation | null =>
+    rows.some((r) => r.verified_at !== null) ? null : claimsVerification(res);
 }

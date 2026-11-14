@@ -11,6 +11,7 @@ import {
   evidenceNumbers,
   mentionsCaveat,
   mentionsUnverified,
+  verifiedOnlyIfChecked,
 } from "./fact-check-rules";
 import { answerWithModel, wrapUser } from "./shared";
 import type { HandlerContext, HandlerOutput } from "./types";
@@ -71,6 +72,7 @@ export async function handleFactCheck(ctx: HandlerContext): Promise<HandlerOutpu
     mentionsUnverified(rows),
     mentionsCaveat(rows),
     echoOnly(ctx.text, rows),
+    verifiedOnlyIfChecked(rows),
   ];
   return {
     ...out,

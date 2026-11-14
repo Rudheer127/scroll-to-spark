@@ -7,7 +7,7 @@ export type InjectionSignal =
   | "tool_coercion";
 
 const GAP = String.raw`(?:\W+\w+){0,3}?\W+`;
-const OVERRIDE_VERB = String.raw`(?:ignore|disregard|forget|override|bypass|skip)`;
+const OVERRIDE_VERB = String.raw`(?:ignore|disregard|forget|override|bypass)`;
 const SCOPE = String.raw`(?:previous|prior|above|earlier|preceding|all|any|your|system|initial|original|these|those|every)`;
 const RULES = String.raw`(?:instructions?|rules|prompts?|guidelines|directions|directives)`;
 const ES_VERB = String.raw`(?:ignora|ignoren|ignorar|olvida|olvidar|descarta|omite|salta|desobedece)`;
@@ -22,7 +22,11 @@ const PATTERNS: Record<InjectionSignal, RegExp[]> = {
       "i",
     ),
     new RegExp(
-      String.raw`\b${OVERRIDE_VERB}\b\W+(?:the\W+)?(?:previous|prior|above|preceding)\b`,
+      String.raw`\b${OVERRIDE_VERB}\b\W+(?:the\W+)?(?:previous|prior|above|preceding)\b(?=\W*(?:$|and\b|then\b|instructions?\b|messages?\b|rules\b|prompts?\b|text\b|context\b|conversation\b|everything\b))`,
+      "i",
+    ),
+    new RegExp(
+      String.raw`\bskip\W+(?:all\W+|any\W+|the\W+)?(?:previous|prior|above|your|system)\W+${RULES}\b`,
       "i",
     ),
     new RegExp(String.raw`\b${ES_VERB}\b${GAP}${ES_RULES}\b`, "i"),
@@ -36,7 +40,7 @@ const PATTERNS: Record<InjectionSignal, RegExp[]> = {
     /\b(?:revela|muestra|repite|imprime)\b(?:\W+\w+){0,2}?\W+(?:tu|su)\s+prompt\b/i,
   ],
   role_override: [
-    /\byou\s+are\s+now\b/i,
+    /\byou\s+are\s+now\b(?!\s+my\s+(?:favou?rite|best|good)\b)/i,
     /\bfrom\s+now\s+on\s*,?\s+you\b/i,
     /\bdo\s+anything\s+now\b/i,
     /\b(?:developer|god|jailbreak|jailbroken|unrestricted)\s+mode\b/i,
@@ -51,18 +55,19 @@ const PATTERNS: Record<InjectionSignal, RegExp[]> = {
     /\[\s*\/?\s*(?:INST|SYS|SYSTEM)\s*\]/i,
     /<<\s*\/?\s*(?:SYS|DATA|END)\b/i,
     /<\|[a-z_ ]{2,30}\|>/i,
-    /(?:^|\s)(?:system|assistant|developer)\s*:/i,
+    /^\s*(?:system|assistant|developer)\s*:/i,
+    /\b(?:system|assistant|developer)\s*:\s*(?:you|ignore|disregard|forget|new|from\s+now|do\s+not|never|always|act|reveal|output|print)\b/i,
     /#{2,}\s*(?:system|instructions?)\b/i,
   ],
   encoded_blob: [/[A-Za-z0-9+/]{100,}={0,2}/, /\b[0-9a-f]{64,}\b/i],
   tool_coercion: [
-    /\b(?:call|invoke|execute|trigger)\W+(?:\w+\W+){0,2}?(?:function|tool|api|endpoint|command)\b/i,
+    /\b(?:call|invoke|execute|trigger)\W+(?:\w+\W+){0,2}?(?:function|tool|api|endpoint|command)\b(?!\W+librar)/i,
     /\brun\W+(?:this|the|a|my)\W+(?:\w+\W+){0,1}?(?:command|script|query|code|shell)\b/i,
     /\b(?:tool_calls?|function_call)\b/i,
     /\b(?:drop|truncate)\s+table\b/i,
     /\bdelete\s+from\s+\w+/i,
     /\bselect\s+\*\s+from\b/i,
-    /\bsend\s+(?:an?\s+)?(?:email|message|request)\s+to\b/i,
+    /\bsend\s+(?:an?\s+)?(?:email|message|request)\s+to\b(?!\s+(?:my|our)\b)/i,
   ],
 };
 
@@ -78,6 +83,9 @@ const SQUASHED: Partial<Record<InjectionSignal, RegExp[]>> = {
   role_override: [/youarenow(?:dan|an?unrestricted|jailbroken)/, /doanythingnow/],
 };
 
+/** Long links are not encoded payloads, so the blob check ignores them. */
+const URL_RUN = /https?:\/\/\S+/gi;
+
 /** Removes everything but letters so "i g n o r e" and "i.g.n.o.r.e" collapse. */
 function squash(text: string): string {
   return text.toLowerCase().replace(/[^\p{L}]/gu, "");
@@ -87,9 +95,11 @@ function squash(text: string): string {
 export function detectInjectionSignals(text: string): InjectionSignal[] {
   const squashed = squash(text);
   const found: InjectionSignal[] = [];
+  const noUrls = text.replace(URL_RUN, " ");
   for (const signal of Object.keys(PATTERNS) as InjectionSignal[]) {
+    const subject = signal === "encoded_blob" ? noUrls : text;
     const hit =
-      PATTERNS[signal].some((re) => re.test(text)) ||
+      PATTERNS[signal].some((re) => re.test(subject)) ||
       (SQUASHED[signal] ?? []).some((re) => re.test(squashed));
     if (hit) found.push(signal);
   }

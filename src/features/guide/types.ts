@@ -19,6 +19,7 @@ export type Violation =
   | "banned_phrase"
   | "em_dash"
   | "canary_leak"
+  | "prompt_leak"
   | "too_long"
   | "claims_human"
   | "unsupported_verdict"

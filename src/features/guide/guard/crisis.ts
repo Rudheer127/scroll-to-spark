@@ -14,9 +14,17 @@ const CRISIS_PATTERNS: RegExp[] = [
     "i",
   ),
   /\bbetter\s+off\s+dead\b/i,
-  /\b(?:hurt|harm|cut)(?:ting)?\s+my\s*self\b/i,
+  /\b(?:hurt|harm|cut)(?:ting|ing)?\s+my\s*self\b/i,
   /\bself[\s-]?harm\b/i,
+  new RegExp(
+    String.raw`\bwish\s+i\s+(?:would\s+)?(?:just\s+)?(?:never\s+wake|not\s+wake|wasn${APOS}?t\s+(?:alive|here|born))`,
+    "i",
+  ),
+  /\bno\s+(?:point|reason)\s+(?:in|to)\s+(?:going\s+on\s+)?(?:living|live)\b/i,
   /\bquiero\s+morir(?:me)?\b/i,
+  /\bno\s+quiero\s+(?:vivir|seguir\s+viviendo|estar\s+vivo)\b/i,
+  /不想活|想去死/,
+  /मरना\s+चाह/,
   /\bquitarme\s+la\s+vida\b/i,
   /\b(?:suicidarme|matarme)\b/i,
 ];

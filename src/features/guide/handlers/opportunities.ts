@@ -1,3 +1,4 @@
+import { claimsVerification } from "../guard/rules/verification";
 import { wrapUntrusted } from "../guard/untrusted";
 import { callStructured } from "../llm/structured";
 import { NO_MATCH_MESSAGE } from "../fallbacks";
@@ -46,9 +47,10 @@ export async function handleOpportunities(ctx: HandlerContext): Promise<HandlerO
   const rows = await searchOpportunities(ctx.db, filters);
   if (rows.length === 0) return staticOutput(ctx, NO_MATCH_MESSAGE, "find_opportunity");
   const content = [wrapUser(ctx), ...rows.map((row) => rowBlock(row, ctx.nonce))].join("\n\n");
-  return answerWithModel(ctx, "find_opportunity", content, {
+  const out = await answerWithModel(ctx, "find_opportunity", content, {
     allowedIds: rows.map((r) => r.id),
     extraNumbers: rows.flatMap((r) => [String(r.minutes), String(r.reply_within_hours)]),
     rows,
   });
+  return { ...out, extraCheck: claimsVerification };
 }
