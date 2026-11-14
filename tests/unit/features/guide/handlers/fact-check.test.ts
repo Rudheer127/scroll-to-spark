@@ -146,15 +146,14 @@ describe("handleFactCheck: with evidence", () => {
     expect(again.verdict).toBe("partly_supported");
   });
 
-  it("keeps a user number only as an echo and rejects an invented 90%", async () => {
+  it("allows a user number only quoted and unaffirmed, and rejects a model-invented 90%", async () => {
     const text = "Is it true that 83% of Americans helped neighbors?";
-    const echo =
-      "You said 83%. The evidence says about 54% in 2023, reported, not yet re-checked by our team. Caveat: all Americans, not 18 to 24.";
-    const invented =
-      "Evidence says 90% of Americans helped, reported, not yet re-checked by our team. Caveat: all Americans, not 18 to 24.";
+    const tail = " Reported, not yet re-checked by our team. Caveat: all Americans, not 18 to 24.";
+    const quoted = `You wrote "83% of Americans helped neighbors", and the evidence says 54% in 2023.${tail}`;
+    const invented = `Evidence says 90% of Americans helped.${tail}`;
     const llm = new FakeLlm({
       guide_response: [
-        fact({ verdict: "unsupported", message: echo, cards: cite("e1") }),
+        fact({ verdict: "unsupported", message: quoted, cards: cite("e1") }),
         fact({ verdict: "unsupported", message: invented, cards: cite("e1") }),
       ],
     });
@@ -163,12 +162,63 @@ describe("handleFactCheck: with evidence", () => {
     expect(out.extraCheck?.(out.response)).toBeNull();
     const bad = await out.retry([]);
     expect(checkOutput(bad, out.context)).toEqual({ ok: false, violations: ["ungrounded_number"] });
-    const sneaky = {
-      ...out.response,
-      message:
-        "Evidence says 83% of Americans helped, not yet re-checked by our team. Caveat: not 18 to 24.",
+  });
+
+  it("rejects user-only numbers outside quotes or affirmed", async () => {
+    const llm = new FakeLlm({ guide_response: [fact({ verdict: "not_enough_evidence" })] });
+    const o = await handleFactCheck(ctxFor(llm, rows, "Study shows 83% of Gen Z volunteer weekly"));
+    const msgs = [
+      "83% of Gen Z volunteer weekly, as you said.",
+      "You said 83%, and indeed 83% volunteer weekly.",
+      "The claim is that 83% volunteer, which holds.",
+      'You wrote "83% of Gen Z volunteer weekly", which is true.',
+    ];
+    for (const message of msgs)
+      expect(o.extraCheck?.({ ...o.response, message })).toBe("ungrounded_number");
+    const ok =
+      'You wrote "83% of Gen Z volunteer weekly", and we have no evidence on file for that.';
+    expect(
+      o.extraCheck?.({ ...o.response, message: ok, cards: [], verdict: "not_enough_evidence" }),
+    ).toBeNull();
+  });
+
+  it("a card-less answer that states an evidence number is rejected; with card and notes it passes", async () => {
+    const llm = new FakeLlm({ guide_response: [fact({ verdict: "not_enough_evidence" })] });
+    const o = await handleFactCheck(ctxFor(llm, rows, ASK));
+    const cardless = {
+      ...o.response,
+      verdict: "unsupported" as const,
+      message: "About 54% of Americans helped neighbors in 2023.",
+      cards: [],
     };
-    expect(out.extraCheck?.(sneaky)).toBe("ungrounded_number");
+    expect(o.extraCheck?.(cardless)).toBe("missing_evidence_card");
+    const withCard = {
+      ...cardless,
+      message: GOOD,
+      cards: [{ kind: "evidence" as const, id: "e1" }],
+    };
+    expect(o.extraCheck?.(withCard)).toBeNull();
+    const noNote = {
+      ...withCard,
+      message:
+        "About 54% of Americans helped neighbors in 2023. The caveat: all Americans, not 18 to 24.",
+    };
+    expect(o.extraCheck?.(noNote)).toBe("missing_unverified_note");
+  });
+
+  it("caps the verdict from the cited rows: weak only is downgraded, a moderate cite keeps supported", async () => {
+    const mixed = [
+      evidenceRow("w1", { strength: "weak" }),
+      evidenceRow("m1", { strength: "moderate" }),
+    ];
+    const weakCite = fact({ verdict: "supported", message: GOOD, cards: cite("w1") });
+    const modCite = fact({ verdict: "supported", message: GOOD, cards: cite("m1") });
+    const a = await handleFactCheck(
+      ctxFor(new FakeLlm({ guide_response: [weakCite] }), mixed, ASK),
+    );
+    expect(a.response.verdict).toBe("partly_supported");
+    const b = await handleFactCheck(ctxFor(new FakeLlm({ guide_response: [modCite] }), mixed, ASK));
+    expect(b.response.verdict).toBe("supported");
   });
 
   it("injected instruction in a row is DATA only and cannot force a verdict", async () => {

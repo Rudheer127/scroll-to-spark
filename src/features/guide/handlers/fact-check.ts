@@ -6,6 +6,7 @@ import { lookupEvidence } from "../tools/lookup-evidence";
 import type { EvidenceRow, Violation } from "../types";
 import {
   capVerdict,
+  citesEvidenceNumbers,
   echoOnly,
   evidenceNumbers,
   mentionsCaveat,
@@ -65,7 +66,12 @@ export async function handleFactCheck(ctx: HandlerContext): Promise<HandlerOutpu
     extraNumbers: evidenceNumbers(rows),
     rows: [],
   });
-  const rules = [mentionsUnverified(rows), mentionsCaveat(rows), echoOnly(ctx.text, rows)];
+  const rules = [
+    citesEvidenceNumbers(rows),
+    mentionsUnverified(rows),
+    mentionsCaveat(rows),
+    echoOnly(ctx.text, rows),
+  ];
   return {
     ...out,
     evidence: rows,

@@ -24,7 +24,8 @@ export type Violation =
   | "unsupported_verdict"
   | "claims_verification"
   | "missing_unverified_note"
-  | "missing_caveat";
+  | "missing_caveat"
+  | "missing_evidence_card";
 
 export type CheckResult = { ok: true } | { ok: false; violations: Violation[] };
 

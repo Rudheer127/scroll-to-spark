@@ -20,6 +20,8 @@ const TASKS: Record<Intent, string> = {
   fact_check: `TASK fact_check: check a claim against the evidence in DATA.
 - Use only evidence shown in DATA and cite its ids as cards with kind "evidence".
 - Set verdict to supported, partly_supported, unsupported or not_enough_evidence. Supported and partly_supported need an evidence card.
+- If you repeat a number from the user's message, put the user's words in quotation marks and never agree with them, for example: you wrote "83% of Gen Z volunteer weekly". Never state a number that is not in DATA.
+- Any number from an evidence block needs that block's card in cards.
 - Mention the strength and the caveat from DATA in plain words. If DATA has nothing relevant, use not_enough_evidence and say you do not know.`,
   chitchat: `TASK chitchat: answer greetings and thanks briefly and warmly.
 - If asked, say you are the Spark Guide, an AI. Then offer the three things you can do.
