@@ -2,17 +2,22 @@ import { LogOut } from "lucide-react";
 import { AccountMenu } from "@/components/layout/account-menu";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
-type AccountRowProps = { name: string; email?: string; signOut: () => Promise<void> };
+type AccountRowProps = {
+  name: string;
+  avatarUrl?: string | null;
+  email?: string;
+  signOut: () => Promise<void>;
+};
 
 /**
  * The account row at the bottom of the sidebar: the avatar (it opens the account menu), the name
  * in a readable size, then the theme switch and sign out. In the collapsed rail the name hides and
  * the three controls stack, so nothing is clipped.
  */
-export function AccountRow({ name, email, signOut }: AccountRowProps) {
+export function AccountRow({ name, avatarUrl, email, signOut }: AccountRowProps) {
   return (
     <div data-sidebar-account className="flex items-center gap-1 border-t border-border px-1 pt-4">
-      <AccountMenu name={name} email={email} signOut={signOut} />
+      <AccountMenu name={name} avatarUrl={avatarUrl} email={email} signOut={signOut} />
       <p
         data-sidebar-expanded-only
         title={name}

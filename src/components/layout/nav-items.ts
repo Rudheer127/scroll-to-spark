@@ -2,9 +2,9 @@ import {
   Building2,
   Home,
   MessagesSquare,
+  Settings,
   Sparkles,
   Sprout,
-  User,
   type LucideIcon,
 } from "lucide-react";
 
@@ -17,7 +17,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/discussions", label: "Discussions", short: "Groups", icon: MessagesSquare },
   { href: "/guide", label: "Guide", short: "Guide", icon: Sparkles },
   { href: "/portal", label: "Partner portal", short: "Portal", icon: Building2 },
-  { href: "/profile", label: "Profile", short: "Profile", icon: User },
+  { href: "/settings", label: "Settings", short: "Settings", icon: Settings },
 ];
 
 export function isActive(pathname: string, href: string): boolean {

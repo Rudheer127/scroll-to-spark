@@ -53,7 +53,7 @@ const css = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8");
 describe("sidebar panel", () => {
   it("every nav link carries its name as aria-label and title, with the Guide icon", () => {
     const html = render(true);
-    for (const name of ["Home", "My steps", "Discussions", "Guide", "Partner portal", "Profile"]) {
+    for (const name of ["Home", "My steps", "Discussions", "Guide", "Partner portal", "Settings"]) {
       expect(html).toMatch(new RegExp(`<a[^>]*aria-label="${name}"[^>]*title="${name}"`));
     }
     expect(html).toMatch(/<a[^>]*aria-current="page"[^>]*aria-label="Guide"/);

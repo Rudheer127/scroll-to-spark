@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const DIR = join(process.cwd(), "supabase/migrations");
-const FILE = "20261114180000_guide_conversations.sql";
+const FILE = "20261114190000_guide_conversations.sql";
 const sql = readFileSync(join(DIR, FILE), "utf8");
 const lower = sql.toLowerCase();
 

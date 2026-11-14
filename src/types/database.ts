@@ -186,7 +186,7 @@ export type Database = {
         };
         Relationships: [];
       };
-      // Matches supabase/migrations/20261114180000_guide_conversations.sql, written by hand before it is applied.
+      // Matches supabase/migrations/20261114190000_guide_conversations.sql, written by hand before it is applied.
       guide_conversations: {
         Row: {
           created_at: string;
@@ -383,6 +383,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_color: string;
+          avatar_url: string | null;
           created_at: string;
           display_name: string | null;
           id: string;
@@ -391,6 +392,7 @@ export type Database = {
         };
         Insert: {
           avatar_color?: string;
+          avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
           id: string;
@@ -399,6 +401,7 @@ export type Database = {
         };
         Update: {
           avatar_color?: string;
+          avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
           id?: string;
