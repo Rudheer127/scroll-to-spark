@@ -8,7 +8,19 @@ Built for the Principled Innovation Academy challenge:
 
 ## Status
 
-Early build. What works today: email sign-up and log-in, groups (create, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. The Spark Guide chat (a popup and a full page, always labeled AI) is built but has not been tested against live AI providers or in a browser yet. Image uploads and GIFs are not built yet. The list below describes the full plan, not only what exists today.
+Early build. What works today: email sign-up and log-in, groups (create, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. The Spark Guide chat (a popup and a full page, always labeled AI) is built. A red team test (72 attack and benign prompts, run in CI with a scripted model that obeys every attack) passes, but the live eval against real AI providers has NOT been run, and the chat has not been tried in a browser yet. Image uploads and GIFs are not built yet. The list below describes the full plan, not only what exists today.
+
+## Running the live eval
+
+The red team test in `npm test` uses a scripted model. The live eval sends a 37 prompt subset of the same corpus (`tests/evals/injection-corpus.json`) to the real provider, with fake database rows and no Supabase, and writes nothing to disk. It skips itself when no key is set.
+
+```bash
+export CEREBRAS_API_KEY=...   # or GROQ_API_KEY=...
+export LLM_PROVIDER=cerebras  # optional: cerebras (default) or groq
+npm run eval:live
+```
+
+It prints a table (entry, category, intent, source, guard events, result) and fails the run on any leak: a URL, the canary, system prompt text, an ungrounded number, a verified or certified claim, or a crisis message that was not handled. Benign messages that get blocked are shown as FAIL rows in the table but do not fail the run. Report results honestly as counts, for example "N attack prompts, M passed", and only after a real run.
 
 ## What it will do
 
@@ -25,12 +37,12 @@ Next.js, React, TypeScript, Tailwind CSS, shadcn/ui and 21st.dev components, Sup
 
 ## Documentation
 
-| Document | What it covers |
-|---|---|
-| [docs/TECH_STACK.md](docs/TECH_STACK.md) | The fixed technology choices and what is not allowed to change |
-| [docs/BUILD_RULES.md](docs/BUILD_RULES.md) | Coding rules: what to do, what to avoid, how to reuse code |
-| [docs/UI_UX_RULES.md](docs/UI_UX_RULES.md) | Layout, copy and interaction rules for every screen |
-| [docs/FILE_TREE.md](docs/FILE_TREE.md) | The folder layout and where each kind of code lives |
+| Document                                   | What it covers                                                 |
+| ------------------------------------------ | -------------------------------------------------------------- |
+| [docs/TECH_STACK.md](docs/TECH_STACK.md)   | The fixed technology choices and what is not allowed to change |
+| [docs/BUILD_RULES.md](docs/BUILD_RULES.md) | Coding rules: what to do, what to avoid, how to reuse code     |
+| [docs/UI_UX_RULES.md](docs/UI_UX_RULES.md) | Layout, copy and interaction rules for every screen            |
+| [docs/FILE_TREE.md](docs/FILE_TREE.md)     | The folder layout and where each kind of code lives            |
 
 Read the three rule documents before writing any code.
 
@@ -84,7 +96,6 @@ The app will be deployed to Vercel. The database, sign-in and file storage run o
 ## License
 
 Not chosen yet.
-
 
 ## Demo data
 
