@@ -29,6 +29,9 @@ export type Violation =
   | "missing_caveat"
   | "missing_evidence_card";
 
+/** Reports a failed helper model call by stage name. Never receives user text. */
+export type ReportStageFailure = (stage: "router" | "filters") => Promise<void>;
+
 export type CheckResult = { ok: true } | { ok: false; violations: Violation[] };
 
 export type OpportunityRow = {

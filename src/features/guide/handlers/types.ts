@@ -7,6 +7,7 @@ import type {
   EvidenceRow,
   OpportunityRow,
   OutputContext,
+  ReportStageFailure,
   Violation,
 } from "../types";
 
@@ -17,6 +18,8 @@ export type HandlerContext = {
   llm: LlmClient;
   db: SupabaseClient<Database>;
   today: string;
+  /** Logs a failed helper call (the filter call). Optional so pure handler tests can omit it. */
+  onStageFailure?: ReportStageFailure;
 };
 
 export type HandlerOutput = {

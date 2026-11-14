@@ -35,3 +35,33 @@ describe("routeIntent", () => {
     expect(await routeIntent(throwing, "x", "n")).toEqual(expected);
   });
 });
+
+describe("routeIntent budget and failure reporting (I7)", () => {
+  it("gives the router 1000 tokens so reasoning does not starve the answer", async () => {
+    const llm = new FakeLlm({ router_output: [routerReply("chitchat")] });
+    await routeIntent(llm, "hi", "n");
+    expect(llm.calls[0].maxTokens).toBe(1000);
+  });
+
+  it("reports a failed or thrown router call, and not a good one", async () => {
+    const stages: string[] = [];
+    const onFailure = async (stage: string) => {
+      stages.push(stage);
+    };
+    await routeIntent(
+      new FakeLlm({ router_output: [routerReply("chitchat")] }),
+      "x",
+      "n",
+      onFailure,
+    );
+    expect(stages).toEqual([]);
+    await routeIntent(new FakeLlm({ router_output: [fail()] }), "x", "n", onFailure);
+    const throwing: LlmClient = {
+      complete: () => {
+        throw new Error("boom");
+      },
+    };
+    await routeIntent(throwing, "x", "n", onFailure);
+    expect(stages).toEqual(["router", "router"]);
+  });
+});

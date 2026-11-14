@@ -3,18 +3,22 @@ import { wrapUntrusted } from "./guard/untrusted";
 import { callStructured } from "./llm/structured";
 import type { LlmClient } from "./llm/types";
 import { routerOutputSchema } from "./schemas";
-import type { Intent } from "./types";
+import type { Intent, ReportStageFailure } from "./types";
 
 const SAFE_DEFAULT: { intent: Intent; safety: "ok" | "crisis" } = {
   intent: "out_of_scope",
   safety: "ok",
 };
 
-/** Classifies one message. Any failure, including a thrown error, means out_of_scope and ok. */
+/**
+ * Classifies one message. Any failure, including a thrown error, means out_of_scope and ok, and
+ * is reported through onFailure so it is not silent.
+ */
 export async function routeIntent(
   llm: LlmClient,
   text: string,
   nonce: string,
+  onFailure: ReportStageFailure = async () => undefined,
 ): Promise<{ intent: Intent; safety: "ok" | "crisis" }> {
   try {
     const result = await callStructured(llm, routerOutputSchema, {
@@ -24,12 +28,15 @@ export async function routeIntent(
       ],
       schemaName: "router_output",
       reasoningEffort: "low",
-      maxTokens: 300,
+      // Reasoning tokens count toward this budget, so it must be roomy.
+      maxTokens: 1000,
       timeoutMs: 8000,
       tier: "router",
     });
-    return result.ok ? result.data : SAFE_DEFAULT;
+    if (result.ok) return result.data;
   } catch {
-    return SAFE_DEFAULT;
+    // Falls through to the safe default below.
   }
+  await onFailure("router");
+  return SAFE_DEFAULT;
 }

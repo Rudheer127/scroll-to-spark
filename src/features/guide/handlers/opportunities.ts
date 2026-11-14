@@ -20,11 +20,14 @@ async function extractFilters(ctx: HandlerContext): Promise<OpportunityFilters> 
     ],
     schemaName: "opportunity_filters",
     reasoningEffort: "low",
-    maxTokens: 300,
+    // Reasoning tokens count toward this budget, so it must be roomy.
+    maxTokens: 1000,
     timeoutMs: 8000,
     tier: "router",
   });
-  return result.ok ? result.data : NO_FILTERS;
+  if (result.ok) return result.data;
+  await ctx.onStageFailure?.("filters");
+  return NO_FILTERS;
 }
 
 function rowBlock(row: OpportunityRow, nonce: string): string {

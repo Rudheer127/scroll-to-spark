@@ -251,3 +251,38 @@ describe("runGuideTurn: over-long replies are repaired, not unavailable (I6)", (
     expect(t.events()).toContain("provider_failure");
   });
 });
+
+describe("runGuideTurn: router and filter failures are logged (I7)", () => {
+  const details = (t: ReturnType<typeof setup>) =>
+    t.log
+      .filter((i) => i.table === "guide_events" && i.row.kind === "provider_failure")
+      .map((i) => i.row.detail);
+
+  it("logs provider_failure with stage router and still answers as out_of_scope", async () => {
+    const t = setup({
+      router_output: [fail("timeout")],
+      guide_response: [guideReply({ message: "I can help with three small things." })],
+    });
+    const res = await t.run("my secret words");
+    expect(res.response.intent).toBe("out_of_scope");
+    expect(details(t)).toEqual([{ stage: "router" }]);
+    expect(JSON.stringify(details(t))).not.toContain("secret");
+  });
+
+  it("logs provider_failure with stage filters and still searches", async () => {
+    const t = setup(
+      {
+        router_output: [routerReply("find_opportunity")],
+        opportunity_filters: [fail()],
+        guide_response: [
+          guideReply({ intent: "find_opportunity", message: "Try one small step." }),
+        ],
+      },
+      { tasks: [taskRow("t1")] },
+    );
+    const res = await t.run("something small");
+    expect(res.source).toBe("ai");
+    expect(details(t)).toEqual([{ stage: "filters" }]);
+    expect(t.llm.callsFor("opportunity_filters")[0].maxTokens).toBe(1000);
+  });
+});

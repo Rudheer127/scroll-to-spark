@@ -1,33 +1,29 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
-import {
-  CRISIS_MESSAGE,
-  EMPTY_MESSAGE,
-  RATE_LIMIT_MESSAGE,
-  REDIRECT_MESSAGE,
-  UNAVAILABLE_MESSAGE,
-} from "./fallbacks";
-import { fixedResponse } from "./fixed-response";
-import { AI_LABEL } from "./constants";
-import { checkOutput } from "./guard/check-output";
+import { EMPTY_MESSAGE, RATE_LIMIT_MESSAGE, REDIRECT_MESSAGE } from "./fallbacks";
 import { detectCrisis } from "./guard/crisis";
 import { detectInjectionSignals, type InjectionSignal } from "./guard/injection-signals";
 import { sanitizeInput } from "./guard/sanitize-input";
 import { newCanary, newNonce } from "./guard/untrusted";
+import {
+  crisisResult,
+  fixedResult,
+  guardedResult,
+  unavailableResult,
+  type LogEvent,
+} from "./guarded-result";
 import { handleFactCheck } from "./handlers/fact-check";
 import { handleGeneral } from "./handlers/general";
 import { handleOpportunities } from "./handlers/opportunities";
 import { handleRecognition } from "./handlers/recognition";
 import { ProviderFailure } from "./handlers/shared";
 import type { HandlerContext, HandlerOutput } from "./handlers/types";
-import { hydrateCards } from "./hydrate-cards";
 import { logGuideEvent } from "./events";
 import type { LlmClient } from "./llm/types";
 import { insertUserTurn, persistAssistantTurn } from "./persist";
 import { checkRateLimit, serializePerUser } from "./rate-limit";
 import { routeIntent } from "./router";
-import type { GuideResponse } from "./schemas";
-import type { CheckResult, GuideTurnResult, Intent } from "./types";
+import type { GuideTurnResult, Intent } from "./types";
 
 export type GuideTurnInput = {
   userId: string;
@@ -45,22 +41,6 @@ const STRONG_SIGNALS: InjectionSignal[] = [
   "tool_coercion",
 ];
 
-const fixedResult = (message: string): GuideTurnResult => ({
-  response: fixedResponse(message),
-  cards: [],
-  source: "fallback",
-});
-
-const crisisResult = (): GuideTurnResult => ({ ...fixedResult(CRISIS_MESSAGE), outcome: "crisis" });
-
-const unavailableResult = (): GuideTurnResult => ({
-  ...fixedResult(UNAVAILABLE_MESSAGE),
-  outcome: "unavailable",
-});
-
-/** The model followed the prompt's crisis rule and wrote the fixed crisis message. */
-const isCrisisReply = (res: GuideResponse) => res.message.trim() === CRISIS_MESSAGE;
-
 /** Every intent has its own handler. */
 export function dispatchHandler(intent: Intent, ctx: HandlerContext): Promise<HandlerOutput> {
   switch (intent) {
@@ -77,51 +57,18 @@ export function dispatchHandler(intent: Intent, ctx: HandlerContext): Promise<Ha
   }
 }
 
-function checkAll(out: HandlerOutput, response: GuideResponse): CheckResult {
-  const base = checkOutput(response, out.context);
-  const extra = out.extraCheck?.(response) ?? null;
-  if (!extra) return base;
-  return { ok: false, violations: [...(base.ok ? [] : base.violations), extra] };
-}
-
-/** Guards model output, makes one repair attempt, then falls back. Fixed copy skips the guard. */
-async function guardedResult(input: GuideTurnInput, out: HandlerOutput): Promise<GuideTurnResult> {
-  if (out.source === "fallback") {
-    return {
-      response: out.response,
-      cards: hydrateCards(out.response, out.rows, out.contributions, out.evidence),
-      source: "fallback",
-    };
-  }
-  if (isCrisisReply(out.response)) {
-    await logGuideEvent(input.admin, input.userId, "crisis", { source: "model" });
-    return crisisResult();
-  }
-  let response = out.response;
-  let check = checkAll(out, response);
-  if (!check.ok) {
-    response = await out.retry(check.violations);
-    check = checkAll(out, response);
-  }
-  if (!check.ok) {
-    await logGuideEvent(input.admin, input.userId, "output_blocked", {
-      violations: check.violations.join(","),
-    });
-    return fixedResult(REDIRECT_MESSAGE);
-  }
-  return {
-    response,
-    cards: hydrateCards(response, out.rows, out.contributions, out.evidence),
-    source: "ai",
-    label: AI_LABEL,
-  };
-}
+const loggerFor =
+  (input: GuideTurnInput): LogEvent =>
+  (kind, detail) =>
+    logGuideEvent(input.admin, input.userId, kind, detail);
 
 async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnResult> {
+  const log = loggerFor(input);
+  const onStageFailure = (stage: "router" | "filters") => log("provider_failure", { stage });
   const nonce = newNonce();
-  const route = await routeIntent(input.llm, text, nonce);
+  const route = await routeIntent(input.llm, text, nonce, onStageFailure);
   if (route.safety === "crisis") {
-    await logGuideEvent(input.admin, input.userId, "crisis", { source: "router" });
+    await log("crisis", { source: "router" });
     return crisisResult();
   }
   const ctx: HandlerContext = {
@@ -131,12 +78,13 @@ async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnRes
     llm: input.llm,
     db: input.db,
     today: input.today,
+    onStageFailure,
   };
   try {
-    return await guardedResult(input, await dispatchHandler(route.intent, ctx));
+    return await guardedResult(log, await dispatchHandler(route.intent, ctx));
   } catch (error) {
     if (error instanceof ProviderFailure) {
-      await logGuideEvent(input.admin, input.userId, "provider_failure", { reason: error.reason });
+      await log("provider_failure", { reason: error.reason });
     }
     return unavailableResult();
   }
