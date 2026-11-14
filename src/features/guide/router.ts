@@ -30,7 +30,8 @@ export async function routeIntent(
       reasoningEffort: "low",
       // Reasoning tokens count toward this budget, so it must be roomy.
       maxTokens: 1000,
-      timeoutMs: 8000,
+      // Free OpenRouter models answered in up to about 10 seconds in a live check.
+      timeoutMs: 15000,
       tier: "router",
     });
     if (result.ok) return result.data;
