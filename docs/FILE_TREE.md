@@ -66,7 +66,7 @@ src/
           page.tsx          one group
           not-found.tsx     shown for a group that does not exist
           [threadId]/page.tsx   one thread with nested comments
-      guide/page.tsx        full-page Spark Guide
+      guide/page.tsx        full-page Spark Guide (the popup is hidden here)
       messages/page.tsx
       notifications/page.tsx
       profile/page.tsx
@@ -115,9 +115,14 @@ src/
       components/           thank-you-card, thank-you-composer
       actions.ts  queries.ts  types.ts
     guide/
-      components/           guide-popup, guide-page, message-bubble
-      actions.ts            send message to the guide route
-      types.ts
+      components/           guide-chat (the one chat), guide-popup, guide-page, message-bubble,
+                            assistant-message, opportunity-card, evidence-card, logged-card,
+                            confirm-contribution-card, crisis-card, starter-prompts,
+                            to-message-view (pure view model), chat-input-state (pure helpers)
+      actions.ts            sendGuideMessage and confirmContribution Server Actions
+      pipeline.ts           one guide turn: screen, route, handle, check
+      handlers/ tools/ guard/ llm/ prompts/   the model side, all server only
+      schemas.ts  types.ts  constants.ts  hydrate-cards.ts  and the other pipeline helpers
     partners/
       components/           task-form, waiting-list, task-card
       actions.ts  queries.ts  schemas.ts  types.ts

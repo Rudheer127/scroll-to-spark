@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { UserBlock } from "@/components/layout/user-block";
+import { GuidePopup } from "@/features/guide/components/guide-popup";
 import { PageSkeleton } from "@/components/shared/page-skeleton";
 
 /**
@@ -23,6 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="min-w-0 px-10 py-8">
         <Suspense fallback={<PageSkeleton />}>{children}</Suspense>
       </main>
+      <GuidePopup />
     </div>
   );
 }

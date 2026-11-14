@@ -8,7 +8,7 @@ Built for the Principled Innovation Academy challenge:
 
 ## Status
 
-Early build. What works today: email sign-up and log-in, groups (create, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. Image uploads, GIFs and the Spark Guide are not built yet. The list below describes the full plan, not only what exists today.
+Early build. What works today: email sign-up and log-in, groups (create, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. The Spark Guide chat (a popup and a full page, always labeled AI) is built but has not been tested against live AI providers or in a browser yet. Image uploads and GIFs are not built yet. The list below describes the full plan, not only what exists today.
 
 ## What it will do
 
