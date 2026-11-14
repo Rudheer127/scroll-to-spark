@@ -16,7 +16,7 @@ Early build. What works today: email sign-up and log-in, signed-out visitors are
 2. **Real thank-yous.** A partner group replies to each action. Every reply is labeled by who wrote it: a real group or the app.
 3. **Progress without pressure.** A private view of what a person has done. No streaks, no leaderboards, no guilt.
 4. **Discussions.** Groups people can create, join, leave and delete, with Reddit-style threaded conversations, image uploads, emojis and GIFs, in an Instagram-style look.
-5. **Spark Guide.** An AI helper that declutters options, listens, and helps a person contribute. It only suggests real partner groups and is always labeled as AI.
+5. **Spark Guide.** An AI helper (served by Cerebras or Groq open models, with one fallback) that declutters options, listens, and helps a person contribute. It only suggests real partner groups and is always labeled as AI.
 6. **Group portal.** A separate area where partner groups post small tasks and send thank-yous.
 
 ## Tech stack

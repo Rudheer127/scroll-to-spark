@@ -25,7 +25,7 @@ These choices are fixed. Changing one needs a written reason in the pull request
 | Supabase client | `@supabase/supabase-js` and `@supabase/ssr` | Official clients for browser and server |
 | Validation | Zod | One schema checks form input and server input |
 | GIFs | A GIF search API called only from a server route | Keeps the API key off the browser. Provider to be confirmed before the GIF feature is built |
-| AI helper | Anthropic Claude API, called only from a server route | Keeps the key off the browser. The helper may only suggest real partner groups |
+| AI helper | Cerebras and Groq (gpt-oss models), called only from server code | Cerebras and Groq serve open models fast and cheap with strict JSON output and one fallback path. Keys stay off the browser. The helper may only suggest real partner groups |
 
 ## Data fetching and state
 
