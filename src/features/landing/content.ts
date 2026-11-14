@@ -110,5 +110,9 @@ export const CONTACT = {
 } as const;
 
 export const FOOTER = {
+  year: 2026,
+  tagline:
+    "Turn a moment of feeling helpless into one small, real thing you can do for your community.",
   note: "Made by a student team. Photos from Unsplash.",
+  legal: "No points. No streaks. No guilt.",
 } as const;
