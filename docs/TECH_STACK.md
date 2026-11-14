@@ -4,53 +4,53 @@ These choices are fixed. Changing one needs a written reason in the pull request
 
 ## Core
 
-| Area | Choice | Why |
-|---|---|---|
-| Framework | Next.js, App Router | One framework for pages, server actions and API routes, and it deploys to Vercel with no extra setup |
-| Language | TypeScript, strict mode | Catches mistakes before they reach a user |
-| UI library | React | Comes with Next.js |
-| Styling | Tailwind CSS | Fast, consistent spacing and color through design tokens |
-| Components | shadcn/ui primitives plus components from 21st.dev | Accessible, editable code that lives in our repo |
-| Icons | lucide-react | One consistent vector icon set. No emoji as icons |
-| Fonts | Inter, self-hosted with `@fontsource-variable/inter` | Matches the Figma mockups, and the build never depends on reaching Google Fonts |
+| Area       | Choice                                                                 | Why                                                                                                  |
+| ---------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Framework  | Next.js, App Router                                                    | One framework for pages, server actions and API routes, and it deploys to Vercel with no extra setup |
+| Language   | TypeScript, strict mode                                                | Catches mistakes before they reach a user                                                            |
+| UI library | React                                                                  | Comes with Next.js                                                                                   |
+| Styling    | Tailwind CSS                                                           | Fast, consistent spacing and color through design tokens                                             |
+| Components | shadcn/ui primitives plus components from 21st.dev                     | Accessible, editable code that lives in our repo                                                     |
+| Icons      | lucide-react                                                           | One consistent vector icon set. No emoji as icons                                                    |
+| Fonts      | Inter for the interface, self-hosted with `@fontsource-variable/inter` | Matches the Figma mockups, and the build never depends on reaching Google Fonts                     |
 
 ## Data and services
 
-| Area | Choice | Why |
-|---|---|---|
-| Database | Supabase Postgres | Relational data fits groups, threads and comments |
-| Security | Row Level Security on every table | The database enforces who can read, write and delete |
-| Auth | Supabase Auth | Sign-in and sessions without building our own |
-| File storage | Supabase Storage | Image uploads in comments and posts |
-| Supabase client | `@supabase/supabase-js` and `@supabase/ssr` | Official clients for browser and server |
-| Validation | Zod | One schema checks form input and server input |
-| GIFs | A GIF search API called only from a server route | Keeps the API key off the browser. Provider to be confirmed before the GIF feature is built |
-| AI helper | Anthropic Claude API, called only from a server route | Keeps the key off the browser. The helper may only suggest real partner groups |
+| Area            | Choice                                                           | Why                                                                                                                                                                                                                                                                             |
+| --------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Database        | Supabase Postgres                                                | Relational data fits groups, threads and comments                                                                                                                                                                                                                               |
+| Security        | Row Level Security on every table                                | The database enforces who can read, write and delete                                                                                                                                                                                                                            |
+| Auth            | Supabase Auth                                                    | Sign-in and sessions without building our own                                                                                                                                                                                                                                   |
+| File storage    | Supabase Storage                                                 | Image uploads in comments and posts                                                                                                                                                                                                                                             |
+| Supabase client | `@supabase/supabase-js` and `@supabase/ssr`                      | Official clients for browser and server                                                                                                                                                                                                                                         |
+| Validation      | Zod                                                              | One schema checks form input and server input                                                                                                                                                                                                                                   |
+| GIFs            | A GIF search API called only from a server route                 | Keeps the API key off the browser. Provider to be confirmed before the GIF feature is built                                                                                                                                                                                     |
+| AI helper       | Cerebras and Groq (gpt-oss models), called only from server code | Cerebras and Groq serve open models fast and cheap with strict JSON output and one fallback path. Keys stay off the browser. The helper may only point to open tasks posted in the app, marks demo tasks as samples, and checks claims only against the app's own evidence list |
 
 ## Data fetching and state
 
-| Area | Rule |
-|---|---|
-| Reading data | Server Components call functions in `features/*/queries.ts` |
-| Writing data | Server Actions in `features/*/actions.ts` |
+| Area         | Rule                                                                    |
+| ------------ | ----------------------------------------------------------------------- |
+| Reading data | Server Components call functions in `features/*/queries.ts`             |
+| Writing data | Server Actions in `features/*/actions.ts`                               |
 | Client state | React state and URL search params. No global state library at the start |
-| Forms | Native forms with Server Actions, validated with Zod |
+| Forms        | Native forms with Server Actions, validated with Zod                    |
 
 If a global state library or a data fetching library is ever needed, add it through the change process above, not inside a feature.
 
 ## Tooling
 
-| Area | Choice |
-|---|---|
-| Package manager | npm |
-| Node.js | 24 or newer |
-| Linting | ESLint with the Next.js config |
-| Formatting | Prettier |
-| Unit tests | Vitest |
-| End to end tests | Playwright |
+| Area                | Choice                                       |
+| ------------------- | -------------------------------------------- |
+| Package manager     | npm                                          |
+| Node.js             | 24 or newer                                  |
+| Linting             | ESLint with the Next.js config               |
+| Formatting          | Prettier                                     |
+| Unit tests          | Vitest                                       |
+| End to end tests    | Playwright                                   |
 | Database migrations | Supabase CLI, files in `supabase/migrations` |
-| Hosting | Vercel |
-| Source control | Git and GitHub |
+| Hosting             | Vercel                                       |
+| Source control      | Git and GitHub                               |
 
 ## Not allowed without approval
 

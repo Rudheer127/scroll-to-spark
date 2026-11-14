@@ -1,5 +1,4 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { SparkGuide } from "@/features/guide/components/spark-guide";
 import { LiveRefresh } from "@/components/shared/live-refresh";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
@@ -7,7 +6,6 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
     <AppShell>
       <LiveRefresh />
       {children}
-      <SparkGuide />
     </AppShell>
   );
 }

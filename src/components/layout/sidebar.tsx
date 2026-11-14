@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Home, MessagesSquare, Sprout, User, type LucideIcon } from "lucide-react";
+import {
+  Building2,
+  Home,
+  MessagesSquare,
+  Sparkles,
+  Sprout,
+  User,
+  type LucideIcon,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/cn";
 
@@ -12,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/steps", label: "My steps", icon: Sprout },
   { href: "/discussions", label: "Discussions", icon: MessagesSquare },
+  { href: "/guide", label: "Guide", icon: Sparkles },
   { href: "/portal", label: "Partner portal", icon: Building2 },
   { href: "/profile", label: "Profile", icon: User },
 ];
