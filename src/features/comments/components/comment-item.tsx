@@ -5,6 +5,8 @@ import { ChevronDown, ChevronRight, Reply } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { formatRelativeTime } from "@/lib/format-time";
+import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
+import { deleteComment } from "@/features/comments/actions";
 import { CommentForm } from "@/features/comments/components/comment-form";
 import { ReactionBar } from "@/features/comments/components/reaction-bar";
 import { MAX_INDENT_DEPTH } from "@/features/comments/constants";
@@ -15,13 +17,23 @@ type CommentItemProps = {
   threadId: string;
   depth: number;
   canParticipate: boolean;
+  viewerId: string;
+  isGroupOwner: boolean;
 };
 
 /** One comment, its reactions, a reply box, and its replies. Replies can be collapsed. */
-export function CommentItem({ node, threadId, depth, canParticipate }: CommentItemProps) {
+export function CommentItem({
+  node,
+  threadId,
+  depth,
+  canParticipate,
+  viewerId,
+  isGroupOwner,
+}: CommentItemProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [replying, setReplying] = useState(false);
   const hasReplies = node.children.length > 0;
+  const canDelete = node.authorId === viewerId || isGroupOwner;
   const replyDepth = Math.min(depth + 1, MAX_INDENT_DEPTH);
 
   return (
@@ -57,6 +69,13 @@ export function CommentItem({ node, threadId, depth, canParticipate }: CommentIt
                 : "Hide replies"}
             </Button>
           ) : null}
+          {canDelete ? (
+            <ConfirmDeleteButton
+              label="Delete"
+              warning={hasReplies ? "This also removes its replies." : "Delete this comment?"}
+              onConfirm={() => deleteComment(node.id)}
+            />
+          ) : null}
         </div>
         {replying ? (
           <div className="max-w-2xl">
@@ -83,6 +102,8 @@ export function CommentItem({ node, threadId, depth, canParticipate }: CommentIt
               threadId={threadId}
               depth={replyDepth}
               canParticipate={canParticipate}
+              viewerId={viewerId}
+              isGroupOwner={isGroupOwner}
             />
           ))}
         </ul>

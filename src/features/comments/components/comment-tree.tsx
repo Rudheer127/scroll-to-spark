@@ -1,9 +1,21 @@
 import { CommentItem } from "@/features/comments/components/comment-item";
 import type { CommentNode } from "@/features/comments/tree";
 
-type CommentTreeProps = { nodes: CommentNode[]; threadId: string; canParticipate: boolean };
+type CommentTreeProps = {
+  nodes: CommentNode[];
+  threadId: string;
+  canParticipate: boolean;
+  viewerId: string;
+  isGroupOwner: boolean;
+};
 
-export function CommentTree({ nodes, threadId, canParticipate }: CommentTreeProps) {
+export function CommentTree({
+  nodes,
+  threadId,
+  canParticipate,
+  viewerId,
+  isGroupOwner,
+}: CommentTreeProps) {
   if (nodes.length === 0) {
     return <p className="text-muted">No comments yet.</p>;
   }
@@ -17,6 +29,8 @@ export function CommentTree({ nodes, threadId, canParticipate }: CommentTreeProp
           threadId={threadId}
           depth={0}
           canParticipate={canParticipate}
+          viewerId={viewerId}
+          isGroupOwner={isGroupOwner}
         />
       ))}
     </ul>

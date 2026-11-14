@@ -70,3 +70,17 @@ export async function voteThread(threadId: string, value: 1 | -1): Promise<Actio
   revalidatePath("/discussions", "layout");
   return { ok: true, data: undefined };
 }
+
+/** Delete a thread. RLS only lets its author or the group owner do this. */
+export async function deleteThread(threadId: string, groupSlug: string): Promise<ActionResult> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("threads").delete().eq("id", threadId).select("id");
+  if (error || !data?.length)
+    return fail("We could not delete that thread. Only its author or the group owner can.");
+
+  revalidatePath("/discussions", "layout");
+  redirect(`/discussions/${groupSlug}`);
+}

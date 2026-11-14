@@ -11,7 +11,7 @@ export function CompleteTaskForm({ taskId }: { taskId: string }) {
   const [state, formAction, pending] = useActionState(completeTask, null);
 
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="taskId" value={taskId} />
       <Field
         label="Write your note"

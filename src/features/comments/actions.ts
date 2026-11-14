@@ -68,3 +68,18 @@ export async function toggleReaction(commentId: string, emoji: string): Promise<
   revalidatePath("/discussions", "layout");
   return { ok: true, data: undefined };
 }
+
+/** Delete a comment and its replies. RLS only lets its author or the group owner do this. */
+export async function deleteComment(commentId: string): Promise<ActionResult> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("comments").delete().eq("id", commentId).select("id");
+  if (error || !data?.length) {
+    return fail("We could not delete that comment. Only its author or the group owner can.");
+  }
+
+  revalidatePath("/discussions", "layout");
+  return { ok: true, data: undefined };
+}

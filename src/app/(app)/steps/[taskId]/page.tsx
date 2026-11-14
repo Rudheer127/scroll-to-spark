@@ -10,15 +10,21 @@ export default async function StepPage({ params }: PageProps<"/steps/[taskId]">)
   if (!task) notFound();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex max-w-3xl flex-col gap-6">
       <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Your step" }]} />
-      <header className="flex max-w-3xl flex-col gap-3">
-        <p className="text-sm font-semibold text-muted">For {task.groupName}</p>
-        <h1 className="text-3xl font-bold">{task.title}</h1>
-        {task.description ? <p className="text-muted">{task.description}</p> : null}
-        <TaskMeta task={task} />
+      <header className="flex flex-col gap-3 rounded-(--radius-card) bg-coral p-7 text-white shadow-card">
+        <p className="w-fit rounded-full bg-white/25 px-3 py-1 text-sm font-bold">
+          For {task.groupName}
+        </p>
+        <h1 className="text-4xl font-bold">{task.title}</h1>
+        {task.description ? <p className="text-lg">{task.description}</p> : null}
+        <div className="text-white [&_*]:text-white">
+          <TaskMeta task={task} />
+        </div>
       </header>
-      <CompleteTaskForm taskId={task.id} />
+      <div className="rounded-(--radius-card) border border-border bg-surface p-6 shadow-card">
+        <CompleteTaskForm taskId={task.id} />
+      </div>
     </div>
   );
 }

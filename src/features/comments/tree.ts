@@ -1,6 +1,7 @@
 export type FlatComment = {
   id: string;
   parentId: string | null;
+  authorId: string;
   authorName: string;
   body: string | null;
   createdAt: string;
@@ -11,6 +12,7 @@ export type ReactionCount = { emoji: string; count: number; mine: boolean };
 
 export type CommentNode = {
   id: string;
+  authorId: string;
   authorName: string;
   body: string | null;
   createdAt: string;
@@ -37,6 +39,7 @@ export function buildCommentTree(items: FlatComment[], userId: string): CommentN
       item.id,
       {
         id: item.id,
+        authorId: item.authorId,
         authorName: item.authorName,
         body: item.body,
         createdAt: item.createdAt,

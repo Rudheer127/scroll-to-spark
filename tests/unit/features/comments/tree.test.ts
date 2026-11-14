@@ -4,6 +4,7 @@ import { buildCommentTree, type FlatComment } from "@/features/comments/tree";
 function comment(overrides: Partial<FlatComment> & { id: string }): FlatComment {
   return {
     parentId: null,
+    authorId: "someone",
     authorName: "maya_r",
     body: "Hello",
     createdAt: "2026-11-14T10:00:00Z",

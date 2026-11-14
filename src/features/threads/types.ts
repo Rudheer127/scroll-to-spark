@@ -7,6 +7,7 @@ export type ThreadSummary = {
   title: string;
   body: string | null;
   createdAt: string;
+  authorId: string;
   authorName: string;
   voteScore: number;
   myVote: -1 | 0 | 1;

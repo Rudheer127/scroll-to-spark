@@ -5,6 +5,7 @@ import { buildCommentTree, type CommentNode, type FlatComment } from "@/features
 type CommentRow = {
   id: string;
   parent_id: string | null;
+  author_id: string;
   body: string | null;
   created_at: string;
   profiles: { username: string };
@@ -20,7 +21,7 @@ export async function getCommentTree(threadId: string): Promise<CommentNode[]> {
   const { data, error } = await supabase
     .from("comments")
     .select(
-      "id, parent_id, body, created_at, profiles!comments_author_id_fkey(username), comment_reactions(emoji, user_id)",
+      "id, parent_id, author_id, body, created_at, profiles!comments_author_id_fkey(username), comment_reactions(emoji, user_id)",
     )
     .eq("thread_id", threadId);
   if (error) throw new Error(`Could not load comments: ${error.message}`);
@@ -28,6 +29,7 @@ export async function getCommentTree(threadId: string): Promise<CommentNode[]> {
   const flat: FlatComment[] = (data as unknown as CommentRow[]).map((row) => ({
     id: row.id,
     parentId: row.parent_id,
+    authorId: row.author_id,
     authorName: row.profiles.username,
     body: row.body,
     createdAt: row.created_at,

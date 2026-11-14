@@ -103,3 +103,21 @@ export async function sendThankYou(
   refreshSteps();
   return { ok: true, data: undefined };
 }
+
+/** Close a task so nobody new sees it, or open it again. Only the person who posted it can. */
+export async function setTaskOpen(taskId: string, isOpen: boolean): Promise<ActionResult> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({ is_open: isOpen })
+    .eq("id", taskId)
+    .eq("created_by", user.id)
+    .select("id");
+  if (error || !data?.length) return fail("We could not update that task. Try again.");
+
+  refreshSteps();
+  return { ok: true, data: undefined };
+}

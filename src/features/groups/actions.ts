@@ -105,3 +105,37 @@ export async function deleteGroup(groupId: string, confirmName: string): Promise
   refreshGroups();
   redirect("/discussions");
 }
+
+/** Owner only. Changes the name, description, color and visibility. The web address stays the same. */
+export async function updateGroup(
+  groupId: string,
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const parsed = createGroupSchema.safeParse({
+    name: formData.get("name") ?? "",
+    description: formData.get("description") ?? "",
+    isPrivate: formData.get("visibility") === "private",
+    color: formData.get("color"),
+  });
+  if (!parsed.success) {
+    return fail("Check the highlighted fields.", fieldErrorsFromZod(parsed.error));
+  }
+
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const { name, description, isPrivate, color } = parsed.data;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("groups")
+    .update({ name, description, is_private: isPrivate, color })
+    .eq("id", groupId)
+    .eq("owner_id", user.id)
+    .select("id");
+  if (error || !data?.length)
+    return fail("We could not save the changes. Only the owner can edit this group.");
+
+  refreshGroups();
+  return { ok: true, data: undefined, message: "Saved." };
+}

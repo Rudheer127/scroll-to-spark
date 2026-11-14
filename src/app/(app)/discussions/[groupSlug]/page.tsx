@@ -27,7 +27,7 @@ export default async function GroupPage({ params }: PageProps<"/discussions/[gro
               Join this group to start threads, vote and comment.
             </p>
           )}
-          <h2 className="text-xl font-bold">Threads</h2>
+          <h2 className="font-display text-2xl font-bold">Threads</h2>
           {threads.length === 0 ? (
             <p className="text-muted">No threads yet.</p>
           ) : (
@@ -38,7 +38,7 @@ export default async function GroupPage({ params }: PageProps<"/discussions/[gro
         </section>
         {group.description ? (
           <aside className="flex h-fit flex-col gap-2 rounded-(--radius-card) shadow-card border border-border bg-surface p-6">
-            <h2 className="text-lg font-bold">About this group</h2>
+            <h2 className="font-display text-xl font-bold">About this group</h2>
             <p className="text-muted">{group.description}</p>
           </aside>
         ) : null}

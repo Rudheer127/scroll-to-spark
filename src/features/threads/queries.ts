@@ -5,6 +5,7 @@ import type { ThreadSummary } from "@/features/threads/types";
 type ThreadRow = {
   id: string;
   group_id: string;
+  author_id: string;
   title: string;
   body: string | null;
   created_at: string;
@@ -15,7 +16,7 @@ type ThreadRow = {
 };
 
 const THREAD_COLUMNS =
-  "id, group_id, title, body, created_at, profiles!threads_author_id_fkey(username), groups(name, slug, color), thread_votes(value, user_id), comments(count)";
+  "id, group_id, author_id, title, body, created_at, profiles!threads_author_id_fkey(username), groups(name, slug, color), thread_votes(value, user_id), comments(count)";
 
 function toThread(row: ThreadRow, userId: string): ThreadSummary {
   const mine = row.thread_votes.find((vote) => vote.user_id === userId)?.value ?? 0;
@@ -28,6 +29,7 @@ function toThread(row: ThreadRow, userId: string): ThreadSummary {
     title: row.title,
     body: row.body,
     createdAt: row.created_at,
+    authorId: row.author_id,
     authorName: row.profiles.username,
     voteScore: row.thread_votes.reduce((sum, vote) => sum + vote.value, 0),
     myVote: mine === 1 ? 1 : mine === -1 ? -1 : 0,
