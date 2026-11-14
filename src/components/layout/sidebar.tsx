@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Building2, Home, MessagesSquare, Sprout, User, type LucideIcon } from "lucide-react";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/cn";
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
@@ -29,13 +28,12 @@ export function Sidebar({ footer }: { footer: React.ReactNode }) {
       aria-label="Main"
       className="sticky top-0 flex h-screen flex-col gap-2 border-r border-border bg-surface p-6"
     >
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center">
         <Link href="/" className="flex items-center gap-2.5 active:opacity-75">
           <span className="bg-(image:--gradient-spark) bg-clip-text font-display text-3xl font-extrabold tracking-tight text-transparent">
             Spark
           </span>
         </Link>
-        <ThemeToggle />
       </div>
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const active = isActive(pathname, href);
