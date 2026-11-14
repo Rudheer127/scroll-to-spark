@@ -28,7 +28,7 @@ It prints a table (entry, category, intent, source, guard events, result) and fa
 2. **Real thank-yous.** A partner group replies to each action. Every reply is labeled by who wrote it: a real group or the app.
 3. **Progress without pressure.** A private view of what a person has done. No streaks, no leaderboards, no guilt.
 4. **Discussions.** Groups people can create, join, leave and delete, with Reddit-style threaded conversations, image uploads, emojis and GIFs, in an Instagram-style look.
-5. **Spark Guide.** An AI helper (served by Cerebras or Groq open models, with one fallback) that declutters options, listens, and helps a person contribute. It only suggests real partner groups and is always labeled as AI.
+5. **Spark Guide.** A labeled AI guide (served by Cerebras or Groq open models, with one fallback) that points to open tasks posted in the app (demo tasks are marked as samples), thanks people for what they report doing (self reported, never verified), and checks claims against a small evidence list. It is not live tested yet: the live eval has not been run and the chat has not been checked in a browser.
 6. **Group portal.** A separate area where partner groups post small tasks and send thank-yous.
 
 ## Tech stack
