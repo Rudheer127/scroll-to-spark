@@ -43,22 +43,23 @@ Everything else is left-aligned. Sign-in and sign-up screens use a full-width sp
 
 ## Look and feel
 
-| Item | Rule |
-|---|---|
-| Font | Inter for everything. Headings are bold with slightly tight letter spacing |
-| Page background | Very light grey (`#FAFAFA`) so white cards lift off it |
-| Surface | White cards with a 1 pixel grey border (`#E6E6E6`), 16 pixel corners and a two-layer shadow |
-| Text | Near-black ink (`#262626`) and a mid grey (`#6B6B6B`) for secondary text |
-| Links and focus | Deep blue (`#0A58B8`). Red for destructive actions |
-| Standard action | A solid near-black pill button (`primary` variant). The active tab and the active effort size use the same fill |
-| Gradient | One sunset blend (`--gradient-spark`) for the Spark wordmark, group story rings, the Create group button, a hairline on the step card, and the peak day in the weekly chart. Nowhere else |
-| Supporting colors | Soft purple chips for labels and sample data, soft green for thank-yous. Quiet, never filled blocks |
-| Emoji | None in the interface |
-| Dark mode | Light is the default. A moon/sun button beside the Spark wordmark switches, and the choice is remembered on that device. Dark tokens live under `:root[data-theme="dark"]` in `globals.css`. Text on an ink fill uses `text-on-ink`, never `text-white`. The landing page uses the same toggle in its floating header |
-| Control edges | Inputs and other controls use the control border token so their edge is at least 3:1 against the page |
-| Radius | 16 pixels on cards, 12 on inputs, full round on buttons, pills and avatars |
-| Depth | Page grey, white card, then a floating layer. `shadow-card` on cards, `shadow-lift` on hover, `shadow-pop` on floating layers |
-| Motion | Short and subtle. Never animate width, height or position of layout. Honor reduced motion |
+| Item              | Rule                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Font              | Inter for everything. Headings are bold with slightly tight letter spacing                                                                                                                                                                                                                                                                                                     |
+| Page background   | Very light grey (`#FAFAFA`) so white cards lift off it                                                                                                                                                                                                                                                                                                                         |
+| Surface           | White cards with a 1 pixel grey border (`#E6E6E6`), 16 pixel corners and a two-layer shadow                                                                                                                                                                                                                                                                                    |
+| Text              | Near-black ink (`#262626`) and a mid grey (`#6B6B6B`) for secondary text                                                                                                                                                                                                                                                                                                       |
+| Links and focus   | Deep blue (`#0A58B8`). Red for destructive actions                                                                                                                                                                                                                                                                                                                             |
+| Standard action   | A solid near-black pill button (`primary` variant). The active tab and the active effort size use the same fill                                                                                                                                                                                                                                                                |
+| Gradient          | One sunset blend (`--gradient-spark`) for the Spark wordmark, group story rings, the Create group button, a hairline on the step card, and the peak day in the weekly chart. Nowhere else                                                                                                                                                                                      |
+| Supporting colors | Soft purple chips for labels and sample data, soft green for thank-yous. Quiet, never filled blocks                                                                                                                                                                                                                                                                            |
+| Emoji             | None in the interface                                                                                                                                                                                                                                                                                                                                                          |
+| Dark mode         | Light is the default. A moon/sun button beside the Spark wordmark switches, and the choice is remembered on that device. Dark tokens live under `:root[data-theme="dark"]` in `globals.css`. Text on an ink fill uses `text-on-ink`, never `text-white`. The landing page uses the same toggle in its floating header                                                          |
+| Scaling           | The root font size is fluid (`clamp` in `globals.css`: 14px on phones, 16px near 1280 wide, up to 22px). Size everything in `rem` or with Tailwind scale classes so the whole interface scales together; never use fixed `px` for widths, type or spacing. Page edge spacing is `--page-gutter`. Below the `lg` breakpoint the sidebar becomes a top bar plus a bottom tab bar |
+| Control edges     | Inputs and other controls use the control border token so their edge is at least 3:1 against the page                                                                                                                                                                                                                                                                          |
+| Radius            | 16 pixels on cards, 12 on inputs, full round on buttons, pills and avatars                                                                                                                                                                                                                                                                                                     |
+| Depth             | Page grey, white card, then a floating layer. `shadow-card` on cards, `shadow-lift` on hover, `shadow-pop` on floating layers                                                                                                                                                                                                                                                  |
+| Motion            | Short and subtle. Never animate width, height or position of layout. Honor reduced motion                                                                                                                                                                                                                                                                                      |
 
 All colors, fonts and spacing come from design tokens defined once in the Tailwind theme. No raw hex color or font name inside a component.
 
@@ -89,13 +90,13 @@ All colors, fonts and spacing come from design tokens defined once in the Tailwi
 
 ## States every screen needs
 
-| State | Rule |
-|---|---|
-| Loading | A placeholder that matches the final layout. No blank screen |
-| Empty | A short message and the one action that fills it |
-| Error | Plain words, what happened, and a button to retry |
-| Success | Quiet confirmation near the action. No full-screen celebration |
-| Disabled | Only with a visible reason |
+| State    | Rule                                                           |
+| -------- | -------------------------------------------------------------- |
+| Loading  | A placeholder that matches the final layout. No blank screen   |
+| Empty    | A short message and the one action that fills it               |
+| Error    | Plain words, what happened, and a button to retry              |
+| Success  | Quiet confirmation near the action. No full-screen celebration |
+| Disabled | Only with a visible reason                                     |
 
 ## Forms
 

@@ -10,7 +10,7 @@ export function ContactSection() {
     <section
       id="contact"
       aria-labelledby="contact-heading"
-      className="relative isolate scroll-mt-20 overflow-hidden rounded-t-[48px] bg-background px-6 pb-12 pt-20 text-ink lg:px-12 lg:pt-28"
+      className="relative isolate scroll-mt-20 overflow-hidden rounded-t-[3rem] bg-background px-6 pb-12 pt-20 text-ink lg:px-12 lg:pt-28"
     >
       <Image
         src={PHOTOS.contact}

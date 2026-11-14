@@ -10,7 +10,7 @@ export function ThankYouCard({ completion }: { completion: CompletionSummary }) 
   if (!thankYou) return null;
 
   return (
-    <article className="flex gap-4 rounded-[18px] bg-background p-4">
+    <article className="flex gap-4 rounded-[1.125rem] bg-background p-4">
       <GroupAvatar name={completion.groupName} color={completion.groupColor} />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex flex-wrap items-center gap-2.5">

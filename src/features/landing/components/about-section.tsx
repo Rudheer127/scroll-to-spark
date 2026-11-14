@@ -34,7 +34,7 @@ export function AboutSection() {
 
         <Reveal
           delay={150}
-          className="relative min-h-[320px] overflow-hidden rounded-(--radius-card) shadow-lift"
+          className="relative min-h-[20rem] overflow-hidden rounded-(--radius-card) shadow-lift"
         >
           <Image
             src={PHOTOS.about}

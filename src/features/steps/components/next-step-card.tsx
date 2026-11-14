@@ -55,7 +55,7 @@ export function NextStepCard({ task, effort }: NextStepCardProps) {
           </>
         )}
       </div>
-      <div className="flex w-full shrink-0 flex-col gap-4 self-start rounded-xl border border-border bg-background p-6 text-ink lg:w-[340px]">
+      <div className="flex w-full shrink-0 flex-col gap-4 self-start rounded-xl border border-border bg-background p-6 text-ink lg:w-[21.25rem]">
         <p className="font-bold">How much do you want to give today?</p>
         <EffortTabs current={effort} />
         {task ? (

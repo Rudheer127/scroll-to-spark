@@ -12,7 +12,7 @@ export function Hero() {
     <section
       id="top"
       aria-labelledby="hero-heading"
-      className="relative isolate overflow-hidden rounded-b-[48px] bg-background text-ink"
+      className="relative isolate overflow-hidden rounded-b-[3rem] bg-background text-ink"
     >
       <Image
         src={PHOTOS.hero}

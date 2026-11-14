@@ -34,15 +34,15 @@ The layout is defined in [FILE_TREE.md](FILE_TREE.md). The rules that keep it na
 
 ## Naming
 
-| Thing | Style | Example |
-|---|---|---|
-| Files and folders | kebab-case | `group-header.tsx` |
-| React components | PascalCase | `GroupHeader` |
-| Functions and variables | camelCase | `getGroupBySlug` |
-| Types and interfaces | PascalCase | `GroupSummary` |
-| Constants | UPPER_SNAKE_CASE | `MAX_IMAGE_BYTES` |
-| Database tables and columns | snake_case | `group_members` |
-| Server Actions | verb first | `createGroup`, `deleteGroup` |
+| Thing                       | Style            | Example                      |
+| --------------------------- | ---------------- | ---------------------------- |
+| Files and folders           | kebab-case       | `group-header.tsx`           |
+| React components            | PascalCase       | `GroupHeader`                |
+| Functions and variables     | camelCase        | `getGroupBySlug`             |
+| Types and interfaces        | PascalCase       | `GroupSummary`               |
+| Constants                   | UPPER_SNAKE_CASE | `MAX_IMAGE_BYTES`            |
+| Database tables and columns | snake_case       | `group_members`              |
+| Server Actions              | verb first       | `createGroup`, `deleteGroup` |
 
 Names say what a thing is or does. No `data2`, `temp`, `thing` or single letters outside short loops.
 
@@ -55,16 +55,16 @@ Names say what a thing is or does. No `data2`, `temp`, `thing` or single letters
 
 ## Where code lives
 
-| Kind of code | Location |
-|---|---|
-| Database reads | `features/<name>/queries.ts` |
-| Database writes | `features/<name>/actions.ts` |
-| Input checks | `features/<name>/schemas.ts` |
-| Screens and pieces of screens | `features/<name>/components/` |
-| Supabase client creation | `src/lib/supabase/` only |
-| Environment variables | `src/lib/env.ts` only |
-| Generic UI pieces (button, dialog) | `src/components/ui/` |
-| App frame (sidebar, top bar) | `src/components/layout/` |
+| Kind of code                       | Location                      |
+| ---------------------------------- | ----------------------------- |
+| Database reads                     | `features/<name>/queries.ts`  |
+| Database writes                    | `features/<name>/actions.ts`  |
+| Input checks                       | `features/<name>/schemas.ts`  |
+| Screens and pieces of screens      | `features/<name>/components/` |
+| Supabase client creation           | `src/lib/supabase/` only      |
+| Environment variables              | `src/lib/env.ts` only         |
+| Generic UI pieces (button, dialog) | `src/components/ui/`          |
+| App frame (sidebar, top bar)       | `src/components/layout/`      |
 
 Components render. They do not talk to the database and they do not contain business rules. They call a query, an action or a hook.
 

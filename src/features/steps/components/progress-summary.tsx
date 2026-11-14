@@ -32,7 +32,7 @@ export function ProgressSummary({ progress }: { progress: Progress }) {
       <Link href="/steps" className={cn(cardClass, "hover:border-control")}>
         <h2 className="text-xl font-semibold">This week</h2>
         <div className="flex items-center gap-5">
-          <div className="relative size-[110px] shrink-0">
+          <div className="relative size-[6.875rem] shrink-0">
             <svg
               viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
               aria-hidden
@@ -74,7 +74,7 @@ export function ProgressSummary({ progress }: { progress: Progress }) {
       </Link>
       <div className={cardClass}>
         <h2 className="text-xl font-semibold">Your rhythm</h2>
-        <ul className="flex h-[110px] items-end gap-2.5">
+        <ul className="flex h-[6.875rem] items-end gap-2.5">
           {progress.days.map((day, index) => {
             const height =
               day.minutes === 0
@@ -86,7 +86,7 @@ export function ProgressSummary({ progress }: { progress: Progress }) {
                   aria-label={`${day.minutes} minutes`}
                   style={{ height }}
                   className={cn(
-                    "block w-[22px] rounded-[10px]",
+                    "block w-[1.375rem] rounded-[0.625rem]",
                     day.minutes === 0
                       ? "bg-border"
                       : index === peak

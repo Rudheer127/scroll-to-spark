@@ -20,10 +20,10 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           aria-hidden
           className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-black/30"
         />
-        <div className="absolute inset-x-0 top-0 p-6">
+        <div className="absolute inset-x-0 top-0 p-(--page-gutter)">
           <AuthTopBar onPhoto />
         </div>
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-10 text-white">
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-[clamp(1.5rem,3.5vw,3.5rem)] text-white">
           <h1 className="max-w-md text-4xl leading-tight font-bold">
             Do one small thing for your community.
           </h1>
@@ -32,7 +32,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           </p>
         </div>
       </section>
-      <section className="flex flex-col px-6 py-6 sm:px-10 lg:px-16">
+      <section className="flex flex-col px-(--page-gutter) py-(--page-gutter) lg:px-[clamp(2rem,6vw,6rem)]">
         <div className="lg:hidden">
           <AuthTopBar />
         </div>

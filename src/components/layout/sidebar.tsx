@@ -13,18 +13,18 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-type NavItem = { href: string; label: string; icon: LucideIcon };
+export type NavItem = { href: string; label: string; short: string; icon: LucideIcon };
 
-const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/steps", label: "My steps", icon: Sprout },
-  { href: "/discussions", label: "Discussions", icon: MessagesSquare },
-  { href: "/guide", label: "Guide", icon: Sparkles },
-  { href: "/portal", label: "Partner portal", icon: Building2 },
-  { href: "/profile", label: "Profile", icon: User },
+export const NAV_ITEMS: NavItem[] = [
+  { href: "/", label: "Home", short: "Home", icon: Home },
+  { href: "/steps", label: "My steps", short: "Steps", icon: Sprout },
+  { href: "/discussions", label: "Discussions", short: "Groups", icon: MessagesSquare },
+  { href: "/guide", label: "Guide", short: "Guide", icon: Sparkles },
+  { href: "/portal", label: "Partner portal", short: "Portal", icon: Building2 },
+  { href: "/profile", label: "Profile", short: "Profile", icon: User },
 ];
 
-function isActive(pathname: string, href: string): boolean {
+export function isActive(pathname: string, href: string): boolean {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
@@ -35,7 +35,7 @@ export function Sidebar({ footer }: { footer: React.ReactNode }) {
   return (
     <nav
       aria-label="Main"
-      className="sticky top-0 flex h-screen flex-col gap-2 border-r border-border bg-surface p-6"
+      className="sticky top-0 hidden h-screen flex-col lg:flex gap-2 border-r border-border bg-surface p-6"
     >
       <div className="mb-4 flex items-center">
         <Link href="/" className="flex items-center gap-2.5 active:opacity-75">
@@ -52,7 +52,7 @@ export function Sidebar({ footer }: { footer: React.ReactNode }) {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors active:opacity-75",
+              "flex items-center gap-3 rounded-xl px-4 py-3 text-[0.9375rem] font-semibold transition-colors active:opacity-75",
               active ? "bg-chip font-extrabold" : "text-ink/80 hover:bg-chip/70",
             )}
           >

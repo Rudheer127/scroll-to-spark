@@ -24,7 +24,7 @@ const FEED_CARDS = [
  */
 export function HeroScene() {
   return (
-    <div aria-hidden className="relative h-[380px] w-full sm:h-[460px] lg:h-[560px]">
+    <div aria-hidden className="relative h-[23.75rem] w-full sm:h-[28.75rem] lg:h-[35rem]">
       {FEED_CARDS.map((card) => (
         <div
           key={card.className}
