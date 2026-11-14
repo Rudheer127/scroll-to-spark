@@ -17,7 +17,7 @@ const chat = (variant: "popup" | "window" | "page") =>
   createElement(GuideChat, { variant, inputId: "f" });
 
 describe("guide empty state", () => {
-  it("shows the headline, the composer, the four task pills and the mood row", () => {
+  it("shows the headline, the composer, and the four task pills", () => {
     const html = render(chat("page"));
     expect(html).toContain('data-mode="empty"');
     expect(html).toMatch(/<h2[^>]*>What small thing can we do for your community today\?<\/h2>/);
@@ -34,10 +34,7 @@ describe("guide empty state", () => {
     ]) {
       expect(tasks).toContain(`</svg>${label}</button>`);
     }
-    const leadId = html.match(/<p id="([^"]+)"[^>]*>Or start from how you feel<\/p>/)?.[1];
-    expect(leadId).toBeTruthy();
-    const moods = html.match(new RegExp(`<ul aria-labelledby="${leadId}"[^>]*>(.*?)</ul>`))?.[1];
-    expect(moods?.match(/<button/g)).toHaveLength(5);
+    expect(html).not.toContain("Or start from how you feel");
   });
 
   it("drops the old greeting and labels", () => {

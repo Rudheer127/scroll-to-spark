@@ -46,12 +46,12 @@ describe("guide composer", () => {
     }
   });
 
-  it("offers the mood pills under Or start from how you feel in the empty state", () => {
+  it("leaves feelings to be typed: no mood pills in the empty state", () => {
     const html = render(chat("popup"));
-    expect(html).toContain("Or start from how you feel");
+    expect(html).not.toContain("Or start from how you feel");
     expect(html).not.toContain("How are you feeling?");
     for (const label of ["Overwhelmed", "Angry", "Sad", "Restless", "Ready for more"]) {
-      expect(html).toContain(`>${label}</button>`);
+      expect(html).not.toContain(`>${label}</button>`);
     }
   });
 

@@ -29,8 +29,8 @@ type PromptBoxProps = Omit<React.ComponentProps<"form">, "children"> & {
 };
 
 const FIELD_SIZE = {
-  compact: "min-h-[3.75rem] max-h-[10rem] text-sm",
-  large: "min-h-[4.75rem] max-h-[12.5rem] text-base",
+  compact: "min-h-[2.25rem] max-h-[10rem] text-sm",
+  large: "min-h-[2.5rem] max-h-[12.5rem] text-base",
 } as const;
 
 /**

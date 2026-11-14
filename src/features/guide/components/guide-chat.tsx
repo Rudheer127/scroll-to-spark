@@ -30,7 +30,7 @@ export function GuideChat({ variant, inputId }: GuideChatProps) {
     <Heading
       className={cn(
         "text-center font-bold text-balance motion-safe:animate-rise",
-        compact ? "text-xl" : "text-2xl sm:text-3xl",
+        compact ? "text-2xl" : "text-3xl sm:text-4xl lg:text-5xl",
       )}
     >
       {compact ? GUIDE_HEADLINE_COMPACT : GUIDE_HEADLINE}
