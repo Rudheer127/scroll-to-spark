@@ -187,6 +187,20 @@ describe("handleRecognition: certification requests", () => {
     expect(t.events()).toContain("output_blocked");
   });
 
+  it("passes an honest 'cannot be verified' reply as ai without a repair", async () => {
+    const t = setup({
+      router_output: [routerReply("recognize_contribution")],
+      guide_response: [
+        recognise({
+          message: "These hours cannot be verified by the app, so they stay self reported.",
+        }),
+      ],
+    });
+    const res = await t.run("I spent 3 hours at a food drive");
+    expect(res.source).toBe("ai");
+    expect(t.llm.callsFor("guide_response")).toHaveLength(1);
+  });
+
   it("omits the policy block for ordinary messages", async () => {
     const llm = new FakeLlm({ guide_response: [recognise({})] });
     await handleRecognition(ctxFor(llm, [], "I helped a neighbor"));

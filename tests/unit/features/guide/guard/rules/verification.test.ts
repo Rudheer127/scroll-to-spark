@@ -14,6 +14,14 @@ describe("claimsVerification", () => {
     "That is unverified and self reported.",
     "It isn't verified by anyone.",
     "I can't certify anything.",
+    "These hours cannot be verified by the app",
+    "Hours have not been verified",
+    "not yet verified",
+    "I can't verify these hours, so they stay self reported",
+    "not confirmed by anyone",
+    "unverified",
+    "un-verified",
+    "They were never officially verified.",
   ])("allows: %s", (text) => {
     expect(claimsVerification(res(text))).toBeNull();
   });
@@ -24,6 +32,11 @@ describe("claimsVerification", () => {
     "You are officially recognized.",
     "It was confirmed by the group.",
     "We certify your 400 hours.",
+    "Your hours are verified",
+    "Self-verified hours",
+    "VERIFIED",
+    "Not a problem at all, your hours are verified",
+    "I cannot wait. Your hours are verified.",
   ])("rejects: %s", (text) => {
     expect(claimsVerification(res(text))).toBe("claims_verification");
   });
