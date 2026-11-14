@@ -43,11 +43,6 @@ export function SignupForm() {
           {formError(state)}
         </p>
       ) : null}
-      {state?.ok && state.message ? (
-        <p role="status" className="rounded-(--radius-control) bg-chip p-3 text-sm">
-          {state.message}
-        </p>
-      ) : null}
       <Button type="submit" variant="brand" disabled={pending}>
         {pending ? "Creating account" : "Create account"}
       </Button>

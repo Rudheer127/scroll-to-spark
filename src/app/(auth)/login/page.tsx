@@ -11,7 +11,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       </header>
       {error === "confirm" ? (
         <p role="alert" className="text-sm text-danger">
-          That confirmation link did not work. Log in, or sign up again to get a new one.
+          We could not sign you in from that link. If you already confirmed your email, log in
+          below.
         </p>
       ) : null}
       <LoginForm />

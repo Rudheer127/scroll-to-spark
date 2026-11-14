@@ -51,6 +51,8 @@ src/
     (auth)/
       login/page.tsx
       signup/page.tsx
+      check-email/page.tsx  shown after sign up, signs the person in once they confirm
+    auth/callback/route.ts  the email link lands here
     (app)/                  signed-in area with the app frame
       layout.tsx            sidebar and top bar
       page.tsx              home dashboard
@@ -116,8 +118,10 @@ src/
       components/           task-form, waiting-list, task-card
       actions.ts  queries.ts  schemas.ts  types.ts
     auth/
-      components/           login-form, signup-form
-      actions.ts
+      components/           login-form, signup-form, confirmation-watcher, resend-button
+      actions.ts            signIn, signUp, resendConfirmation, signOut
+      pending-email.ts      remembers the address waiting for confirmation, in a cookie
+      queries.ts  schemas.ts
 
   lib/                      shared helpers and service clients
     supabase/

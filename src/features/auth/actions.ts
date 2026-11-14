@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { fail, type ActionResult } from "@/lib/result";
 import { fieldErrorsFromZod } from "@/lib/zod-errors";
+import { getPendingEmail, rememberPendingEmail } from "@/features/auth/pending-email";
 import { loginSchema, signupSchema } from "@/features/auth/schemas";
 
 const CHECK_FIELDS = "Check the highlighted fields.";
@@ -14,6 +15,10 @@ async function getOrigin(): Promise<string> {
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
   const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
   return `${protocol}://${host}`;
+}
+
+async function getConfirmationRedirect(): Promise<string> {
+  return `${await getOrigin()}/auth/callback`;
 }
 
 export async function signIn(
@@ -40,16 +45,30 @@ export async function signUp(
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     ...parsed.data,
-    options: { emailRedirectTo: `${await getOrigin()}/auth/callback` },
+    options: { emailRedirectTo: await getConfirmationRedirect() },
   });
   if (error) return fail("We could not create that account. Try a different email.");
 
   if (data.session) redirect("/");
-  return {
-    ok: true,
-    data: undefined,
-    message: "Account created. Check your email and open the link to confirm it.",
-  };
+
+  await rememberPendingEmail(parsed.data.email);
+  redirect("/check-email");
+}
+
+/** Send the confirmation email again to the address that just signed up. */
+export async function resendConfirmation(): Promise<ActionResult> {
+  const email = await getPendingEmail();
+  if (!email) return fail("Start again from the sign-up page.");
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: await getConfirmationRedirect() },
+  });
+  if (error) return fail("We could not send it again yet. Wait a moment and try again.");
+
+  return { ok: true, data: undefined };
 }
 
 export async function signOut(): Promise<void> {
