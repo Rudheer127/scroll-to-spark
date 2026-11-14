@@ -3,37 +3,57 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/cn";
 
 const WELCOME_FROM = ["/login", "/signup"];
-const WORDMARK =
-  "bg-(image:--gradient-spark) bg-clip-text font-display text-5xl font-extrabold tracking-tight text-transparent";
 
-/** The Spark logo. On log in and sign up it links back to the welcome page; elsewhere it is plain. */
-export function AuthLogo() {
+/**
+ * The top bar of the sign-in screens: the Spark logo, and on log in and sign up a round back
+ * button. Both lead to the welcome page. On the other sign-in screens the logo is plain.
+ * `onPhoto` is for the dark photo panel, where the controls are white.
+ */
+export function AuthTopBar({ onPhoto = false }: { onPhoto?: boolean }) {
   const pathname = usePathname();
-  if (!WELCOME_FROM.includes(pathname)) return <p className={WORDMARK}>Spark</p>;
-  return (
-    <Link
-      href="/welcome"
-      aria-label="Spark, back to the welcome page"
-      className="w-fit active:opacity-75"
+  const canGoBack = WELCOME_FROM.includes(pathname);
+
+  const wordmark = (
+    <span
+      className={cn(
+        "font-display text-3xl font-extrabold tracking-tight",
+        onPhoto ? "text-white" : "bg-(image:--gradient-spark) bg-clip-text text-transparent",
+      )}
     >
-      <span className={WORDMARK}>Spark</span>
-    </Link>
+      Spark
+    </span>
   );
-}
 
-/** A back link to the welcome page, shown on log in and sign up only. */
-export function AuthBackLink() {
-  const pathname = usePathname();
-  if (!WELCOME_FROM.includes(pathname)) return null;
   return (
-    <Link
-      href="/welcome"
-      className="inline-flex min-h-11 w-fit items-center gap-2 rounded-(--radius-control) border border-border bg-surface px-4 text-sm font-semibold hover:bg-chip active:opacity-75"
-    >
-      <ArrowLeft aria-hidden className="size-4" />
-      Back to home
-    </Link>
+    <div className="flex items-center gap-3">
+      {canGoBack ? (
+        <Link
+          href="/welcome"
+          aria-label="Back to the welcome page"
+          className={cn(
+            "flex size-11 items-center justify-center rounded-full active:opacity-75",
+            onPhoto
+              ? "bg-black/40 text-white backdrop-blur hover:bg-black/55"
+              : "border border-border bg-surface hover:bg-chip",
+          )}
+        >
+          <ArrowLeft aria-hidden className="size-5" />
+        </Link>
+      ) : null}
+      {canGoBack ? (
+        <Link
+          href="/welcome"
+          aria-label="Spark, back to the welcome page"
+          className="active:opacity-75"
+        >
+          {wordmark}
+        </Link>
+      ) : (
+        wordmark
+      )}
+    </div>
   );
 }

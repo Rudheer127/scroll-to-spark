@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 /** Starts Google sign-in. Google sends people back to /auth/callback, which makes the session. */
-export function GoogleButton({ label }: { label: string }) {
+export function GoogleButton({ label, hideHint = false }: { label: string; hideHint?: boolean }) {
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -50,7 +50,7 @@ export function GoogleButton({ label }: { label: string }) {
           Google sign-in did not start. Try again.
         </p>
       ) : null}
-      <p className="text-center text-sm text-muted">or use your email</p>
+      {hideHint ? null : <p className="text-center text-sm text-muted">or use your email</p>}
     </div>
   );
 }

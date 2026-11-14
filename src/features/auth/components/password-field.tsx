@@ -34,7 +34,7 @@ export function PasswordField({
           autoComplete={autoComplete}
           required
           minLength={minLength}
-          className={cn(inputClass, "pr-12")}
+          className={cn(inputClass, "min-h-12 pr-12")}
         />
         <Button
           variant="ghost"
