@@ -76,7 +76,9 @@ describe("red team corpus", () => {
   });
 
   it("contains no em dash or en dash", () => {
-    expect(JSON.stringify(corpus)).not.toMatch(/[–—]/);
+    expect(JSON.stringify(corpus)).not.toMatch(
+      new RegExp(`[${String.fromCharCode(0x2013)}${String.fromCharCode(0x2014)}]`),
+    );
   });
 
   it.each(corpus.map((e, i) => [e.id, e, i] as const))("%s", async (_id, entry, index) => {

@@ -13,7 +13,7 @@ import type { Intent } from "@/features/guide/types";
 const CANARY = "CANARY-q7x9k2";
 const NONCE = "a1b2c3d4e5f6";
 const TODAY = "2026-11-14";
-const DASHES = /[–—]/;
+const DASHES = new RegExp(`[${String.fromCharCode(0x2013)}${String.fromCharCode(0x2014)}]`);
 
 const sys = (intent: Intent = "find_opportunity") =>
   buildSystemPrompt({ intent, canary: CANARY, nonce: NONCE, today: TODAY });

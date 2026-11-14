@@ -47,7 +47,8 @@ describe("guide harness migration", () => {
   });
 
   it("contains no em dash", () => {
-    expect(sql).not.toContain("—");
+    expect(sql).not.toContain(String.fromCharCode(0x2014));
+    expect(sql).not.toContain(String.fromCharCode(0x2013));
   });
 
   it("seeds the census figures with verified_at null", () => {
