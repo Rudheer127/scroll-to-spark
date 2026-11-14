@@ -49,6 +49,3 @@ export const guideReply = (over: Record<string, unknown> = {}): LlmResult =>
   });
 
 export const routerReply = (intent: string, safety = "ok"): LlmResult => ok({ intent, safety });
-
-export const filtersReply = (over: Record<string, unknown> = {}): LlmResult =>
-  ok({ effort: null, remoteOnly: false, keyword: null, ...over });

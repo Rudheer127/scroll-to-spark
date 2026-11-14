@@ -32,7 +32,7 @@ export type Violation =
   | "affirms_without_support";
 
 /** Reports a failed helper model call by stage name. Never receives user text. */
-export type ReportStageFailure = (stage: "router" | "filters") => Promise<void>;
+export type ReportStageFailure = (stage: "router") => Promise<void>;
 
 export type CheckResult = { ok: true } | { ok: false; violations: Violation[] };
 

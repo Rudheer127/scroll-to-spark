@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { EFFORTS } from "@/features/steps/constants";
 import { INTENTS } from "./constants";
 
 /**
@@ -43,14 +42,6 @@ export const routerOutputSchema = z.object({
 export type RouterOutput = z.infer<typeof routerOutputSchema>;
 
 /** Filters the opportunity handler asks the model to pull out of the message. Strict-compatible. */
-export const opportunityFiltersSchema = z.object({
-  effort: z.enum(EFFORTS).nullable(),
-  remoteOnly: z.boolean(),
-  keyword: z.string().max(100).nullable(),
-});
-
-export type OpportunityFiltersOutput = z.infer<typeof opportunityFiltersSchema>;
-
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function isRealDate(value: string): boolean {

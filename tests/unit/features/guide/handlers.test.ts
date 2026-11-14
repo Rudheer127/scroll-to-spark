@@ -5,7 +5,7 @@ import { handleGeneral } from "@/features/guide/handlers/general";
 import { ProviderFailure } from "@/features/guide/handlers/shared";
 import type { HandlerContext } from "@/features/guide/handlers/types";
 import { fakeSupabase, taskRow } from "./helpers/fake-db";
-import { fail, filtersReply, FakeLlm, guideReply } from "./helpers/fake-llm";
+import { fail, FakeLlm, guideReply } from "./helpers/fake-llm";
 
 function ctxFor(llm: FakeLlm, tasks: unknown[], text = "I have 20 minutes") {
   const { client } = fakeSupabase({ label: "db", log: [], tasks });
@@ -23,7 +23,6 @@ function ctxFor(llm: FakeLlm, tasks: unknown[], text = "I have 20 minutes") {
 describe("handleOpportunities", () => {
   it("wraps each row, grounds ids and numbers, and keeps the user's own numbers", async () => {
     const llm = new FakeLlm({
-      opportunity_filters: [filtersReply({ effort: "tiny" })],
       guide_response: [guideReply({ intent: "find_opportunity" })],
     });
     const out = await handleOpportunities(
@@ -34,12 +33,11 @@ describe("handleOpportunities", () => {
     const user = llm.callsFor("guide_response")[0].messages[1].content;
     expect(user).toContain("<<DATA label=opportunity id=n0nce>>");
     expect(user).toContain("<<DATA label=user_message id=n0nce>>");
-    expect(llm.callsFor("opportunity_filters")[0].tier).toBe("router");
+    expect(llm.calls.map((c) => c.schemaName)).toEqual(["guide_response"]);
   });
 
   it("marks a demo row as a sample in its DATA block, and only that row (I3)", async () => {
     const llm = new FakeLlm({
-      opportunity_filters: [filtersReply()],
       guide_response: [guideReply({ intent: "find_opportunity" })],
     });
     await handleOpportunities(
@@ -54,17 +52,17 @@ describe("handleOpportunities", () => {
     expect(blocks[1]).not.toContain("sample: true");
   });
 
-  it("still searches when filter extraction fails", async () => {
-    const llm = new FakeLlm({
-      opportunity_filters: [fail()],
-      guide_response: [guideReply({ intent: "find_opportunity" })],
-    });
-    const out = await handleOpportunities(ctxFor(llm, [taskRow("t1")]));
+  it("reads filters with rules, so the only model call is the answer", async () => {
+    const llm = new FakeLlm({ guide_response: [guideReply({ intent: "find_opportunity" })] });
+    const out = await handleOpportunities(
+      ctxFor(llm, [taskRow("t1")], "something quick from home"),
+    );
     expect(out.rows).toHaveLength(1);
+    expect(llm.calls).toHaveLength(1);
   });
 
   it("throws ProviderFailure with a reason code when the main call fails", async () => {
-    const llm = new FakeLlm({ opportunity_filters: [filtersReply()], guide_response: [fail()] });
+    const llm = new FakeLlm({ guide_response: [fail()] });
     await expect(handleOpportunities(ctxFor(llm, [taskRow("t1")]))).rejects.toBeInstanceOf(
       ProviderFailure,
     );
@@ -87,7 +85,6 @@ describe("user statistics are not grounding (I5)", () => {
 
   it("find_opportunity cannot adopt the user's 83%", async () => {
     const llm = new FakeLlm({
-      opportunity_filters: [filtersReply()],
       guide_response: [guideReply({ intent: "find_opportunity", message: adopt })],
     });
     const out = await handleOpportunities(ctxFor(llm, [taskRow("t1")], stat));
@@ -106,7 +103,6 @@ describe("user statistics are not grounding (I5)", () => {
 
   it("find_opportunity keeps the minutes the person said they have", async () => {
     const llm = new FakeLlm({
-      opportunity_filters: [filtersReply()],
       guide_response: [
         guideReply({ intent: "find_opportunity", message: "Here is a 20 minute idea." }),
       ],

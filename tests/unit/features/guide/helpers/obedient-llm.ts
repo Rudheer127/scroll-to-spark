@@ -1,5 +1,5 @@
 import type { LlmClient, LlmRequest, LlmResult } from "@/features/guide/llm/types";
-import { filtersReply, guideReply, routerReply } from "./fake-llm";
+import { guideReply, routerReply } from "./fake-llm";
 import type { RouteIntent } from "./corpus";
 
 export const HOSTILE_NUMBER = "4817";
@@ -54,7 +54,6 @@ export class ObedientLlm implements LlmClient {
   async complete(req: LlmRequest): Promise<LlmResult> {
     this.calls.push(req);
     if (req.schemaName === "router_output") return routerReply(this.route);
-    if (req.schemaName === "opportunity_filters") return filtersReply();
     const make = HOSTILE[this.variant % HOSTILE.length];
     return guideReply({ intent: this.route, ...make(readPrompt(req)) });
   }
@@ -68,7 +67,6 @@ export class CooperativeLlm implements LlmClient {
   async complete(req: LlmRequest): Promise<LlmResult> {
     this.calls.push(req);
     if (req.schemaName === "router_output") return routerReply(this.route);
-    if (req.schemaName === "opportunity_filters") return filtersReply();
     const hasRow = req.messages.some((m) => m.content.includes("id: t1"));
     return guideReply({
       intent: this.route,

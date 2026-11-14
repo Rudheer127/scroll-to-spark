@@ -6,13 +6,12 @@ import {
   REDIRECT_MESSAGE,
   UNAVAILABLE_MESSAGE,
 } from "@/features/guide/fallbacks";
-import { fail, filtersReply, guideReply, routerReply } from "./helpers/fake-llm";
+import { fail, guideReply, routerReply } from "./helpers/fake-llm";
 import { taskRow } from "./helpers/fake-db";
 import { setup } from "./helpers/setup";
 
 const oppScript = (reply: ReturnType<typeof guideReply>[]) => ({
   router_output: [routerReply("find_opportunity")],
-  opportunity_filters: [filtersReply()],
   guide_response: reply,
 });
 

@@ -1,35 +1,12 @@
 import { claimsVerification } from "../guard/rules/verification";
 import { wrapUntrusted } from "../guard/untrusted";
-import { callStructured } from "../llm/structured";
 import { NO_MATCH_MESSAGE } from "../fallbacks";
-import { buildFilterPrompt } from "../prompts/filters";
-import { opportunityFiltersSchema } from "../schemas";
 import { searchOpportunities } from "../tools/search-opportunities";
-import type { OpportunityFilters, OpportunityRow } from "../types";
+import type { OpportunityRow } from "../types";
+import { parseOpportunityFilters } from "./parse-opportunity-filters";
 import { answerWithModel, staticOutput, wrapUser } from "./shared";
 import { timedNumbersIn } from "./user-numbers";
 import type { HandlerContext, HandlerOutput } from "./types";
-
-const NO_FILTERS: OpportunityFilters = { effort: null, remoteOnly: false, keyword: null };
-
-/** A small first call. If it fails we simply search without filters. */
-async function extractFilters(ctx: HandlerContext): Promise<OpportunityFilters> {
-  const result = await callStructured(ctx.llm, opportunityFiltersSchema, {
-    messages: [
-      { role: "system", content: buildFilterPrompt({ nonce: ctx.nonce }) },
-      { role: "user", content: wrapUser(ctx) },
-    ],
-    schemaName: "opportunity_filters",
-    reasoningEffort: "low",
-    // Reasoning tokens count toward this budget, so it must be roomy.
-    maxTokens: 1000,
-    timeoutMs: 8000,
-    tier: "router",
-  });
-  if (result.ok) return result.data;
-  await ctx.onStageFailure?.("filters");
-  return NO_FILTERS;
-}
 
 function rowBlock(row: OpportunityRow, nonce: string): string {
   const lines = [
@@ -48,8 +25,12 @@ function rowBlock(row: OpportunityRow, nonce: string): string {
 
 /** Finds open tasks for the person. The model only picks ids from the rows fetched here. */
 export async function handleOpportunities(ctx: HandlerContext): Promise<HandlerOutput> {
-  const filters = await extractFilters(ctx);
-  const rows = await searchOpportunities(ctx.db, filters);
+  const filters = parseOpportunityFilters(ctx.text);
+  let rows = await searchOpportunities(ctx.db, filters);
+  // A topic word read by rules can miss. Then search again without it rather than find nothing.
+  if (rows.length === 0 && filters.keyword !== null) {
+    rows = await searchOpportunities(ctx.db, { ...filters, keyword: null });
+  }
   if (rows.length === 0) return staticOutput(ctx, NO_MATCH_MESSAGE, "find_opportunity");
   const content = [wrapUser(ctx), ...rows.map((row) => rowBlock(row, ctx.nonce))].join("\n\n");
   const out = await answerWithModel(ctx, "find_opportunity", content, {

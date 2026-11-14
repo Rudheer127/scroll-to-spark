@@ -1,6 +1,11 @@
 import { AI_LABEL } from "./constants";
 import type { GuideEventKind } from "./events";
-import { CRISIS_MESSAGE, REDIRECT_MESSAGE, UNAVAILABLE_MESSAGE } from "./fallbacks";
+import {
+  CRISIS_MESSAGE,
+  RATE_LIMIT_MESSAGE,
+  REDIRECT_MESSAGE,
+  UNAVAILABLE_MESSAGE,
+} from "./fallbacks";
 import { fixedResponse } from "./fixed-response";
 import { checkOutput } from "./guard/check-output";
 import type { HandlerOutput } from "./handlers/types";
@@ -29,6 +34,17 @@ export const unavailableResult = (): GuideTurnResult => ({
   ...fixedResult(UNAVAILABLE_MESSAGE),
   outcome: "unavailable",
 });
+
+/** Every provider said "too many requests", for example the free tier's daily cap. */
+export const providerLimitResult = (): GuideTurnResult => ({
+  ...fixedResult(RATE_LIMIT_MESSAGE),
+  outcome: "rate_limited",
+});
+
+/** The reason stored on a provider_failure event. A provider rate limit gets a clearer name. */
+export function failureDetail(reason: string): string {
+  return reason === "rate_limited" ? "daily_or_minute_limit" : reason;
+}
 
 /** The model followed the prompt's crisis rule and wrote the fixed crisis message. */
 const isCrisisReply = (res: GuideResponse) => res.message.trim() === CRISIS_MESSAGE;

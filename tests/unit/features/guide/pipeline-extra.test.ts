@@ -6,7 +6,7 @@ import {
   CRISIS_MESSAGE,
   RATE_LIMIT_MESSAGE,
 } from "@/features/guide/fallbacks";
-import { fail, filtersReply, guideReply, routerReply } from "./helpers/fake-llm";
+import { fail, guideReply, routerReply } from "./helpers/fake-llm";
 import { taskRow } from "./helpers/fake-db";
 import { setup } from "./helpers/setup";
 
@@ -28,7 +28,6 @@ describe("runGuideTurn: more behavior", () => {
     const t = setup(
       {
         router_output: [routerReply("find_opportunity")],
-        opportunity_filters: [filtersReply()],
         guide_response: [guideReply()],
       },
       { throwOnTable: "tasks" },
@@ -91,7 +90,6 @@ describe("runGuideTurn: more behavior", () => {
     const t = setup(
       {
         router_output: [routerReply("find_opportunity")],
-        opportunity_filters: [filtersReply({ keyword: "zoo" })],
       },
       { tasks: [] },
     );
@@ -105,7 +103,6 @@ describe("runGuideTurn: more behavior", () => {
     const t = setup(
       {
         router_output: [routerReply("find_opportunity")],
-        opportunity_filters: [filtersReply()],
         guide_response: [
           guideReply({ intent: "find_opportunity", message: "See https://x.org now" }),
           guideReply({ intent: "find_opportunity", message: "Try one small step." }),
@@ -206,7 +203,6 @@ describe("runGuideTurn: user row first (R18)", () => {
 describe("runGuideTurn: over-long replies are repaired, not unavailable (I6)", () => {
   const opp = (reply: unknown[]) => ({
     router_output: [routerReply("find_opportunity")],
-    opportunity_filters: [filtersReply()],
     guide_response: reply as ReturnType<typeof guideReply>[],
   });
 
@@ -268,23 +264,6 @@ describe("runGuideTurn: router and filter failures are logged (I7)", () => {
     expect(details(t)).toEqual([{ stage: "router" }]);
     expect(JSON.stringify(details(t))).not.toContain("secret");
   });
-
-  it("logs provider_failure with stage filters and still searches", async () => {
-    const t = setup(
-      {
-        router_output: [routerReply("find_opportunity")],
-        opportunity_filters: [fail()],
-        guide_response: [
-          guideReply({ intent: "find_opportunity", message: "Try one small step." }),
-        ],
-      },
-      { tasks: [taskRow("t1")] },
-    );
-    const res = await t.run("something small");
-    expect(res.source).toBe("ai");
-    expect(details(t)).toEqual([{ stage: "filters" }]);
-    expect(t.llm.callsFor("opportunity_filters")[0].maxTokens).toBe(1000);
-  });
 });
 
 describe("runGuideTurn: failure logging (minor d)", () => {
@@ -292,7 +271,6 @@ describe("runGuideTurn: failure logging (minor d)", () => {
     const t = setup(
       {
         router_output: [routerReply("find_opportunity")],
-        opportunity_filters: [filtersReply()],
         guide_response: [
           guideReply({ intent: "find_opportunity", message: "See https://x.org now" }),
           fail("timeout"),
