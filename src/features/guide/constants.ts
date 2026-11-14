@@ -1,15 +1,22 @@
-import type { ProviderName } from "./llm/types";
+import type { ProviderModels, ProviderName } from "./llm/types";
 
-/** Model IDs per provider and tier. Run scripts/check-models.mjs with keys set to confirm they exist. */
-export const MODELS: Record<ProviderName, { main: string; router: string }> = {
+/**
+ * Built-in model IDs for Cerebras and Groq. OpenRouter IDs come from env (src/lib/env.ts holds
+ * their defaults). Run scripts/check-models.mjs to confirm the IDs exist.
+ */
+export const MODELS: Record<Exclude<ProviderName, "openrouter">, ProviderModels> = {
   cerebras: { main: "gpt-oss-120b", router: "gpt-oss-120b" },
   groq: { main: "openai/gpt-oss-120b", router: "openai/gpt-oss-20b" },
 };
 
 export const PROVIDER_URLS: Record<ProviderName, string> = {
+  openrouter: "https://openrouter.ai/api/v1/chat/completions",
   cerebras: "https://api.cerebras.ai/v1/chat/completions",
   groq: "https://api.groq.com/openai/v1/chat/completions",
 };
+
+/** Sent to OpenRouter so the app is named on its dashboard. */
+export const OPENROUTER_APP_TITLE = "Scroll to Spark";
 
 /** Longest user message the guide accepts, in characters, after sanitizing. */
 export const MAX_INPUT_CHARS = 1000;
