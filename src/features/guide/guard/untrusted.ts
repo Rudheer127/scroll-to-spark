@@ -9,6 +9,9 @@ export function newNonce(): string {
 
 /** Fences untrusted content so it cannot forge or close its own delimiter. */
 export function wrapUntrusted(label: UntrustedLabel, content: string, nonce: string): string {
-  const safe = content.replaceAll("<<", "< <").replaceAll(">>", "> >").replaceAll(nonce, "[id]");
+  const safe = content
+    .replace(/<+/g, (run) => run.split("").join(" "))
+    .replace(/>+/g, (run) => run.split("").join(" "))
+    .replaceAll(nonce, "[id]");
   return `<<DATA label=${label} id=${nonce}>>\n${safe}\n<<END id=${nonce}>>`;
 }
