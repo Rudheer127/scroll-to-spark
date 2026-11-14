@@ -14,3 +14,9 @@ export const AI_DISCLOSURE =
   "The Spark Guide is an AI. It can be wrong and never replaces a real person.";
 
 export const MOOD_LEAD = "Or start from how you feel";
+
+/** The popup is small, so it gets the short form of the disclosure. */
+export const AI_DISCLOSURE_SHORT = "The Spark Guide is an AI. It can be wrong.";
+
+/** Said where the chat list is, so nobody is surprised that chats are kept. */
+export const CHATS_SAVED_NOTE = "Chats are saved to your account. You can delete any chat.";

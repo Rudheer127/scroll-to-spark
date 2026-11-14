@@ -90,6 +90,8 @@ export function GuideComposer({ inputId, size, className }: ComposerProps) {
       textarea={{
         id: inputId,
         ref: textareaRef,
+        // The popup keeps body text at a readable 15px.
+        className: size === "compact" ? "text-[0.9375rem]" : undefined,
         value: draft,
         maxLength: MAX_INPUT_CHARS,
         placeholder: COMPOSER_PLACEHOLDER,

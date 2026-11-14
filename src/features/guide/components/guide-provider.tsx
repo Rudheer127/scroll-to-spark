@@ -1,30 +1,32 @@
 "use client";
 
 import { createContext, useContext, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useGuideConversation, type GuideConversation } from "./use-guide-conversation";
 import { useImageAttachment, type ImageAttachment } from "./use-image-attachment";
 
-type GuideView = "closed" | "popup" | "window";
-
 export type GuideContextValue = GuideConversation & {
-  /** The text being written. Shared, so expanding or minimizing keeps the draft. */
+  /** The text being written. Shared, so moving between the popup and the page keeps the draft. */
   draft: string;
   setDraft: (value: string) => void;
   attachment: ImageAttachment;
   /** True only when the server has image reading turned on. */
   imageInputEnabled: boolean;
-  view: GuideView;
+  /** Whether the mini chat popup is open. */
+  popupOpen: boolean;
   openPopup: () => void;
-  maximise: () => void;
-  close: () => void;
+  closePopup: () => void;
   launcherRef: React.RefObject<HTMLButtonElement | null>;
+  /** Clears the thread, the draft and any attached image, even while an answer is on its way. */
+  startNewChat: () => void;
 };
 
 const GuideContext = createContext<GuideContextValue | null>(null);
 
 /**
- * Holds the Spark Guide conversation for the whole signed-in app, so the popup, the maximised
- * window and the full page share one thread.
+ * Holds the Spark Guide conversation for the whole signed-in app, so the popup and the full page
+ * share one thread. It lives in the app layout, so moving between pages never resets it. When a
+ * turn creates a new saved chat, the page data is refreshed so the sidebar lists it.
  */
 export function GuideProvider({
   imageInputEnabled,
@@ -33,10 +35,11 @@ export function GuideProvider({
   imageInputEnabled: boolean;
   children?: React.ReactNode;
 }) {
-  const conversation = useGuideConversation();
+  const router = useRouter();
+  const conversation = useGuideConversation({ onConversationCreated: () => router.refresh() });
   const attachment = useImageAttachment();
   const [draft, setDraft] = useState("");
-  const [view, setView] = useState<GuideView>("closed");
+  const [popupOpen, setPopupOpen] = useState(false);
   const launcherRef = useRef<HTMLButtonElement>(null);
 
   const value: GuideContextValue = {
@@ -45,11 +48,15 @@ export function GuideProvider({
     setDraft,
     attachment,
     imageInputEnabled,
-    view,
-    openPopup: () => setView("popup"),
-    maximise: () => setView("window"),
-    close: () => setView("closed"),
+    popupOpen,
+    openPopup: () => setPopupOpen(true),
+    closePopup: () => setPopupOpen(false),
     launcherRef,
+    startNewChat: () => {
+      conversation.loadConversation([], null);
+      setDraft("");
+      attachment.clear();
+    },
   };
 
   return <GuideContext.Provider value={value}>{children}</GuideContext.Provider>;

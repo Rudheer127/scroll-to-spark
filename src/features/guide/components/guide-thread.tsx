@@ -15,6 +15,8 @@ type GuideThreadProps = {
   headline: React.ReactNode;
   /** The shared reading column, so messages line up with the composer. */
   columnClassName: string;
+  /** The popup: the thread always fills the space above the composer and scrolls. */
+  fill?: boolean;
 };
 
 /**
@@ -22,7 +24,7 @@ type GuideThreadProps = {
  * replaces the failed one in place. It scrolls to the newest message. The log is there from the
  * start, even while empty, so the first answer is announced.
  */
-export function GuideThread({ mode, headline, columnClassName }: GuideThreadProps) {
+export function GuideThread({ mode, headline, columnClassName, fill = false }: GuideThreadProps) {
   const { items, sending, error, retryBubble, retryError } = useGuide();
   const endRef = useRef<HTMLDivElement>(null);
   const empty = mode === "empty";
@@ -35,16 +37,20 @@ export function GuideThread({ mode, headline, columnClassName }: GuideThreadProp
   return (
     <div
       className={cn(
-        empty ? "flex-none" : "min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-4",
+        fill && "min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4",
+        !fill &&
+          (empty ? "flex-none" : "min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-4"),
       )}
     >
-      <div className={cn("flex flex-col", empty ? "gap-0" : "gap-6", columnClassName)}>
+      <div
+        className={cn("flex flex-col", empty ? "gap-0" : fill ? "gap-5" : "gap-6", columnClassName)}
+      >
         {empty ? headline : null}
         <div
           role="log"
           aria-live="polite"
           aria-label="Conversation"
-          className="flex flex-col gap-6"
+          className={cn("flex flex-col", fill ? "gap-5" : "gap-6")}
         >
           {items.map((item) =>
             item.role === "user" ? (
