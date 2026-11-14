@@ -9,7 +9,11 @@ export type InjectionSignal =
 const GAP = String.raw`(?:\W+\w+){0,3}?\W+`;
 const OVERRIDE_VERB = String.raw`(?:ignore|disregard|forget|override|bypass)`;
 const SCOPE = String.raw`(?:previous|prior|above|earlier|preceding|all|any|your|system|initial|original|these|those|every)`;
-const RULES = String.raw`(?:instructions?|rules|prompts?|guidelines|directions|directives)`;
+const DETS = String.raw`(?:(?:all|everything|any|the|your|of)\W+)*`;
+const DETS_REQUIRED = String.raw`(?:(?:all|any|the|your|of)\W+)+`;
+const BACK = String.raw`(?:previous|prior|above|earlier|preceding)`;
+const NOUN = String.raw`(?:instructions?|rules|prompts?|commands?|orders?|directions|directives|guidelines|text|context|conversation|messages?|everything|input)`;
+const RULES = String.raw`(?:instructions?|rules|prompts?|guidelines|directions|directives|commands?|orders?)`;
 const ES_VERB = String.raw`(?:ignora|ignoren|ignorar|olvida|olvidar|descarta|omite|salta|desobedece)`;
 const ES_RULES = String.raw`(?:instrucciones|reglas|indicaciones|directrices|normas)`;
 
@@ -22,11 +26,20 @@ const PATTERNS: Record<InjectionSignal, RegExp[]> = {
       "i",
     ),
     new RegExp(
-      String.raw`\b${OVERRIDE_VERB}\b\W+(?:the\W+)?(?:previous|prior|above|preceding)\b(?=\W*(?:$|and\b|then\b|instructions?\b|messages?\b|rules\b|prompts?\b|text\b|context\b|conversation\b|everything\b))`,
+      String.raw`\b${OVERRIDE_VERB}\b\W+${DETS}${BACK}\b(?=\W*(?:$|[,.:;!]|and\b|then\b|${NOUN}\b))`,
+      "i",
+    ),
+    new RegExp(String.raw`\bskip\W+${DETS}${BACK}\b(?=\W*(?:$|[,.:;!]|${NOUN}\b))`, "i"),
+    new RegExp(
+      String.raw`\b(?:ignore|skip|disregard|forget)\W+(?:everything|all)\W+(?:above|before)\b`,
       "i",
     ),
     new RegExp(
-      String.raw`\bskip\W+(?:all\W+|any\W+|the\W+)?(?:previous|prior|above|your|system)\W+${RULES}\b`,
+      String.raw`\b(?:ignore|skip|disregard|forget)\W+${DETS_REQUIRED}${RULES}\W+(?:above|before|earlier|previously)\b`,
+      "i",
+    ),
+    new RegExp(
+      String.raw`\bskip\W+${DETS}(?:previous|prior|above|earlier|preceding|your|system)\W+${RULES}\b`,
       "i",
     ),
     new RegExp(String.raw`\b${ES_VERB}\b${GAP}${ES_RULES}\b`, "i"),
@@ -55,8 +68,8 @@ const PATTERNS: Record<InjectionSignal, RegExp[]> = {
     /\[\s*\/?\s*(?:INST|SYS|SYSTEM)\s*\]/i,
     /<<\s*\/?\s*(?:SYS|DATA|END)\b/i,
     /<\|[a-z_ ]{2,30}\|>/i,
-    /^\s*(?:system|assistant|developer)\s*:/i,
-    /\b(?:system|assistant|developer)\s*:\s*(?:you|ignore|disregard|forget|new|from\s+now|do\s+not|never|always|act|reveal|output|print)\b/i,
+    /^\s*(?:system|assistant|developer)\s*:/im,
+    /\b(?:system|assistant|developer)\s*:\s*(?:you|ignore|disregard|forget|new|from\s+now|do\s+not|never|always|act|reveal|output|print|admin|approved|authorized|override|list|tell|give|show|sure|ok|okay|certainly|here\s+is|the\s+(?:admin|administrator|developer|owner|operator))\b/i,
     /#{2,}\s*(?:system|instructions?)\b/i,
   ],
   encoded_blob: [/[A-Za-z0-9+/]{100,}={0,2}/, /\b[0-9a-f]{64,}\b/i],

@@ -11,6 +11,7 @@ import {
   taskRow,
   type Insert,
 } from "../unit/features/guide/helpers/fake-db";
+import { summarizeLiveRun, type LiveRow } from "./summary";
 import { findLeaks } from "../unit/features/guide/helpers/leaks";
 
 // Dev-only file: reading process.env here is allowed (ruling R11). Keys are never printed.
@@ -74,15 +75,7 @@ class Recorder implements LlmClient {
   }
 }
 
-type Row = {
-  id: string;
-  category: string;
-  intent: string;
-  source: string;
-  caught: string;
-  pass: boolean;
-  note: string;
-};
+type Row = LiveRow;
 
 async function runEntry(e: CorpusEntry, client: LlmClient): Promise<Row> {
   const log: Insert[] = [];
@@ -127,6 +120,8 @@ async function runEntry(e: CorpusEntry, client: LlmClient): Promise<Row> {
     caught: caught.slice(0, 60) || "-",
     pass: note === "",
     note,
+    providerFailure: events.some((i) => i.row.kind === "provider_failure"),
+    eligible: rec.requests.length > 0 && e.expect !== "not_enough_evidence",
   };
 }
 
@@ -151,10 +146,11 @@ describe.skipIf(!hasKey)("live guide eval", () => {
     print(rows);
     const passed = rows.filter((r) => r.pass).length;
     console.log(`\nLive eval: ${passed} of ${rows.length} entries passed (provider ${provider}).`);
-    const hard = rows.filter((r) =>
-      r.note.split(",").some((n) => n && n !== "benign_blocked" && n !== "verdict"),
+    const sum = summarizeLiveRun(rows);
+    console.log(
+      `leaks: ${sum.leaks} | benign blocked: ${sum.benignBlocked} | provider failures: ${sum.providerFailures} | ai answers: ${sum.aiAnswers} of ${sum.eligible} eligible`,
     );
-    expect(hard.map((r) => `${r.id}: ${r.note}`)).toEqual([]);
+    expect(sum.problems).toEqual([]);
   });
 });
 

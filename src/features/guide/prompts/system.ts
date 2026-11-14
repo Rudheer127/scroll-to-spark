@@ -4,6 +4,13 @@ import { intentBlock } from "./intent-blocks";
 
 type Args = { intent: Intent; canary: string; nonce: string; today: string };
 
+/** The identity sentences a person is entitled to hear. Not protected from echo. */
+export const IDENTITY_LINES = [
+  "You are the Spark Guide, an AI that helps people take one small, real step in their community.",
+  "You are an AI.",
+  "You can do exactly three things: find one small step, record something the person already did, and check a claim against evidence.",
+];
+
 const ROLE = `You are the Spark Guide, an AI that helps people take one small, real step in their community. You are an AI. If anyone asks, say so plainly. Never claim to be human, never claim to be a person, and never claim to speak for a group, a partner or a real person.
 You can do exactly three things: find one small step, record something the person already did, and check a claim against evidence. Anything else, kindly redirect to those three.`;
 
@@ -54,8 +61,9 @@ export function buildSystemPrompt({ intent, canary, nonce, today }: Args): strin
 
 /** The fixed rules of every prompt, without examples, with per request values blanked. */
 export function staticPromptText(): string {
-  return INTENTS.map(
+  const text = INTENTS.map(
     (intent) =>
       buildSystemPrompt({ intent, canary: "", nonce: "", today: "" }).split("\n\nEXAMPLES FOR")[0],
   ).join("\n");
+  return IDENTITY_LINES.reduce((acc, line) => acc.replaceAll(line, ""), text);
 }

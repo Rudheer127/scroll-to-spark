@@ -62,7 +62,7 @@ export function claimsHuman(res: GuideResponse): Violation | null {
     : null;
 }
 
-const ECHO_WINDOW = 40;
+const ECHO_WINDOW = 60;
 const lettersOnly = (s: string) =>
   s
     .normalize("NFKC")
@@ -70,7 +70,7 @@ const lettersOnly = (s: string) =>
     .replace(/[^\p{L}\p{N}]/gu, "");
 let promptLetters: string | null = null;
 
-/** The output repeats 40 or more letters in a row of the fixed system prompt. */
+/** The output repeats 60 or more letters in a row of the fixed system prompt. */
 export function promptEcho(res: GuideResponse): Violation | null {
   promptLetters ??= lettersOnly(staticPromptText());
   const source = promptLetters;
