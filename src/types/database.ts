@@ -99,8 +99,8 @@ export type Database = {
           },
         ];
       };
-      // Provisional: hand-written from supabase/migrations/20261114160000_guide_harness.sql.
-      // Regenerate this file with the Supabase CLI once that migration is applied.
+      // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
+      // Regenerate the whole file with `supabase gen types` when the schema changes again.
       contributions: {
         Row: {
           created_at: string;
@@ -142,8 +142,8 @@ export type Database = {
           },
         ];
       };
-      // Provisional: hand-written from supabase/migrations/20261114160000_guide_harness.sql.
-      // Regenerate this file with the Supabase CLI once that migration is applied.
+      // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
+      // Regenerate the whole file with `supabase gen types` when the schema changes again.
       evidence_claims: {
         Row: {
           caveat: string | null;
@@ -186,8 +186,8 @@ export type Database = {
         };
         Relationships: [];
       };
-      // Provisional: hand-written from supabase/migrations/20261114160000_guide_harness.sql.
-      // Regenerate this file with the Supabase CLI once that migration is applied.
+      // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
+      // Regenerate the whole file with `supabase gen types` when the schema changes again.
       guide_events: {
         Row: {
           created_at: string;
@@ -220,8 +220,8 @@ export type Database = {
           },
         ];
       };
-      // Provisional: hand-written from supabase/migrations/20261114160000_guide_harness.sql.
-      // Regenerate this file with the Supabase CLI once that migration is applied.
+      // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
+      // Regenerate the whole file with `supabase gen types` when the schema changes again.
       guide_messages: {
         Row: {
           content: string;
