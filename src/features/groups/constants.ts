@@ -4,12 +4,12 @@ export type GroupColor = (typeof GROUP_COLOR_VALUES)[number];
 
 /** Full class names are written out so Tailwind can find them. */
 const SWATCH_CLASSES: Record<GroupColor, string> = {
-  orange: "bg-brand-orange",
-  pink: "bg-brand-pink",
-  purple: "bg-brand-purple",
-  indigo: "bg-brand-indigo",
-  blue: "bg-action",
-  green: "bg-success",
+  orange: "bg-group-orange",
+  pink: "bg-group-pink",
+  purple: "bg-group-purple",
+  indigo: "bg-group-indigo",
+  blue: "bg-group-blue",
+  green: "bg-group-green",
 };
 
 export function swatchClass(color: string): string {

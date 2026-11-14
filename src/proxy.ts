@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/check-email", "/auth/callback"];
-const SIGNED_OUT_ONLY_PATHS = ["/login", "/signup", "/check-email"];
+const PUBLIC_PATHS = ["/login", "/signup", "/check-email", "/forgot-password", "/auth/callback"];
+const SIGNED_OUT_ONLY_PATHS = ["/login", "/signup", "/check-email", "/forgot-password"];
 
 function matches(pathname: string, paths: string[]): boolean {
   return paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));

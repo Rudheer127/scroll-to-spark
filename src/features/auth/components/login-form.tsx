@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
 import { fieldError, formError } from "@/lib/form-state";
 import { signIn } from "@/features/auth/actions";
+import { PasswordField } from "@/features/auth/components/password-field";
 
 export function LoginForm() {
   const [state, formAction, pending] = useActionState(signIn, null);
@@ -22,16 +23,12 @@ export function LoginForm() {
           className={inputClass}
         />
       </Field>
-      <Field label="Password" htmlFor="password" error={fieldError(state, "password")}>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className={inputClass}
-        />
-      </Field>
+      <div className="flex flex-col gap-2">
+        <PasswordField autoComplete="current-password" error={fieldError(state, "password")} />
+        <Link href="/forgot-password" className="text-sm font-semibold text-action hover:underline">
+          Forgot your password?
+        </Link>
+      </div>
       {formError(state) ? (
         <p role="alert" className="text-sm text-danger">
           {formError(state)}
@@ -42,7 +39,7 @@ export function LoginForm() {
       </Button>
       <p className="text-sm text-muted">
         New here?{" "}
-        <Link href="/signup" className="font-semibold text-action">
+        <Link href="/signup" className="font-semibold text-action hover:underline">
           Create an account
         </Link>
       </p>

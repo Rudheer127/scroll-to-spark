@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Globe, Lock, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field, inputClass } from "@/components/ui/field";
@@ -14,11 +14,6 @@ import {
   GROUP_NAME_MAX,
   swatchClass,
 } from "@/features/groups/constants";
-
-const VISIBILITY_OPTIONS = [
-  { value: "public", label: "Public", icon: Globe },
-  { value: "private", label: "Private", icon: Lock },
-] as const;
 
 function CreateGroupForm({ onCancel }: { onCancel: () => void }) {
   const [state, formAction, pending] = useActionState(createGroup, null);
@@ -48,29 +43,6 @@ function CreateGroupForm({ onCancel }: { onCancel: () => void }) {
           className={inputClass}
         />
       </Field>
-      <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-semibold">Who can join?</legend>
-        <div className="flex gap-2">
-          {VISIBILITY_OPTIONS.map(({ value, label, icon: Icon }) => (
-            <label key={value}>
-              <input
-                type="radio"
-                name="visibility"
-                value={value}
-                defaultChecked={value === "public"}
-                className="peer sr-only"
-              />
-              <span className="flex cursor-pointer items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-action">
-                <Icon aria-hidden className="size-4" />
-                {label}
-              </span>
-            </label>
-          ))}
-        </div>
-        <p className="text-sm text-muted">
-          Private groups are hidden from other people. Inviting people comes later.
-        </p>
-      </fieldset>
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-semibold">Group color</legend>
         <div className="flex gap-3">

@@ -1,19 +1,23 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field, inputClass } from "@/components/ui/field";
 import { deleteGroup } from "@/features/groups/actions";
 
-type DeleteGroupDialogProps = { groupId: string; groupName: string };
+type DeleteGroupDialogProps = {
+  groupId: string;
+  groupName: string;
+  open: boolean;
+  onClose: () => void;
+};
 
 function DeleteGroupForm({
   groupId,
   groupName,
   onCancel,
-}: DeleteGroupDialogProps & { onCancel: () => void }) {
+}: Omit<DeleteGroupDialogProps, "open" | "onClose"> & { onCancel: () => void }) {
   const [typed, setTyped] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -57,30 +61,16 @@ function DeleteGroupForm({
   );
 }
 
-/** Owner only. The button opens a dialog that asks for the group name before anything is removed. */
-export function DeleteGroupDialog({ groupId, groupName }: DeleteGroupDialogProps) {
-  const [open, setOpen] = useState(false);
-
+/** Owner only. It asks for the group name before anything is removed. */
+export function DeleteGroupDialog({ groupId, groupName, open, onClose }: DeleteGroupDialogProps) {
   return (
-    <>
-      <Button variant="outline" onClick={() => setOpen(true)} className="text-danger">
-        <Trash2 aria-hidden className="size-4" />
-        Delete group
-      </Button>
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        title={`Delete ${groupName}?`}
-        description="This removes every thread and comment in the group for everyone. It cannot be undone."
-      >
-        {open ? (
-          <DeleteGroupForm
-            groupId={groupId}
-            groupName={groupName}
-            onCancel={() => setOpen(false)}
-          />
-        ) : null}
-      </Dialog>
-    </>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title={`Delete ${groupName}?`}
+      description="This removes every thread and comment in the group for everyone. It cannot be undone."
+    >
+      {open ? <DeleteGroupForm groupId={groupId} groupName={groupName} onCancel={onClose} /> : null}
+    </Dialog>
   );
 }

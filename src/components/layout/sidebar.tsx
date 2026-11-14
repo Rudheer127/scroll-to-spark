@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessagesSquare, type LucideIcon } from "lucide-react";
+import { Home, MessagesSquare, User, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
@@ -10,6 +10,7 @@ type NavItem = { href: string; label: string; icon: LucideIcon };
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/discussions", label: "Discussions", icon: MessagesSquare },
+  { href: "/profile", label: "Profile", icon: User },
 ];
 
 function isActive(pathname: string, href: string): boolean {

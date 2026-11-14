@@ -10,9 +10,8 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           Do one small thing for your community.
         </h1>
         <ul className="flex max-w-xl flex-col gap-3 text-lg text-muted">
-          <li>Pick how much you want to give: tiny, medium or big.</li>
-          <li>Hear back from a real group about what you changed.</li>
-          <li>Join groups and talk it through with people who care.</li>
+          <li>Join groups for the causes you care about.</li>
+          <li>Start a group of your own for a cause that matters to you.</li>
         </ul>
       </section>
       <section className="flex flex-col gap-8 px-10 py-12 lg:px-16 lg:py-20">

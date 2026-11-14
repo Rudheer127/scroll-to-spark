@@ -6,7 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import { fail, type ActionResult } from "@/lib/result";
 import { fieldErrorsFromZod } from "@/lib/zod-errors";
 import { getPendingEmail, rememberPendingEmail } from "@/features/auth/pending-email";
-import { loginSchema, signupSchema } from "@/features/auth/schemas";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  resetPasswordSchema,
+  signupSchema,
+} from "@/features/auth/schemas";
 
 const CHECK_FIELDS = "Check the highlighted fields.";
 
@@ -69,6 +74,38 @@ export async function resendConfirmation(): Promise<ActionResult> {
   if (error) return fail("We could not send it again yet. Wait a moment and try again.");
 
   return { ok: true, data: undefined };
+}
+
+/** Email a link for choosing a new password. The reply is the same whether or not the account exists. */
+export async function requestPasswordReset(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const parsed = forgotPasswordSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return fail(CHECK_FIELDS, fieldErrorsFromZod(parsed.error));
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${await getOrigin()}/auth/callback?next=/reset-password`,
+  });
+  if (error) return fail("We could not send the email yet. Wait a moment and try again.");
+
+  return { ok: true, data: undefined };
+}
+
+/** Save a new password for the person who opened the reset link. */
+export async function updatePassword(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const parsed = resetPasswordSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return fail(CHECK_FIELDS, fieldErrorsFromZod(parsed.error));
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) return fail("We could not save that password. Open the email link again and retry.");
+
+  redirect("/");
 }
 
 export async function signOut(): Promise<void> {

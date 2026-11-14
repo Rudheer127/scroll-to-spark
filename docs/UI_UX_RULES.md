@@ -1,6 +1,6 @@
 # UI and UX rules
 
-These rules apply to every screen. The look is Instagram-style: a white and light-grey interface, thin borders, rounded shapes, black text, and one gradient used sparingly. The structure of conversations is Reddit-style: threads with nested replies.
+These rules apply to every screen. The look is Warm Civic: a warm paper-like page, crisp white cards with a thin warm border, navy text and one terracotta action. It borrows familiar social patterns for conversations, which are Reddit-style threads with nested replies. It is calm and trustworthy first, and friendly through plain words and real photos.
 
 ## Hard rules
 
@@ -46,12 +46,13 @@ Everything else is left-aligned. Sign-in and sign-up screens use a full-width sp
 | Item | Rule |
 |---|---|
 | Font | Inter |
-| Page background | Very light grey (`#FAFAFA`) |
-| Surface | White cards with a 1 pixel light border |
-| Text | Near-black (`#262626`) and a mid-grey for secondary text |
-| Action color | A darker blue for links, focus and standard actions (white text on it passes contrast), red for destructive actions |
-| Main action | One filled pink button per screen (`brand` variant). White text on it must pass 4.5:1 |
-| Gradient | An orange-to-pink gradient only on the story ring around group avatars. No purple or indigo gradients anywhere, and no gradient on text. The logo is solid ink |
+| Page background | Warm off-white (`#F9F8F6`) |
+| Surface | White cards with a 1 pixel warm border (`#E2E0D8`) and no shadow |
+| Text | Navy ink (`#1F2A44`) and a warm grey for secondary text that passes 4.5:1 |
+| Links and focus | Deep blue. Red for destructive actions |
+| Standard action | A solid navy button (`primary` variant) |
+| Main action | One filled terracotta button per screen (`brand` variant). White text on it must pass 4.5:1 |
+| Gradient | None. No gradients, no glass and no purple. The logo is solid ink and avatars are plain colored circles |
 | Control edges | Inputs and other controls use the control border token so their edge is at least 3:1 against the page |
 | Radius | 12 to 16 pixels on cards, full round on pills and avatars |
 | Shadows | Only on floating layers: menus, popovers, dialogs |

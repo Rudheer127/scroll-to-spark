@@ -52,8 +52,11 @@ src/
       login/page.tsx
       signup/page.tsx
       check-email/page.tsx  shown after sign up, signs the person in once they confirm
+      forgot-password/page.tsx  asks for an email and sends a reset link
+      reset-password/page.tsx   choose a new password after opening the reset link
     auth/callback/route.ts  the email link lands here
     (app)/                  signed-in area with the app frame
+      error.tsx             shown when a screen fails to load, with a Try again button
       layout.tsx            sidebar and top bar
       page.tsx              home dashboard
       steps/page.tsx        my steps and progress
@@ -61,6 +64,7 @@ src/
         page.tsx            hub: your groups and discover groups
         [groupSlug]/
           page.tsx          one group
+          not-found.tsx     shown for a group that does not exist
           [threadId]/page.tsx   one thread with nested comments
       guide/page.tsx        full-page Spark Guide
       messages/page.tsx

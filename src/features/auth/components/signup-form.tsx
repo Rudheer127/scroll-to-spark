@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
 import { fieldError, formError } from "@/lib/form-state";
 import { signUp } from "@/features/auth/actions";
+import { PasswordField } from "@/features/auth/components/password-field";
 
 export function SignupForm() {
   const [state, formAction, pending] = useActionState(signUp, null);
@@ -22,22 +23,12 @@ export function SignupForm() {
           className={inputClass}
         />
       </Field>
-      <Field
-        label="Password"
-        htmlFor="password"
+      <PasswordField
+        autoComplete="new-password"
         hint="At least 8 characters."
+        minLength={8}
         error={fieldError(state, "password")}
-      >
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={8}
-          className={inputClass}
-        />
-      </Field>
+      />
       {formError(state) ? (
         <p role="alert" className="text-sm text-danger">
           {formError(state)}
@@ -48,7 +39,7 @@ export function SignupForm() {
       </Button>
       <p className="text-sm text-muted">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-action">
+        <Link href="/login" className="font-semibold text-action hover:underline">
           Log in
         </Link>
       </p>
