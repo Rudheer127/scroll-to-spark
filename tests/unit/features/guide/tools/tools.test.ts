@@ -159,18 +159,31 @@ describe("lookupEvidence", () => {
     expect(calls).toHaveLength(0);
   });
 
-  it("returns [] without querying for queries over 200 chars", async () => {
-    const { db, calls } = fakeDb([]);
-    expect(await lookupEvidence(db, "a".repeat(201))).toEqual([]);
+  it("truncates long input instead of rejecting it (I2)", async () => {
+    const { db, calls } = fakeDb([{ id: "1" }]);
+    expect(await lookupEvidence(db, `neighbors ${"a ".repeat(300)}`)).toEqual([{ id: "1" }]);
+    expect(calls).toContainEqual({
+      method: "textSearch",
+      args: ["fts", "neighbors", { type: "websearch", config: "english" }],
+    });
+  });
+
+  it("returns [] without querying when there are no keywords (I2)", async () => {
+    const { db, calls } = fakeDb([{ id: "1" }]);
+    expect(await lookupEvidence(db, "Check a claim")).toEqual([]);
     expect(calls).toHaveLength(0);
   });
 
-  it("uses websearch full text search on fts and caps at 4", async () => {
+  it("searches keywords with OR semantics on fts and caps at 4 (I2)", async () => {
     const { db, calls } = fakeDb([{ id: "1" }]);
-    await lookupEvidence(db, "  volunteering wellbeing ");
+    await lookupEvidence(db, "Is it true that 54% of Americans helped neighbors?");
     expect(calls).toContainEqual({
       method: "textSearch",
-      args: ["fts", "volunteering wellbeing", { type: "websearch", config: "english" }],
+      args: [
+        "fts",
+        "54 or americans or helped or neighbors",
+        { type: "websearch", config: "english" },
+      ],
     });
     expect(calls).toContainEqual({ method: "limit", args: [4] });
   });

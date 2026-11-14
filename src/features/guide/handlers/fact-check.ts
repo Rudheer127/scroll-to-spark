@@ -2,6 +2,7 @@ import { KNOWN_PRIMARY_SOURCES } from "../constants";
 import { fixedResponse } from "../fixed-response";
 import { wrapUntrusted } from "../guard/untrusted";
 import type { GuideResponse } from "../schemas";
+import { evidenceKeywords } from "../tools/evidence-keywords";
 import { lookupEvidence } from "../tools/lookup-evidence";
 import type { EvidenceRow, Violation } from "../types";
 import {
@@ -13,10 +14,14 @@ import {
   mentionsUnverified,
   verifiedOnlyIfChecked,
 } from "./fact-check-rules";
-import { answerWithModel, numbersIn, wrapUser } from "./shared";
+import { answerWithModel, numbersIn, staticOutput, wrapUser } from "./shared";
 import type { HandlerContext, HandlerOutput } from "./types";
 
 const NO_EVIDENCE_MESSAGE = `We have no evidence on file for that claim, and we will not guess. To check it yourself, a good place to start is a primary source such as ${KNOWN_PRIMARY_SOURCES.map((s) => s.name).join(", ")}.`;
+
+/** Shown when there is nothing to look up, such as the bare "Check a claim" starter. */
+export const PASTE_CLAIM_MESSAGE =
+  "Paste the claim you want checked and I will look for it in our evidence list.";
 
 function noEvidenceOutput(ctx: HandlerContext): HandlerOutput {
   const response: GuideResponse = {
@@ -59,6 +64,9 @@ function evidenceBlock(row: EvidenceRow, nonce: string): string {
  * against the DATA blocks and the handler caps and checks what it says.
  */
 export async function handleFactCheck(ctx: HandlerContext): Promise<HandlerOutput> {
+  if (evidenceKeywords(ctx.text).length === 0) {
+    return staticOutput(ctx, PASTE_CLAIM_MESSAGE, "fact_check");
+  }
   const rows = await lookupEvidence(ctx.db, ctx.text);
   if (rows.length === 0) return noEvidenceOutput(ctx);
   const content = [wrapUser(ctx), ...rows.map((r) => evidenceBlock(r, ctx.nonce))].join("\n\n");

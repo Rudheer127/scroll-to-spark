@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { KNOWN_PRIMARY_SOURCES } from "@/features/guide/constants";
-import { handleFactCheck } from "@/features/guide/handlers/fact-check";
+import { handleFactCheck, PASTE_CLAIM_MESSAGE } from "@/features/guide/handlers/fact-check";
 import type { HandlerContext } from "@/features/guide/handlers/types";
 import { checkOutput } from "@/features/guide/guard/check-output";
 import { evidenceRow, fakeSupabase } from "../helpers/fake-db";
@@ -61,6 +61,44 @@ describe("handleFactCheck: no evidence", () => {
     expect(out.response.verdict).toBe("not_enough_evidence");
     expect(out.response.cards).toEqual([]);
     expect(llm.calls).toHaveLength(0);
+  });
+});
+
+describe("handleFactCheck: nothing to look up (I2)", () => {
+  it("the bare starter gets a paste-the-claim reply, no verdict, no lookup, no model call", async () => {
+    const llm = new FakeLlm({ guide_response: [fact({ verdict: "supported" })] });
+    const { client, tablesRead } = fakeSupabase({
+      label: "db",
+      log: [],
+      evidence: [evidenceRow("e1")],
+    });
+    const out = await handleFactCheck({ ...ctxFor(llm, [], "Check a claim"), db: client });
+    expect(out.response.message).toBe(PASTE_CLAIM_MESSAGE);
+    expect(out.response.intent).toBe("fact_check");
+    expect(out.response.verdict).toBeNull();
+    expect(out.source).toBe("fallback");
+    expect(tablesRead).not.toContain("evidence_claims");
+    expect(llm.calls).toHaveLength(0);
+    expect(checkOutput(out.response, out.context).ok).toBe(true);
+  });
+
+  it("a real claim with zero rows still gets not_enough_evidence", async () => {
+    const llm = new FakeLlm({});
+    const out = await handleFactCheck(
+      ctxFor(llm, [], "Is it true that 54% of Americans helped neighbors?"),
+    );
+    expect(out.response.verdict).toBe("not_enough_evidence");
+  });
+
+  it("through the pipeline the starter is a fallback, not a verdict", async () => {
+    const t = setup(
+      { router_output: [routerReply("fact_check")] },
+      { evidence: [evidenceRow("e1")] },
+    );
+    const res = await t.run("Check a claim");
+    expect(res.source).toBe("fallback");
+    expect(res.response.verdict).toBeNull();
+    expect(res.response.message).toBe(PASTE_CLAIM_MESSAGE);
   });
 });
 
