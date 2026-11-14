@@ -12,7 +12,7 @@ These choices are fixed. Changing one needs a written reason in the pull request
 | Styling | Tailwind CSS | Fast, consistent spacing and color through design tokens |
 | Components | shadcn/ui primitives plus components from 21st.dev | Accessible, editable code that lives in our repo |
 | Icons | lucide-react | One consistent vector icon set. No emoji as icons |
-| Fonts | Fredoka and Nunito, self-hosted with `@fontsource-variable/fredoka` and `@fontsource-variable/nunito` | Matches the Figma mockups, and the build never depends on reaching Google Fonts |
+| Fonts | Inter, self-hosted with `@fontsource-variable/inter` | Matches the Figma mockups, and the build never depends on reaching Google Fonts |
 
 ## Data and services
 

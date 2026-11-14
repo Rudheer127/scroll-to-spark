@@ -17,10 +17,7 @@ export function ThreadCard({ thread, canVote }: ThreadCardProps) {
       <div className="flex items-center gap-3">
         <GroupAvatar name={thread.groupName} color={thread.groupColor} size="sm" />
         <p className="flex min-w-0 flex-wrap items-baseline gap-x-2 text-sm">
-          <Link
-            href={`/discussions/${thread.groupSlug}`}
-            className="font-extrabold hover:underline"
-          >
+          <Link href={`/discussions/${thread.groupSlug}`} className="font-bold hover:underline">
             {thread.groupName}
           </Link>
           <span className="text-muted">
@@ -43,7 +40,7 @@ export function ThreadCard({ thread, canVote }: ThreadCardProps) {
         />
         <Link
           href={path}
-          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-chip px-4 text-sm font-extrabold active:opacity-75 md:min-h-9"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-chip px-4 text-sm font-bold active:opacity-75 md:min-h-9"
         >
           <MessageCircle aria-hidden className="size-4" />
           {thread.commentCount}

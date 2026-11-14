@@ -23,7 +23,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-4xl font-bold">Hey {profile?.username ?? "there"} 👋</h1>
+        <h1 className="text-4xl font-bold">Hey {profile?.username ?? "there"}</h1>
         <p className="text-lg text-muted">
           No pressure. Here is one small thing you could do today.
         </p>

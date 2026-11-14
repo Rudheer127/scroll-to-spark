@@ -29,7 +29,7 @@ export function SparkGuide() {
           aria-label="Spark Guide"
           className="flex max-h-[32rem] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-(--radius-card) border border-border bg-surface shadow-pop"
         >
-          <header className="flex items-center gap-2 bg-lavender-soft px-4 py-3">
+          <header className="flex items-center gap-2 border-b border-border bg-surface px-4 py-3">
             <Sparkles aria-hidden className="size-5 text-lavender-ink" />
             <h2 className="flex-1 text-lg font-bold">Spark Guide</h2>
             <button
@@ -47,7 +47,7 @@ export function SparkGuide() {
             </p>
             {turns.map((turn, index) => (
               <div key={index} className="flex flex-col gap-2">
-                <p className="self-end rounded-2xl bg-action px-3.5 py-2 text-sm font-semibold text-white">
+                <p className="self-end rounded-2xl bg-ink px-3.5 py-2 text-sm font-semibold text-white">
                   {turn.mood}
                 </p>
                 <p className="rounded-2xl bg-chip px-3.5 py-2.5 text-sm">{turn.suggestion.reply}</p>
@@ -88,7 +88,7 @@ export function SparkGuide() {
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="flex min-h-12 items-center gap-2 rounded-full bg-sun px-5 font-extrabold text-ink shadow-pop hover:brightness-95"
+        className="flex min-h-12 items-center gap-2 rounded-full bg-ink px-5 font-semibold text-white shadow-pop hover:opacity-90"
       >
         <Sparkles aria-hidden className="size-5" />
         Spark Guide

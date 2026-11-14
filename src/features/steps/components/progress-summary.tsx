@@ -44,7 +44,7 @@ export function ProgressSummary({ progress }: { progress: Progress }) {
                 r={RING_RADIUS}
                 fill="none"
                 strokeWidth={RING_STROKE}
-                className="stroke-sun/30"
+                className="stroke-chip"
               />
               <circle
                 cx={RING_SIZE / 2}
@@ -54,7 +54,7 @@ export function ProgressSummary({ progress }: { progress: Progress }) {
                 strokeWidth={RING_STROKE}
                 strokeLinecap="round"
                 strokeDasharray={`${filled} ${RING_LENGTH}`}
-                className="stroke-sun"
+                className="stroke-coral"
               />
             </svg>
             <p className="absolute inset-0 flex items-center justify-center font-display text-2xl font-bold">
@@ -87,7 +87,11 @@ export function ProgressSummary({ progress }: { progress: Progress }) {
                   style={{ height }}
                   className={cn(
                     "block w-[22px] rounded-[10px]",
-                    day.minutes === 0 ? "bg-border" : index === peak ? "bg-coral" : "bg-teal",
+                    day.minutes === 0
+                      ? "bg-border"
+                      : index === peak
+                        ? "bg-(image:--gradient-spark)"
+                        : "bg-ink/80",
                   )}
                 />
                 <span className="text-xs font-bold text-muted">{day.letter}</span>

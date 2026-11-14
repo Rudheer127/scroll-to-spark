@@ -24,9 +24,21 @@ export default async function StepsPage() {
         <>
           <dl className="grid max-w-3xl grid-cols-3 gap-3">
             {[
-              { label: "Steps done", value: completions.length, tone: "bg-sun/40" },
-              { label: "Minutes given", value: minutes, tone: "bg-lavender-soft" },
-              { label: "Thank-yous", value: replies, tone: "bg-teal-soft" },
+              {
+                label: "Steps done",
+                value: completions.length,
+                tone: "bg-surface border border-border shadow-card",
+              },
+              {
+                label: "Minutes given",
+                value: minutes,
+                tone: "bg-surface border border-border shadow-card",
+              },
+              {
+                label: "Thank-yous",
+                value: replies,
+                tone: "bg-surface border border-border shadow-card",
+              },
             ].map((stat) => (
               <div
                 key={stat.label}

@@ -12,13 +12,14 @@ export default async function StepPage({ params }: PageProps<"/steps/[taskId]">)
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Your step" }]} />
-      <header className="flex flex-col gap-3 rounded-(--radius-card) bg-coral p-7 text-white shadow-card">
-        <p className="w-fit rounded-full bg-white/25 px-3 py-1 text-sm font-bold">
+      <header className="flex flex-col gap-3 relative overflow-hidden rounded-(--radius-card) border border-border bg-surface p-7 shadow-card">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-(image:--gradient-spark)" />
+        <p className="w-fit rounded-full bg-lavender-soft px-3 py-1 text-sm font-semibold text-lavender-ink">
           For {task.groupName}
         </p>
         <h1 className="text-4xl font-bold">{task.title}</h1>
-        {task.description ? <p className="text-lg">{task.description}</p> : null}
-        <div className="text-white [&_*]:text-white">
+        {task.description ? <p className="text-lg text-muted">{task.description}</p> : null}
+        <div>
           <TaskMeta task={task} />
         </div>
       </header>

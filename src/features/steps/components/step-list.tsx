@@ -31,7 +31,7 @@ export function StepList({ completions }: { completions: CompletionSummary[] }) 
             {item.note ? <p className="max-w-3xl">{item.note}</p> : null}
             {item.thankYou ? (
               <p className="rounded-(--radius-input) bg-teal-soft p-3 text-sm text-ink">
-                <span className="font-extrabold text-teal-ink">From a real group:</span>{" "}
+                <span className="font-bold text-teal-ink">From a real group:</span>{" "}
                 {item.thankYou.kind === "written" && item.thankYou.body
                   ? item.thankYou.body
                   : "They sent a thank-you."}

@@ -8,14 +8,17 @@ export async function UserBlock() {
   const profile = await getCurrentProfile();
 
   return (
-    <form action={signOut} className="flex flex-col gap-3 rounded-[20px] bg-lavender-soft p-4">
+    <form
+      action={signOut}
+      className="flex flex-col gap-3 rounded-xl border border-border bg-background p-4"
+    >
       {profile ? (
         <div className="flex flex-col">
           <p className="font-display text-lg font-semibold">{profile.username}</p>
           <p className="text-sm text-muted">Signed in</p>
         </div>
       ) : null}
-      <Button type="submit" variant="outline" className="bg-surface text-lavender-ink">
+      <Button type="submit" variant="outline" className="bg-surface text-ink">
         <LogOut aria-hidden className="size-4" />
         Sign out
       </Button>

@@ -18,7 +18,7 @@ export function FeedTabs({ current }: { current: FeedTab }) {
           href={tab === "trending" ? "/discussions" : `/discussions?tab=${tab}`}
           aria-current={tab === current ? "true" : undefined}
           className={cn(
-            "inline-flex min-h-11 items-center rounded-full px-5 text-sm font-extrabold active:opacity-75 md:min-h-10",
+            "inline-flex min-h-11 items-center rounded-full px-5 text-sm font-bold active:opacity-75 md:min-h-10",
             tab === current ? "bg-ink text-white" : "bg-chip hover:bg-border",
           )}
         >

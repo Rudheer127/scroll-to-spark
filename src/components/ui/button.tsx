@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 const VARIANTS = {
   primary: "bg-ink text-white hover:opacity-90",
   brand: "bg-cta text-white hover:opacity-90",
-  outline: "border border-border bg-background text-ink hover:bg-chip",
+  outline: "border border-border bg-surface text-ink hover:bg-chip",
   ghost: "hover:bg-chip",
   danger: "bg-danger text-white hover:opacity-90",
   join: "bg-join text-white hover:opacity-90",
@@ -15,7 +15,7 @@ export type ButtonVariant = keyof typeof VARIANTS;
 /** The shared look of buttons, so a link that acts like a button matches a real button. */
 export function buttonClasses(variant: ButtonVariant = "primary", className?: string): string {
   return cn(
-    "inline-flex min-h-11 items-center justify-center gap-2 rounded-(--radius-control) px-5 py-2.5 text-sm font-extrabold active:opacity-75 disabled:cursor-not-allowed disabled:opacity-50 md:min-h-10",
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-(--radius-control) px-5 py-2.5 text-sm font-semibold active:opacity-75 disabled:cursor-not-allowed disabled:opacity-50 md:min-h-10",
     VARIANTS[variant],
     className,
   );

@@ -14,7 +14,7 @@ export function ThankYouCard({ completion }: { completion: CompletionSummary }) 
       <GroupAvatar name={completion.groupName} color={completion.groupColor} />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex flex-wrap items-center gap-2.5">
-          <h3 className="font-sans text-base font-extrabold">{completion.groupName}</h3>
+          <h3 className="font-sans text-base font-bold">{completion.groupName}</h3>
           <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-bold text-teal-ink">
             From a real group
           </span>

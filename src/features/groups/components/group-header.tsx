@@ -7,7 +7,7 @@ import type { GroupSummary } from "@/features/groups/types";
 
 export function GroupHeader({ group }: { group: GroupSummary }) {
   return (
-    <header className="flex flex-wrap items-center gap-5 rounded-(--radius-card) border border-border border-t-8 border-t-coral bg-surface px-6 py-5 shadow-card">
+    <header className="flex flex-wrap items-center gap-5 rounded-(--radius-card) border border-border border-t-4 border-t-coral bg-surface px-6 py-5 shadow-card">
       <GroupAvatar name={group.name} color={group.color} size="lg" />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-3">

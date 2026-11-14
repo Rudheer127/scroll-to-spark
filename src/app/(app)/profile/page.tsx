@@ -11,10 +11,10 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <header className="flex items-center gap-5 rounded-(--radius-card) bg-lavender-soft p-6 shadow-card">
+      <header className="flex items-center gap-5 rounded-(--radius-card) border border-border bg-surface p-6 shadow-card">
         <span
           aria-hidden
-          className="flex size-20 shrink-0 items-center justify-center rounded-full bg-lavender font-display text-3xl font-bold text-white"
+          className="flex size-20 shrink-0 items-center justify-center rounded-full bg-(image:--gradient-spark) font-display text-3xl font-bold text-white"
         >
           {profile.username.slice(0, 1).toUpperCase()}
         </span>

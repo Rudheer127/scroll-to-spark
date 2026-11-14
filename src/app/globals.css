@@ -1,38 +1,37 @@
 @import "tailwindcss";
 
-/* Design tokens: the Spark mockups. Every color, font, radius and shadow used in the UI comes from here. */
+/* Design tokens: the Spark "Instagram" mockup. Every color, font, radius and shadow comes from here. */
 @theme {
-  --font-sans: "Nunito Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fredoka Variable", "Nunito Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
 
-  /* Warm cream page, white cards, deep navy ink. */
-  --color-background: #fff8ef;
+  /* Quiet neutrals. The page is a touch grey so white cards lift off it. */
+  --color-background: #fafafa;
   --color-surface: #ffffff;
-  --color-border: #f0e3d0;
-  /* Edge of inputs. Darker than a card border so a field can be found. */
-  --color-control: #b8a687;
-  --color-ink: #2b2a4c;
-  --color-muted: #6e6c8a;
-  --color-chip: #f6ebd9;
+  --color-border: #e6e6e6;
+  /* Edge of inputs. Darker than a card border so a field can be found (3:1 on white). */
+  --color-control: #8e8e8e;
+  --color-ink: #262626;
+  --color-muted: #6b6b6b;
+  --color-chip: #f0f0f0;
 
-  /* Coral for the big step card and the active nav item. */
-  --color-coral: #f96a45;
-  /* Yellow, teal and lavender are the supporting colors. */
-  --color-sun: #ffc93c;
-  --color-teal: #2fbf9b;
-  --color-teal-soft: #d5f5ec;
-  --color-teal-ink: #17806a;
-  --color-lavender: #8b7cf6;
-  --color-lavender-soft: #e8e4ff;
-  --color-lavender-ink: #5b4bd6;
+  /* The sunset blend is the only loud color. It is used sparingly. */
+  --color-coral: #dd2a7b;
+  --color-sun: #f58529;
+  --color-teal: #1f9d6b;
+  --color-teal-soft: #e6f6ee;
+  --color-teal-ink: #11704c;
+  --color-lavender: #8134af;
+  --color-lavender-soft: #f4eefa;
+  --color-lavender-ink: #7a2fa6;
 
   /* Links and focus. Deep enough to read on white. */
-  --color-action: #5b4bd6;
-  /* The main action button. White text on it passes 4.5:1. */
-  --color-cta: #d4461f;
+  --color-action: #0a58b8;
+  /* The main action button. */
+  --color-cta: #262626;
   --color-join: #0873c4;
   --color-danger: #c0392b;
-  --color-success: #17806a;
+  --color-success: #11704c;
 
   /* Group colors, the same set as the Discussions mockup. */
   --color-group-orange: #f58529;
@@ -40,14 +39,16 @@
   --color-group-purple: #8134af;
   --color-group-indigo: #515bd4;
   --color-group-blue: #0095f6;
-  --color-group-green: #2fbf9b;
+  --color-group-green: #1f9d6b;
 
-  --radius-card: 24px;
+  --radius-card: 16px;
   --radius-control: 999px;
-  --radius-input: 16px;
+  --radius-input: 12px;
 
-  --shadow-card: 0 6px 20px rgb(43 42 76 / 0.07);
-  --shadow-pop: 0 10px 24px rgb(139 124 246 / 0.45);
+  /* Two layers: a hairline contact shadow and a soft ambient one. */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05), 0 8px 24px -12px rgb(0 0 0 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.06), 0 16px 32px -14px rgb(0 0 0 / 0.2);
+  --shadow-pop: 0 12px 32px -8px rgb(0 0 0 / 0.25);
 }
 
 @layer base {
@@ -55,6 +56,7 @@
   h2,
   h3 {
     font-family: var(--font-display);
+    letter-spacing: -0.02em;
   }
 }
 
@@ -71,7 +73,7 @@ body {
 
 /* The ring around a group story and the Create group button use this sunset blend. */
 :root {
-  --gradient-spark: linear-gradient(90deg, #f58529 0%, #dd2a7b 35%, #8134af 70%, #515bd4 100%);
+  --gradient-spark: linear-gradient(90deg, #e0701a 0%, #d6246e 35%, #8134af 70%, #515bd4 100%);
 }
 
 :focus-visible {

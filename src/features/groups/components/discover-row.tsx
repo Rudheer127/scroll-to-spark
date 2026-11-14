@@ -9,7 +9,7 @@ export function DiscoverRow({ group }: { group: GroupSummary }) {
     <li className="flex items-center gap-3">
       <GroupAvatar name={group.name} color={group.color} size="sm" />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Link href={`/discussions/${group.slug}`} className="truncate text-sm font-extrabold">
+        <Link href={`/discussions/${group.slug}`} className="truncate text-sm font-bold">
           {group.name}
         </Link>
         <p className="text-xs text-muted">

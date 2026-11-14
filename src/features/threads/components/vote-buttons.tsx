@@ -30,7 +30,7 @@ export function VoteButtons({ threadId, score, myVote, canVote }: VoteButtonsPro
           className={cn("size-5", myVote === 1 ? "stroke-[3] text-coral" : "text-muted")}
         />
       </button>
-      <span aria-live="polite" className="min-w-6 text-center text-sm font-extrabold">
+      <span aria-live="polite" className="min-w-6 text-center text-sm font-bold">
         {score}
       </span>
       <button

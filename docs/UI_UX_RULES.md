@@ -1,6 +1,6 @@
 # UI and UX rules
 
-These rules apply to every screen. The look comes from the Figma mockups: a warm cream page, white rounded cards, deep navy text, a coral step card, and yellow, teal and lavender as supporting colors. Discussions borrow the Instagram feel (round group stories with a sunset ring, pill tabs) and Reddit-style threads with nested replies. It stays kind and unpressured through plain words.
+These rules apply to every screen. The look is the Instagram theme from the Figma mockups: a light grey page, white bordered cards, near-black text and one sunset gradient used sparingly (round group stories with a sunset ring, pill tabs), with Reddit-style threads and nested replies. It stays kind and unpressured through plain words.
 
 ## Hard rules
 
@@ -45,18 +45,18 @@ Everything else is left-aligned. Sign-in and sign-up screens use a full-width sp
 
 | Item | Rule |
 |---|---|
-| Font | Fredoka for headings and numbers, Nunito for everything else |
-| Page background | Warm cream (`#FFF8EF`) |
-| Surface | White cards with a 1 pixel cream border (`#F0E3D0`), 24 pixel corners and a soft shadow |
-| Text | Navy ink (`#2B2A4C`) and a muted violet-grey (`#6E6C8A`) for secondary text |
-| Links and focus | Deep lavender (`#5B4BD6`). Red for destructive actions |
-| Standard action | A solid navy pill button (`primary` variant) |
-| Main action | The coral step card on Home, and one filled `brand` pill button where a page has none |
-| Supporting colors | Yellow `#FFC93C` for selected sizes and progress, teal `#2FBF9B` for done and good news, lavender `#8B7CF6` for the account card and quiet chips |
-| Gradient | One sunset blend (`--gradient-spark`) for group story rings and the Create group button. Nowhere else |
+| Font | Inter for everything. Headings are bold with slightly tight letter spacing |
+| Page background | Very light grey (`#FAFAFA`) so white cards lift off it |
+| Surface | White cards with a 1 pixel grey border (`#E6E6E6`), 16 pixel corners and a two-layer shadow |
+| Text | Near-black ink (`#262626`) and a mid grey (`#6B6B6B`) for secondary text |
+| Links and focus | Deep blue (`#0A58B8`). Red for destructive actions |
+| Standard action | A solid near-black pill button (`primary` variant). The active tab and the active effort size use the same fill |
+| Gradient | One sunset blend (`--gradient-spark`) for the Spark wordmark, group story rings, the Create group button, a hairline on the step card, and the peak day in the weekly chart. Nowhere else |
+| Supporting colors | Soft purple chips for labels and sample data, soft green for thank-yous. Quiet, never filled blocks |
+| Emoji | None in the interface |
 | Control edges | Inputs and other controls use the control border token so their edge is at least 3:1 against the page |
-| Radius | 24 pixels on cards, 16 on inputs, full round on buttons, pills and avatars |
-| Shadows | A soft card shadow (`shadow-card`) on cards and a stronger one on floating layers |
+| Radius | 16 pixels on cards, 12 on inputs, full round on buttons, pills and avatars |
+| Depth | Page grey, white card, then a floating layer. `shadow-card` on cards, `shadow-lift` on hover, `shadow-pop` on floating layers |
 | Motion | Short and subtle. Never animate width, height or position of layout. Honor reduced motion |
 
 All colors, fonts and spacing come from design tokens defined once in the Tailwind theme. No raw hex color or font name inside a component.
