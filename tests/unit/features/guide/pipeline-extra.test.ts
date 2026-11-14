@@ -202,3 +202,52 @@ describe("runGuideTurn: user row first (R18)", () => {
     );
   });
 });
+
+describe("runGuideTurn: over-long replies are repaired, not unavailable (I6)", () => {
+  const opp = (reply: unknown[]) => ({
+    router_output: [routerReply("find_opportunity")],
+    opportunity_filters: [filtersReply()],
+    guide_response: reply as ReturnType<typeof guideReply>[],
+  });
+
+  it("a 700 character reply triggers one repair, then passes when the repair is short", async () => {
+    const long = guideReply({ intent: "find_opportunity", message: "a ".repeat(350) });
+    const short = guideReply({ intent: "find_opportunity", message: "Try one small step." });
+    const t = setup(opp([long, short]), { tasks: [taskRow("t1")] });
+    const res = await t.run("something small");
+    expect(t.llm.callsFor("guide_response")).toHaveLength(2);
+    const retry = t.llm.callsFor("guide_response")[1].messages;
+    expect(retry[retry.length - 1].content).toContain("too_long");
+    expect(res.source).toBe("ai");
+    expect(res.response.message).toBe("Try one small step.");
+  });
+
+  it("six cards trigger too_many_cards and a repair", async () => {
+    const card = { kind: "opportunity", id: "t1" };
+    const many = guideReply({
+      intent: "find_opportunity",
+      message: "Pick one.",
+      cards: Array(6).fill(card),
+    });
+    const t = setup(opp([many]), { tasks: [taskRow("t1")] });
+    const res = await t.run("something small");
+    expect(t.llm.callsFor("guide_response")).toHaveLength(2);
+    expect(res.source).toBe("fallback");
+    const blocked = t.log.find((i) => i.row.kind === "output_blocked");
+    expect(JSON.stringify(blocked?.row.detail)).toContain("too_many_cards");
+  });
+
+  it("invalid JSON is still a provider failure", async () => {
+    const broken = {
+      ok: true as const,
+      text: "{not json",
+      provider: "cerebras" as const,
+      model: "m",
+    };
+    const t = setup(opp([broken]), { tasks: [taskRow("t1")] });
+    const res = await t.run("something small");
+    expect(res.response.message).toBe(UNAVAILABLE_MESSAGE);
+    expect(res.outcome).toBe("unavailable");
+    expect(t.events()).toContain("provider_failure");
+  });
+});

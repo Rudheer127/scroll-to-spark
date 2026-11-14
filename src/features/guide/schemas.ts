@@ -1,19 +1,22 @@
 import { z } from "zod";
 import { EFFORTS } from "@/features/steps/constants";
-import { INTENTS, MAX_CARDS, MAX_MESSAGE_CHARS } from "./constants";
+import { INTENTS } from "./constants";
 
-/** Strict structured output: every field required, optional values use nullable. */
+/**
+ * Strict structured output: every field required, optional values use nullable. There is no
+ * length cap on message and no count cap on cards here on purpose: the output guard enforces
+ * MAX_MESSAGE_CHARS (too_long) and MAX_CARDS (too_many_cards), which earns one repair instead
+ * of a parse failure.
+ */
 export const guideResponseSchema = z.object({
   intent: z.enum(INTENTS),
-  message: z.string().max(MAX_MESSAGE_CHARS),
-  cards: z
-    .array(
-      z.object({
-        kind: z.enum(["opportunity", "evidence", "contribution"]),
-        id: z.string(),
-      }),
-    )
-    .max(MAX_CARDS),
+  message: z.string(),
+  cards: z.array(
+    z.object({
+      kind: z.enum(["opportunity", "evidence", "contribution"]),
+      id: z.string(),
+    }),
+  ),
   proposed_contribution: z
     .object({
       title: z.string(),

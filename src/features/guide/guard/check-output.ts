@@ -10,6 +10,7 @@ import {
   markup,
   promptEcho,
   tooLong,
+  tooManyCards,
   urlInText,
 } from "./rules/text-rules";
 
@@ -25,6 +26,7 @@ const RULES: Rule[] = [
   canaryLeak,
   promptEcho,
   tooLong,
+  tooManyCards,
   claimsHuman,
   unsupportedVerdict,
 ];

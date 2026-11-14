@@ -156,10 +156,31 @@ describe("guideResponseSchema", () => {
     expect(schema.required.sort()).toEqual(Object.keys(schema.properties).sort());
   });
 
-  it("caps cards at 5 and message at 600", () => {
+  it("parses long messages and many cards so the guard, not the parser, rejects them (I6)", () => {
     const card = { kind: "opportunity", id: "a" } as const;
-    expect(guideResponseSchema.safeParse(res({ cards: Array(6).fill(card) })).success).toBe(false);
-    expect(guideResponseSchema.safeParse(res({ message: "a".repeat(601) })).success).toBe(false);
+    expect(guideResponseSchema.safeParse(res({ cards: Array(6).fill(card) })).success).toBe(true);
+    expect(guideResponseSchema.safeParse(res({ message: "a".repeat(700) })).success).toBe(true);
     expect(guideResponseSchema.safeParse(res()).success).toBe(true);
+  });
+
+  it("still rejects wrong types, unknown enums and missing fields", () => {
+    expect(guideResponseSchema.safeParse({ ...res(), intent: "nope" }).success).toBe(false);
+    expect(guideResponseSchema.safeParse({ ...res(), verdict: "maybe" }).success).toBe(false);
+    expect(guideResponseSchema.safeParse({ ...res(), message: 5 }).success).toBe(false);
+    const missing: Record<string, unknown> = { ...res() };
+    delete missing.next_step;
+    expect(guideResponseSchema.safeParse(missing).success).toBe(false);
+  });
+});
+
+describe("length and card limits in the guard (I6)", () => {
+  it("too_long above 600 characters", () => {
+    expect(violations(res({ message: "a ".repeat(350) }))).toContain("too_long");
+  });
+
+  it("too_many_cards above 5 cards, not at 5", () => {
+    const card = { kind: "opportunity", id: "opp-1" } as const;
+    expect(violations(res({ cards: Array(6).fill(card) }))).toContain("too_many_cards");
+    expect(violations(res({ cards: Array(5).fill(card) }))).not.toContain("too_many_cards");
   });
 });

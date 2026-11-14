@@ -1,4 +1,4 @@
-import { BANNED_PHRASES, MAX_MESSAGE_CHARS } from "../../constants";
+import { BANNED_PHRASES, MAX_CARDS, MAX_MESSAGE_CHARS } from "../../constants";
 import type { GuideResponse } from "../../schemas";
 import type { OutputContext, Violation } from "../../types";
 import { staticPromptText } from "../../prompts/system";
@@ -54,6 +54,10 @@ export function canaryLeak(res: GuideResponse, ctx: OutputContext): Violation | 
 
 export function tooLong(res: GuideResponse): Violation | null {
   return res.message.length > MAX_MESSAGE_CHARS ? "too_long" : null;
+}
+
+export function tooManyCards(res: GuideResponse): Violation | null {
+  return res.cards.length > MAX_CARDS ? "too_many_cards" : null;
 }
 
 export function claimsHuman(res: GuideResponse): Violation | null {

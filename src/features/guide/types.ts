@@ -21,6 +21,7 @@ export type Violation =
   | "canary_leak"
   | "prompt_leak"
   | "too_long"
+  | "too_many_cards"
   | "claims_human"
   | "unsupported_verdict"
   | "claims_verification"
