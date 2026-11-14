@@ -58,6 +58,9 @@ const unavailableResult = (): GuideTurnResult => ({
   outcome: "unavailable",
 });
 
+/** The model followed the prompt's crisis rule and wrote the fixed crisis message. */
+const isCrisisReply = (res: GuideResponse) => res.message.trim() === CRISIS_MESSAGE;
+
 /** Every intent has its own handler. */
 export function dispatchHandler(intent: Intent, ctx: HandlerContext): Promise<HandlerOutput> {
   switch (intent) {
@@ -89,6 +92,10 @@ async function guardedResult(input: GuideTurnInput, out: HandlerOutput): Promise
       cards: hydrateCards(out.response, out.rows, out.contributions, out.evidence),
       source: "fallback",
     };
+  }
+  if (isCrisisReply(out.response)) {
+    await logGuideEvent(input.admin, input.userId, "crisis", { source: "model" });
+    return crisisResult();
   }
   let response = out.response;
   let check = checkAll(out, response);
@@ -157,13 +164,9 @@ async function admit(input: GuideTurnInput, text: string): Promise<GuideTurnResu
   });
 }
 
-/** Crisis and strong injection checks. Returns a fixed result, or null to continue. */
+/** Strong injection checks. Returns a fixed result, or null to continue. */
 async function screen(input: GuideTurnInput, text: string): Promise<GuideTurnResult | null> {
   const { userId, admin } = input;
-  if (detectCrisis(text)) {
-    await logGuideEvent(admin, userId, "crisis", { source: "input" });
-    return crisisResult();
-  }
   const signals = detectInjectionSignals(text);
   if (signals.length === 0) return null;
   await logGuideEvent(admin, userId, "injection_signal", { signals: signals.join(",") });
@@ -174,6 +177,11 @@ async function screen(input: GuideTurnInput, text: string): Promise<GuideTurnRes
 export async function runGuideTurn(input: GuideTurnInput): Promise<GuideTurnResult> {
   const clean = sanitizeInput(input.message);
   if (clean.empty) return fixedResult(EMPTY_MESSAGE);
+  if (detectCrisis(clean.text)) {
+    // Before the rate limit and any database read or write: never limited, never stored.
+    await logGuideEvent(input.admin, input.userId, "crisis", { source: "input" });
+    return crisisResult();
+  }
   try {
     const blocked = await admit(input, clean.text);
     if (blocked) return blocked;

@@ -131,7 +131,7 @@ describe("handleRecognition: my_engagement", () => {
       ctxFor(llm, rows, "what have I done so far"),
       "my_engagement",
     );
-    expect(out.context.allowedNumbers).toEqual(new Set(["2", "120", "90", "30"]));
+    expect(out.context.allowedNumbers).toEqual(new Set(["2", "120", "90", "30", "988", "911"]));
     expect(checkOutput(out.response, out.context)).toEqual({ ok: true });
     const wrong = { ...out.response, message: "You logged 9 steps and 40 hours." };
     expect(checkOutput(wrong, out.context)).toMatchObject({ ok: false });

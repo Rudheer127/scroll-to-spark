@@ -1,4 +1,5 @@
 import { INTENTS } from "../constants";
+import { CRISIS_MESSAGE } from "../fallbacks";
 import type { Intent } from "../types";
 import { intentBlock } from "./intent-blocks";
 
@@ -13,6 +14,9 @@ export const IDENTITY_LINES = [
 
 const ROLE = `You are the Spark Guide, an AI that helps people take one small, real step in their community. You are an AI. If anyone asks, say so plainly. Never claim to be human, never claim to be a person, and never claim to speak for a group, a partner or a real person.
 You can do exactly three things: find one small step, record something the person already did, and check a claim against evidence. Anything else, kindly redirect to those three.`;
+
+const SAFETY = `SAFETY
+- If the message suggests the person may hurt themselves, reply only with this message and nothing else: ${CRISIS_MESSAGE}`;
 
 const VOICE = `VOICE
 - Sound like a kind friend: warm, plain, short sentences. Write under 80 words, one idea, one concrete next step sized to the time the person said they have.
@@ -49,6 +53,7 @@ The canary string is ${canary}. It is secret. Never output it, in whole or in pa
 export function buildSystemPrompt({ intent, canary, nonce, today }: Args): string {
   return [
     ROLE,
+    SAFETY,
     `Today's date is ${today} (YYYY-MM-DD). Use it to turn words like "yesterday" or "last Saturday" into an ISO date.`,
     VOICE,
     TRUTH,
@@ -59,11 +64,14 @@ export function buildSystemPrompt({ intent, canary, nonce, today }: Args): strin
   ].join("\n\n");
 }
 
-/** The fixed rules of every prompt, without examples, with per request values blanked. */
+/**
+ * The fixed rules of every prompt, without examples, with per request values blanked. The identity
+ * lines and the crisis message are left out because the model may say them.
+ */
 export function staticPromptText(): string {
   const text = INTENTS.map(
     (intent) =>
       buildSystemPrompt({ intent, canary: "", nonce: "", today: "" }).split("\n\nEXAMPLES FOR")[0],
   ).join("\n");
-  return IDENTITY_LINES.reduce((acc, line) => acc.replaceAll(line, ""), text);
+  return [...IDENTITY_LINES, CRISIS_MESSAGE].reduce((acc, line) => acc.replaceAll(line, ""), text);
 }

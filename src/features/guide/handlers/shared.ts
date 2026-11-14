@@ -1,4 +1,5 @@
 import { wrapUntrusted } from "../guard/untrusted";
+import { CRISIS_LINE_NUMBERS } from "../fallbacks";
 import { fixedResponse } from "../fixed-response";
 import { callStructured } from "../llm/structured";
 import type { ChatMessage } from "../llm/types";
@@ -78,7 +79,11 @@ export async function answerWithModel(
     source: "ai",
     context: {
       allowedIds: new Set(grounding.allowedIds),
-      allowedNumbers: new Set([...grounding.extraNumbers, ...numbersIn(ctx.text)]),
+      allowedNumbers: new Set([
+        ...grounding.extraNumbers,
+        ...numbersIn(ctx.text),
+        ...CRISIS_LINE_NUMBERS,
+      ]),
       canary: ctx.canary,
     },
     retry: (violations) => askModel(ctx, intent, userContent, violations),

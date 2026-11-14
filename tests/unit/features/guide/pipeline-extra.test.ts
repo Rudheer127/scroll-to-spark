@@ -142,9 +142,41 @@ describe("runGuideTurn: user row first (R18)", () => {
     expect(JSON.stringify(t.log.filter((i) => i.table === "guide_events"))).not.toContain("hello");
   });
 
-  it("crisis turns write the user row and the assistant row", async () => {
+  it("crisis input turns are never persisted and touch no user-session table (I1)", async () => {
     const t = setup({});
     await t.run("I want to die");
+    expect(t.log.filter((i) => i.table === "guide_messages")).toHaveLength(0);
+    expect(t.db.tablesRead).toHaveLength(0);
+    const events = t.log.filter((i) => i.table === "guide_events");
+    expect(events.map((i) => i.client)).toEqual(["admin"]);
+    expect(JSON.stringify(events)).not.toContain("die");
+  });
+
+  it("a rate limited person in crisis still gets the crisis message (I1)", async () => {
+    const t = setup({}, { minuteCount: 99, dayCount: 99 });
+    const res = await t.run("I feel helpless and want to end it");
+    expect(res.response.message).toBe(CRISIS_MESSAGE);
+    expect(res.outcome).toBe("crisis");
+    expect(t.events()).toEqual(["crisis"]);
+  });
+
+  it("a database failure never hides the crisis message (I1)", async () => {
+    const t = setup({}, { throwOnTable: "guide_messages", insertError: true });
+    const res = await t.run("I can't go on anymore");
+    expect(res.response.message).toBe(CRISIS_MESSAGE);
+    expect(res.outcome).toBe("crisis");
+    expect(t.llm.calls).toHaveLength(0);
+  });
+
+  it("a crisis turn still answers when event logging fails (I1)", async () => {
+    const t = setup({}, {}, { throwOnTable: "guide_events" });
+    const res = await t.run("I want to end it");
+    expect(res.outcome).toBe("crisis");
+  });
+
+  it("router crisis turns keep writing the user row and the assistant row", async () => {
+    const t = setup({ router_output: [routerReply("chitchat", "crisis")] });
+    await t.run("everything feels pointless lately");
     expect(t.log.filter((i) => i.table === "guide_messages").map((i) => i.row.role)).toEqual([
       "user",
       "assistant",

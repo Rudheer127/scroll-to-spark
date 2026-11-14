@@ -29,7 +29,7 @@ describe("handleOpportunities", () => {
       ctxFor(llm, [taskRow("t1", { minutes: 15, reply_within_hours: 72 })]),
     );
     expect([...out.context.allowedIds]).toEqual(["t1"]);
-    expect(out.context.allowedNumbers).toEqual(new Set(["15", "72", "20"]));
+    expect(out.context.allowedNumbers).toEqual(new Set(["15", "72", "20", "988", "911"]));
     const user = llm.callsFor("guide_response")[0].messages[1].content;
     expect(user).toContain("<<DATA label=opportunity id=n0nce>>");
     expect(user).toContain("<<DATA label=user_message id=n0nce>>");
