@@ -8,7 +8,7 @@ Built for the Principled Innovation Academy challenge:
 
 ## Status
 
-Early build. What works today: email sign-up and log-in, groups (create, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. Image uploads, GIFs and the Spark Guide are not built yet. The list below describes the full plan, not only what exists today.
+Early build. What works today: email sign-up and log-in, groups (create, edit, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, deleting your own threads and comments, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. The Spark Guide is a simple mood-to-step helper, not an AI chat. Image uploads and GIFs are not built yet. The list below describes the full plan, not only what exists today.
 
 ## What it will do
 
@@ -88,4 +88,4 @@ Not chosen yet.
 
 ## Demo data
 
-`supabase/demo-seed.sql` fills the app with sample groups, steps, threads and replies, all marked as sample data. Only the demo account can see them; every other account sees an empty start. The demo login is kept outside the repository.
+`supabase/demo-seed.sql` fills the app with sample groups, steps, threads and replies, all marked as sample data. `supabase/demo-seed-extra.sql` adds more activity. Everyone who signs in sees the sample groups, can join them and post, and the pages refresh themselves every few seconds, so new activity shows up without a hard refresh. The demo login is kept outside the repository.
