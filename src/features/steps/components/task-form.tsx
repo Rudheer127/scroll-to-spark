@@ -19,7 +19,7 @@ import {
 type OwnedGroup = { id: string; name: string };
 
 const PILL =
-  "flex min-h-11 cursor-pointer items-center rounded-full border border-control px-4 text-sm font-semibold peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-action md:min-h-10";
+  "flex min-h-11 cursor-pointer items-center rounded-full border border-control px-4 text-sm font-semibold peer-checked:border-ink peer-checked:bg-ink peer-checked:text-on-ink peer-focus-visible:outline-2 peer-focus-visible:outline-action md:min-h-10";
 
 export function TaskForm({ groups }: { groups: OwnedGroup[] }) {
   const [state, formAction, pending] = useActionState(createTask, null);

@@ -15,7 +15,7 @@ export function EffortTabs({ current }: { current?: Effort }) {
             aria-current={active ? "true" : undefined}
             className={cn(
               "inline-flex min-h-11 items-center rounded-full border px-5 text-sm font-semibold active:opacity-75 md:min-h-10",
-              active ? "border-ink bg-ink text-white" : "border-border bg-surface hover:bg-chip",
+              active ? "border-ink bg-ink text-on-ink" : "border-border bg-surface hover:bg-chip",
             )}
           >
             {EFFORT_LABELS[effort].label}

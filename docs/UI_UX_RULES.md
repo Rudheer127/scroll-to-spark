@@ -54,6 +54,7 @@ Everything else is left-aligned. Sign-in and sign-up screens use a full-width sp
 | Gradient | One sunset blend (`--gradient-spark`) for the Spark wordmark, group story rings, the Create group button, a hairline on the step card, and the peak day in the weekly chart. Nowhere else |
 | Supporting colors | Soft purple chips for labels and sample data, soft green for thank-yous. Quiet, never filled blocks |
 | Emoji | None in the interface |
+| Dark mode | Light is the default. A moon/sun button beside the Spark wordmark switches, and the choice is remembered on that device. Dark tokens live under `:root[data-theme="dark"]` in `globals.css`. Text on an ink fill uses `text-on-ink`, never `text-white`. The landing page stays light |
 | Control edges | Inputs and other controls use the control border token so their edge is at least 3:1 against the page |
 | Radius | 16 pixels on cards, 12 on inputs, full round on buttons, pills and avatars |
 | Depth | Page grey, white card, then a floating layer. `shadow-card` on cards, `shadow-lift` on hover, `shadow-pop` on floating layers |

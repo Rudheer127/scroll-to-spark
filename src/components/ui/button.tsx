@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 
 const VARIANTS = {
-  primary: "bg-ink text-white hover:opacity-90",
+  primary: "bg-ink text-on-ink hover:opacity-90",
   brand: "bg-cta text-white hover:opacity-90",
   outline: "border border-border bg-surface text-ink hover:bg-chip",
   ghost: "hover:bg-chip",

@@ -12,6 +12,8 @@
   /* Edge of inputs. Darker than a card border so a field can be found (3:1 on white). */
   --color-control: #8e8e8e;
   --color-ink: #262626;
+  /* Text on top of an ink-filled control. It flips in dark mode with ink. */
+  --color-on-ink: #ffffff;
   --color-muted: #6b6b6b;
   --color-chip: #f0f0f0;
 
@@ -49,6 +51,38 @@
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05), 0 8px 24px -12px rgb(0 0 0 / 0.12);
   --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.06), 0 16px 32px -14px rgb(0 0 0 / 0.2);
   --shadow-pop: 0 12px 32px -8px rgb(0 0 0 / 0.25);
+}
+
+/* Dark mode. Light is the default; a person opts in with the toggle and the choice is remembered. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-background: #0f0e10;
+  --color-surface: #19181b;
+  --color-border: #2d2b30;
+  --color-control: #85828b;
+  --color-ink: #f3f1ee;
+  --color-on-ink: #121110;
+  --color-muted: #a6a3ab;
+  --color-chip: #26242a;
+
+  --color-coral: #ff5fa8;
+  --color-sun: #ffa04d;
+  --color-teal: #3fcf93;
+  --color-teal-soft: #12271e;
+  --color-teal-ink: #78dcae;
+  --color-lavender: #b56bf0;
+  --color-lavender-soft: #261a33;
+  --color-lavender-ink: #cf9bf5;
+
+  --color-action: #7db4ff;
+  --color-cta: #f3f1ee;
+  --color-join: #1478c9;
+  --color-danger: #dd4b3d;
+  --color-success: #78dcae;
+
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.02), 0 12px 32px -16px rgb(0 0 0 / 0.8);
+  --shadow-lift: 0 0 0 1px rgb(255 255 255 / 0.04), 0 20px 40px -16px rgb(0 0 0 / 0.9);
+  --shadow-pop: 0 16px 40px -10px rgb(0 0 0 / 0.9);
 }
 
 @layer base {

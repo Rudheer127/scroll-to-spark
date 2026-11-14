@@ -47,7 +47,7 @@ export function SparkGuide() {
             </p>
             {turns.map((turn, index) => (
               <div key={index} className="flex flex-col gap-2">
-                <p className="self-end rounded-2xl bg-ink px-3.5 py-2 text-sm font-semibold text-white">
+                <p className="self-end rounded-2xl bg-ink px-3.5 py-2 text-sm font-semibold text-on-ink">
                   {turn.mood}
                 </p>
                 <p className="rounded-2xl bg-chip px-3.5 py-2.5 text-sm">{turn.suggestion.reply}</p>
@@ -88,7 +88,7 @@ export function SparkGuide() {
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="flex min-h-12 items-center gap-2 rounded-full bg-ink px-5 font-semibold text-white shadow-pop hover:opacity-90"
+        className="flex min-h-12 items-center gap-2 rounded-full bg-ink px-5 font-semibold text-on-ink shadow-pop hover:opacity-90"
       >
         <Sparkles aria-hidden className="size-5" />
         Spark Guide
