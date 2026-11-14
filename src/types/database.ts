@@ -99,7 +99,7 @@ export type Database = {
           },
         ];
       };
-      // Provisional: hand-written from supabase/migrations/20261114150000_guide_harness.sql.
+      // Provisional: hand-written from supabase/migrations/20261114160000_guide_harness.sql.
       // Regenerate this file with the Supabase CLI once that migration is applied.
       contributions: {
         Row: {
@@ -142,7 +142,7 @@ export type Database = {
           },
         ];
       };
-      // Provisional: hand-written from supabase/migrations/20261114150000_guide_harness.sql.
+      // Provisional: hand-written from supabase/migrations/20261114160000_guide_harness.sql.
       // Regenerate this file with the Supabase CLI once that migration is applied.
       evidence_claims: {
         Row: {
@@ -186,7 +186,7 @@ export type Database = {
         };
         Relationships: [];
       };
-      // Provisional: hand-written from supabase/migrations/20261114150000_guide_harness.sql.
+      // Provisional: hand-written from supabase/migrations/20261114160000_guide_harness.sql.
       // Regenerate this file with the Supabase CLI once that migration is applied.
       guide_events: {
         Row: {
@@ -220,7 +220,7 @@ export type Database = {
           },
         ];
       };
-      // Provisional: hand-written from supabase/migrations/20261114150000_guide_harness.sql.
+      // Provisional: hand-written from supabase/migrations/20261114160000_guide_harness.sql.
       // Regenerate this file with the Supabase CLI once that migration is applied.
       guide_messages: {
         Row: {

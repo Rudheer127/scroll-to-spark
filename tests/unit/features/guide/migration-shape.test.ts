@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const sql = readFileSync(
-  join(process.cwd(), "supabase/migrations/20261114150000_guide_harness.sql"),
+  join(process.cwd(), "supabase/migrations/20261114160000_guide_harness.sql"),
   "utf8",
 );
 const lower = sql.toLowerCase();
