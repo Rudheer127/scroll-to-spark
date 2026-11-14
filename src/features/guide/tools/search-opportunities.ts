@@ -5,7 +5,8 @@ import type { OpportunityFilters, OpportunityRow } from "@/features/guide/types"
 
 const MAX_ROWS = 5;
 const KEYWORD_MAX = 100;
-const COLUMNS = "id, title, description, effort, minutes, place, reply_within_hours, groups(name)";
+const COLUMNS =
+  "id, title, description, effort, minutes, place, reply_within_hours, groups(name, is_demo)";
 
 type Raw = {
   id: string;
@@ -15,7 +16,7 @@ type Raw = {
   minutes: number;
   place: string;
   reply_within_hours: number;
-  groups: { name: string } | null;
+  groups: { name: string; is_demo?: boolean | null } | null;
 };
 
 /** Escape LIKE wildcards and drop characters that would break the PostgREST or filter. */
@@ -36,6 +37,7 @@ function toRow(raw: Raw): OpportunityRow {
     minutes: raw.minutes,
     place: (PLACES as readonly string[]).includes(raw.place) ? (raw.place as Place) : "either",
     reply_within_hours: raw.reply_within_hours,
+    is_demo: raw.groups?.is_demo === true,
   };
 }
 

@@ -22,6 +22,7 @@ const opportunity: HydratedCard = {
   minutes: 10,
   place: "home",
   reply_within_hours: 48,
+  is_demo: false,
 };
 
 describe("toMessageView", () => {

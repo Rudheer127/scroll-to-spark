@@ -1,15 +1,22 @@
 import { Clock, MapPin } from "lucide-react";
+import { SampleBadge } from "@/components/shared/sample-badge";
 import { ButtonLink } from "@/components/ui/button-link";
 import { formatMinutes } from "@/lib/format-time";
 import { EFFORT_LABELS, PLACE_LABELS } from "@/features/steps/constants";
 import type { OpportunityRow } from "../types";
 
-/** One real task from a partner group. The link goes to the existing step page for that task. */
+/**
+ * One open task posted in the app. Demo tasks carry the Sample data badge. The link goes to the
+ * existing step page for that task.
+ */
 export function OpportunityCard({ card }: { card: OpportunityRow }) {
   return (
     <article className="flex flex-col gap-3 rounded-(--radius-card) border border-border bg-surface p-4">
       <header className="flex flex-col gap-0.5">
-        <h3 className="text-base font-bold">{card.title}</h3>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-base font-bold">{card.title}</h3>
+          {card.is_demo ? <SampleBadge /> : null}
+        </div>
         <p className="text-sm text-muted">{card.org_name}</p>
       </header>
       <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted">
@@ -24,7 +31,7 @@ export function OpportunityCard({ card }: { card: OpportunityRow }) {
         <li>{EFFORT_LABELS[card.effort].label}</li>
       </ul>
       <p className="text-sm text-muted">
-        A real person from the group will reply within {card.reply_within_hours} hours.
+        The group promises to reply within {card.reply_within_hours} hours.
       </p>
       <div>
         <ButtonLink href={`/steps/${card.id}`} variant="outline">

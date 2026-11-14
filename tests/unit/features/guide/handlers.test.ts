@@ -37,6 +37,23 @@ describe("handleOpportunities", () => {
     expect(llm.callsFor("opportunity_filters")[0].tier).toBe("router");
   });
 
+  it("marks a demo row as a sample in its DATA block, and only that row (I3)", async () => {
+    const llm = new FakeLlm({
+      opportunity_filters: [filtersReply()],
+      guide_response: [guideReply({ intent: "find_opportunity" })],
+    });
+    await handleOpportunities(
+      ctxFor(llm, [
+        taskRow("demo1", { groups: { name: "Demo Org", is_demo: true } }),
+        taskRow("real1"),
+      ]),
+    );
+    const user = llm.callsFor("guide_response")[0].messages[1].content;
+    const blocks = user.split("<<DATA label=opportunity").slice(1);
+    expect(blocks[0]).toContain("sample: true. Say that this is a sample task");
+    expect(blocks[1]).not.toContain("sample: true");
+  });
+
   it("still searches when filter extraction fails", async () => {
     const llm = new FakeLlm({
       opportunity_filters: [fail()],

@@ -45,6 +45,8 @@ export type OpportunityRow = {
   minutes: number;
   place: Place;
   reply_within_hours: number;
+  /** The task belongs to a demo group, so it is sample content and must be labeled that way. */
+  is_demo: boolean;
 };
 
 export type OpportunityFilters = {

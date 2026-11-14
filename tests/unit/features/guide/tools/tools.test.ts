@@ -67,6 +67,18 @@ describe("searchOpportunities", () => {
     );
   });
 
+  it("selects groups.is_demo and maps it, defaulting to false (I3)", async () => {
+    const { db, calls } = fakeDb([
+      { ...oppRow("a"), groups: { name: "Demo Org", is_demo: true } },
+      oppRow("b"),
+      { ...oppRow("c"), groups: null },
+    ]);
+    const rows = await searchOpportunities(db, { effort: null, remoteOnly: false, keyword: null });
+    expect(rows.map((r) => r.is_demo)).toEqual([true, false, false]);
+    const select = calls.find((c) => c.method === "select");
+    expect(String(select?.args[0])).toContain("groups(name, is_demo)");
+  });
+
   it("filters remote to home or either, and by effort", async () => {
     const { db, calls } = fakeDb([]);
     await searchOpportunities(db, { effort: "big", remoteOnly: true, keyword: null });

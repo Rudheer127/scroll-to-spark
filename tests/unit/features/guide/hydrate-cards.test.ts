@@ -12,6 +12,7 @@ const row = (id: string): OpportunityRow => ({
   minutes: 10,
   place: "home",
   reply_within_hours: 48,
+  is_demo: false,
 });
 
 const withCards = (cards: { kind: "opportunity" | "evidence"; id: string }[]) => ({
@@ -30,6 +31,13 @@ describe("hydrateCards", () => {
     );
     expect(out.map((c) => c.id)).toEqual(["b", "a"]);
     expect(out[0]).toEqual({ kind: "opportunity", ...row("b") });
+  });
+
+  it("carries is_demo from the row onto the card (I3)", () => {
+    const out = hydrateCards(withCards([{ kind: "opportunity", id: "a" }]), [
+      { ...row("a"), is_demo: true },
+    ]);
+    expect(out[0]).toMatchObject({ kind: "opportunity", id: "a", is_demo: true });
   });
 
   it("drops unknown ids, duplicates and non opportunity kinds", () => {

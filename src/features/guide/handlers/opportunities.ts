@@ -41,6 +41,7 @@ function rowBlock(row: OpportunityRow, nonce: string): string {
     `place: ${row.place}`,
     `reply_within_hours: ${row.reply_within_hours}`,
     `description: ${row.description ?? ""}`,
+    ...(row.is_demo ? ["sample: true. Say that this is a sample task"] : []),
   ];
   return wrapUntrusted("opportunity", lines.join("\n"), nonce);
 }

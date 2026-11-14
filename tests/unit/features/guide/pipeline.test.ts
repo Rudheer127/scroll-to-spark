@@ -92,6 +92,7 @@ describe("runGuideTurn: model paths", () => {
         minutes: 10,
         place: "home",
         reply_within_hours: 48,
+        is_demo: false,
       },
     ]);
   });
