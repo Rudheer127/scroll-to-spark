@@ -33,10 +33,8 @@ export const INTENTS = [
   "out_of_scope",
 ] as const;
 
-/** Phrases that must never appear in model output (matched case-insensitively). */
+/** Phrases that must never appear in model output (matched case-insensitively, as substrings). */
 export const BANNED_PHRASES = [
-  "streak",
-  "points",
   "leaderboard",
   "you must",
   "don't let people down",
@@ -45,6 +43,12 @@ export const BANNED_PHRASES = [
   "last chance",
   "hurry",
 ] as const;
+
+/**
+ * Gamification words matched as whole words, so "viewpoints", "disappoints" and "talking points"
+ * pass while "you earn points" and "streaks" fail.
+ */
+export const BANNED_WORDS: RegExp[] = [/\bstreaks?\b/i, /(?<!\btalking\s)\bpoints\b/i];
 
 /** Most user messages one person may send to the guide per minute and per day. */
 export const RATE_PER_MINUTE = 6;

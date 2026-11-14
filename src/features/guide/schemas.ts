@@ -64,7 +64,8 @@ function isRealDate(value: string): boolean {
  */
 export function contributionInputSchemaFor(today: string) {
   return z.object({
-    title: z.string().min(1).max(120),
+    // Matches the contributions.title database check (3 to 120 characters).
+    title: z.string().min(3).max(120),
     description: z.string().max(500),
     minutes: z.number().int().min(1).max(1440),
     occurred_on: z

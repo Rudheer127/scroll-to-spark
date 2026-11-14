@@ -132,6 +132,14 @@ describe("system prompt", () => {
     expect(shown).toContain("today=2026-11-14");
   });
 
+  it("example wording is hedged, never claims outcomes or motives", () => {
+    const all = JSON.stringify(EXAMPLES);
+    expect(all).not.toContain("Sorted food is easier");
+    expect(all).not.toContain("it means you care");
+    expect(all).toContain("sorting food can make it easier for the people there");
+    expect(all).toContain("that is a very human reaction");
+  });
+
   it("contains no em or en dash in any prompt", () => {
     for (const intent of INTENTS) expect(sys(intent)).not.toMatch(DASHES);
     expect(router()).not.toMatch(DASHES);

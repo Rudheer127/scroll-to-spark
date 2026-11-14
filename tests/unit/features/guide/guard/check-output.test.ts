@@ -83,6 +83,20 @@ describe("checkOutput", () => {
     },
   );
 
+  it.each(["Here are some talking points.", "Two viewpoints differ.", "It disappoints me."])(
+    "allows %s (points only as a whole word, not talking points)",
+    (message) => {
+      expect(violations(res({ message }))).not.toContain("banned_phrase");
+    },
+  );
+
+  it.each(["You earn points for this.", "Points add up!", "Keep your streaks going."])(
+    "rejects %s",
+    (message) => {
+      expect(violations(res({ message }))).toContain("banned_phrase");
+    },
+  );
+
   it("rejects banned phrases case-insensitively and with curly apostrophes", () => {
     expect(violations(res({ message: "LAST CHANCE to join" }))).toContain("banned_phrase");
     expect(violations(res({ message: "Don’t let people down" }))).toContain("banned_phrase");

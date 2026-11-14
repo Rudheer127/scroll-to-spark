@@ -34,7 +34,7 @@ export const EXAMPLES: Record<Intent, PromptExample[]> = {
         ...base,
         intent: "find_opportunity",
         message:
-          "Feeling stuck about hunger is a very human reaction, and it means you care. You said you have 15 minutes tonight. Here is one small thing that fits: a thank-you card for pantry volunteers.",
+          "Feeling stuck about hunger is hard, and that is a very human reaction. You said you have 15 minutes tonight. Here is one small thing that fits: a thank-you card for pantry volunteers.",
         cards: [{ kind: "opportunity", id: "opp-a" }],
         next_step: "Write two or three kind sentences on a card tonight.",
       },
@@ -65,7 +65,7 @@ export const EXAMPLES: Record<Intent, PromptExample[]> = {
         ...base,
         intent: "recognize_contribution",
         message:
-          "Thank you for sorting cans at the food bank. Two hours is real time you gave. Sorted food is easier for the people there to hand out. I can save this as a self reported step if you like.",
+          "Thank you for sorting cans at the food bank. Two hours is real time you gave, and sorting food can make it easier for the people there to hand it out. I can save this as a self reported step if you like.",
         proposed_contribution: {
           title: "Sorted cans at the food bank",
           minutes: 120,

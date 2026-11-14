@@ -1,4 +1,4 @@
-import { BANNED_PHRASES, MAX_CARDS, MAX_MESSAGE_CHARS } from "../../constants";
+import { BANNED_PHRASES, BANNED_WORDS, MAX_CARDS, MAX_MESSAGE_CHARS } from "../../constants";
 import type { GuideResponse } from "../../schemas";
 import type { OutputContext, Violation } from "../../types";
 import { staticPromptText } from "../../prompts/system";
@@ -27,7 +27,10 @@ export function markup(res: GuideResponse): Violation | null {
 
 export function bannedPhrase(res: GuideResponse): Violation | null {
   const texts = allTexts(res).map((t) => normalize(t).toLowerCase());
-  return BANNED_PHRASES.some((p) => texts.some((t) => t.includes(p))) ? "banned_phrase" : null;
+  const hit =
+    BANNED_PHRASES.some((p) => texts.some((t) => t.includes(p))) ||
+    BANNED_WORDS.some((re) => texts.some((t) => re.test(t)));
+  return hit ? "banned_phrase" : null;
 }
 
 /** U+2014 and U+2013 are both rejected. */
