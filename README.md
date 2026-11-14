@@ -8,7 +8,7 @@ Built for the Principled Innovation Academy challenge:
 
 ## Status
 
-Early build. What works today: email sign-up and log-in, signed-out visitors are sent to the login page, and the Discussions area lets a signed-in person create, join, leave and delete groups. The database and its security rules are in place. Threads, comments, uploads, GIFs, the Spark Guide and the partner portal are not built yet. The list below describes the full plan, not only what exists today.
+Early build. What works today: email sign-up and log-in, groups (create, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. Image uploads, GIFs and the Spark Guide are not built yet. The list below describes the full plan, not only what exists today.
 
 ## What it will do
 
@@ -84,3 +84,8 @@ The app will be deployed to Vercel. The database, sign-in and file storage run o
 ## License
 
 Not chosen yet.
+
+
+## Demo data
+
+`supabase/demo-seed.sql` fills the app with sample groups, steps, threads and replies, all marked as sample data. Only the demo account can see them; every other account sees an empty start. The demo login is kept outside the repository.

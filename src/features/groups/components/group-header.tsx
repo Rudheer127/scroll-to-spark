@@ -1,4 +1,5 @@
 import { Lock, Users } from "lucide-react";
+import { SampleBadge } from "@/components/shared/sample-badge";
 import { GroupAvatar } from "@/features/groups/components/group-avatar";
 import { GroupOwnerMenu } from "@/features/groups/components/group-owner-menu";
 import { JoinLeaveButton } from "@/features/groups/components/join-leave-button";
@@ -9,7 +10,10 @@ export function GroupHeader({ group }: { group: GroupSummary }) {
     <header className="flex flex-wrap items-center gap-5 rounded-(--radius-card) border border-border bg-surface px-6 py-5">
       <GroupAvatar name={group.name} color={group.color} size="lg" />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <h1 className="truncate text-3xl font-bold">{group.name}</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="truncate text-3xl font-bold">{group.name}</h1>
+          {group.isDemo ? <SampleBadge /> : null}
+        </div>
         <p className="flex items-center gap-4 text-sm text-muted">
           <span className="flex items-center gap-1.5">
             <Users aria-hidden className="size-4" />

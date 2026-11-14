@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Lock, Users } from "lucide-react";
+import { SampleBadge } from "@/components/shared/sample-badge";
 import { GroupAvatar } from "@/features/groups/components/group-avatar";
 import { JoinLeaveButton } from "@/features/groups/components/join-leave-button";
 import type { GroupSummary } from "@/features/groups/types";
@@ -28,6 +29,11 @@ export function GroupCard({ group }: { group: GroupSummary }) {
         </div>
       </div>
       {group.description ? <p className="line-clamp-2 text-sm">{group.description}</p> : null}
+      {group.isDemo ? (
+        <div>
+          <SampleBadge />
+        </div>
+      ) : null}
       <div className="mt-auto">
         {group.isOwner ? (
           <p className="text-sm text-muted">You own this group</p>

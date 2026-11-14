@@ -10,6 +10,7 @@ function group(overrides: Partial<GroupSummary>): GroupSummary {
     description: "Small things we do for our neighbors",
     color: "pink",
     isPrivate: false,
+    isDemo: false,
     memberCount: 3,
     isMember: false,
     isOwner: false,

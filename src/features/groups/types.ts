@@ -5,6 +5,7 @@ export type GroupSummary = {
   description: string | null;
   color: string;
   isPrivate: boolean;
+  isDemo: boolean;
   memberCount: number;
   isMember: boolean;
   isOwner: boolean;
