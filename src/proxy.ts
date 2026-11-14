@@ -1,17 +1,34 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/check-email", "/forgot-password", "/auth/callback"];
+const LANDING_PATH = "/welcome";
+const PUBLIC_PATHS = [
+  LANDING_PATH,
+  "/login",
+  "/signup",
+  "/check-email",
+  "/forgot-password",
+  "/auth/callback",
+];
 const SIGNED_OUT_ONLY_PATHS = ["/login", "/signup", "/check-email", "/forgot-password"];
 
 function matches(pathname: string, paths: string[]): boolean {
   return paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
-/** Send signed-out visitors to the login page and signed-in people away from it. */
+/**
+ * Signed-out visitors see the landing page at "/" (the address stays "/"), and are sent to the login
+ * page for everything else that is private. Signed-in people go to the app and away from the sign-in pages.
+ */
 export async function proxy(request: NextRequest) {
   const { response, user } = await updateSession(request);
   const { pathname } = request.nextUrl;
+
+  if (!user && pathname === "/") {
+    const landing = NextResponse.rewrite(new URL(LANDING_PATH, request.url));
+    response.cookies.getAll().forEach((cookie) => landing.cookies.set(cookie));
+    return landing;
+  }
 
   const target =
     !user && !matches(pathname, PUBLIC_PATHS)

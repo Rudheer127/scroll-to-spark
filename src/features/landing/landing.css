@@ -1,0 +1,177 @@
+/* Landing page motion. Plain CSS, so it adds no dependency. Colors come from the theme tokens in globals.css. */
+
+html:has(.landing-root) {
+  scroll-behavior: smooth;
+}
+
+/* Hero headline: each word rises in one after another. */
+.landing-rise {
+  animation: landing-rise 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 150ms);
+}
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Sections fade and lift in as they scroll into view. The Reveal component sets data-state. */
+.landing-reveal {
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--delay, 0ms);
+}
+.landing-reveal[data-state="hidden"] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+/* The line that joins the three steps draws itself. */
+.landing-line {
+  transform-origin: left;
+  transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s;
+}
+[data-state="hidden"] .landing-line {
+  transform: scaleX(0);
+}
+
+/* Hero scene. */
+.landing-glow {
+  background-image: radial-gradient(
+    55% 55% at 72% 62%,
+    color-mix(in srgb, var(--color-coral) 32%, transparent),
+    transparent
+  );
+}
+.landing-float {
+  animation: landing-float 7s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translateY(-14px) rotate(var(--r, 0deg));
+  }
+}
+.landing-pulse {
+  animation: landing-pulse 2.6s ease-in-out infinite;
+}
+@keyframes landing-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-sun) 55%, transparent);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 28px color-mix(in srgb, var(--color-sun) 0%, transparent);
+  }
+}
+.landing-spark-up {
+  animation: landing-spark-up var(--t, 6s) linear infinite;
+  animation-delay: var(--d, 0s);
+  opacity: 0;
+}
+@keyframes landing-spark-up {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-230px) scale(1);
+    opacity: 0;
+  }
+}
+/* Three example steps take turns in the same spot. */
+.landing-cycle {
+  animation: landing-cycle 9s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+  opacity: 0;
+}
+@keyframes landing-cycle {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  6%,
+  30% {
+    opacity: 1;
+    transform: none;
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.97);
+  }
+}
+
+/* Marquee band. Pauses on hover. */
+.landing-marquee {
+  display: flex;
+  width: max-content;
+  animation: landing-marquee 32s linear infinite;
+}
+.landing-marquee-wrap:hover .landing-marquee {
+  animation-play-state: paused;
+}
+@keyframes landing-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Small hover motion for cards and icons. */
+.landing-lift {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.landing-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-card);
+}
+.group:hover .landing-wiggle {
+  animation: landing-wiggle 0.6s ease;
+}
+@keyframes landing-wiggle {
+  25% {
+    transform: rotate(-10deg) scale(1.08);
+  }
+  60% {
+    transform: rotate(8deg) scale(1.08);
+  }
+}
+
+/* Reduced motion: stop every loop. The global rule in globals.css would only make loops flicker. */
+@media (prefers-reduced-motion: reduce) {
+  .landing-rise,
+  .landing-float,
+  .landing-pulse,
+  .landing-marquee,
+  .landing-cycle {
+    animation: none !important;
+  }
+  .landing-spark-up {
+    display: none;
+  }
+  .landing-cycle:first-child {
+    opacity: 1;
+  }
+  .landing-reveal,
+  .landing-lift,
+  .landing-line {
+    transition: none !important;
+  }
+}

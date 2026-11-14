@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { getCurrentProfile } from "@/features/auth/queries";
 import { NextStepCard } from "@/features/steps/components/next-step-card";
 import { ProgressSummary } from "@/features/steps/components/progress-summary";
 import { ThankYouCard } from "@/features/steps/components/thank-you-card";
@@ -13,8 +12,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const { effort: effortParam, skip } = await searchParams;
   const effort = isEffort(effortParam) ? effortParam : undefined;
 
-  const [profile, task, completions] = await Promise.all([
-    getCurrentProfile(),
+  const [task, completions] = await Promise.all([
     getNextTask({ effort, skip: typeof skip === "string" ? skip : undefined }),
     getMyCompletions(),
   ]);
@@ -23,10 +21,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-4xl font-bold">Hey {profile?.username ?? "there"}</h1>
-        <p className="text-lg text-muted">
-          No pressure. Here is one small thing you could do today.
-        </p>
+        <h1 className="text-2xl font-bold">Welcome back</h1>
+        <p className="text-muted">No pressure. Here is one small thing you could do today.</p>
       </header>
       <NextStepCard task={task} effort={effort} />
       <ProgressSummary progress={summarizeProgress(completions)} />

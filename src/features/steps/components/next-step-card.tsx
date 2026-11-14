@@ -18,7 +18,7 @@ export function NextStepCard({ task, effort }: NextStepCardProps) {
   return (
     <section className="relative flex flex-col gap-8 overflow-hidden rounded-(--radius-card) border border-border bg-surface p-8 shadow-card lg:flex-row">
       <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-(image:--gradient-spark)" />
-      <div className="flex min-w-0 flex-1 flex-col items-start gap-4">
+      <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-4">
         <span className="rounded-full bg-lavender-soft px-3 py-1.5 text-xs font-semibold text-lavender-ink">
           Your next small step
         </span>
