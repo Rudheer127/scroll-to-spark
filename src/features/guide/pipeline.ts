@@ -20,8 +20,8 @@ import type { HandlerContext, HandlerOutput } from "./handlers/types";
 import { hydrateCards } from "./hydrate-cards";
 import { logGuideEvent } from "./events";
 import type { LlmClient } from "./llm/types";
-import { persistTurns } from "./persist";
-import { checkRateLimit } from "./rate-limit";
+import { insertUserTurn, persistAssistantTurn } from "./persist";
+import { checkRateLimit, serializePerUser } from "./rate-limit";
 import { routeIntent } from "./router";
 import type { GuideTurnResult, Intent } from "./types";
 
@@ -33,8 +33,6 @@ export type GuideTurnInput = {
   llm: LlmClient;
   today: string;
 };
-
-type Outcome = { result: GuideTurnResult; persist: boolean };
 
 const STRONG_SIGNALS: InjectionSignal[] = [
   "ignore_instructions",
@@ -111,40 +109,53 @@ async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnRes
   }
 }
 
-/** Everything before the model: rate limit, crisis, injection. Returns null to continue. */
-async function precheck(input: GuideTurnInput, text: string): Promise<Outcome | null> {
+/**
+ * Rate limit, then write the user row before any model call so the turn counts and a failed
+ * write fails closed. Returns a result to send back now, or null to continue.
+ */
+async function admit(input: GuideTurnInput, text: string): Promise<GuideTurnResult | null> {
   const { userId, admin, db } = input;
-  const rate = await checkRateLimit(db, userId);
-  if (!rate.allowed) {
-    await logGuideEvent(admin, userId, "rate_limited", { retryAfterSec: rate.retryAfterSec });
-    return { result: fixedResult(RATE_LIMIT_MESSAGE), persist: false };
-  }
+  return serializePerUser(userId, async () => {
+    const rate = await checkRateLimit(db, userId);
+    if (!rate.allowed) {
+      await logGuideEvent(admin, userId, "rate_limited", { retryAfterSec: rate.retryAfterSec });
+      return fixedResult(RATE_LIMIT_MESSAGE);
+    }
+    if (await insertUserTurn(db, userId, text)) return null;
+    await logGuideEvent(admin, userId, "provider_failure", { reason: "user_row_insert" });
+    return fixedResult(UNAVAILABLE_MESSAGE);
+  });
+}
+
+/** Crisis and strong injection checks. Returns a fixed result, or null to continue. */
+async function screen(input: GuideTurnInput, text: string): Promise<GuideTurnResult | null> {
+  const { userId, admin } = input;
   if (detectCrisis(text)) {
     await logGuideEvent(admin, userId, "crisis", { source: "input" });
-    return { result: fixedResult(CRISIS_MESSAGE), persist: true };
+    return fixedResult(CRISIS_MESSAGE);
   }
   const signals = detectInjectionSignals(text);
   if (signals.length === 0) return null;
   await logGuideEvent(admin, userId, "injection_signal", { signals: signals.join(",") });
-  const strong = signals.some((s) => STRONG_SIGNALS.includes(s));
-  return strong ? { result: fixedResult(REDIRECT_MESSAGE), persist: true } : null;
+  return signals.some((s) => STRONG_SIGNALS.includes(s)) ? fixedResult(REDIRECT_MESSAGE) : null;
 }
 
 /** One guide turn. Never throws: every failure becomes a safe, fixed answer. */
 export async function runGuideTurn(input: GuideTurnInput): Promise<GuideTurnResult> {
   const clean = sanitizeInput(input.message);
   if (clean.empty) return fixedResult(EMPTY_MESSAGE);
-  let outcome: Outcome;
   try {
-    outcome = (await precheck(input, clean.text)) ?? {
-      result: await answer(input, clean.text),
-      persist: true,
-    };
+    const blocked = await admit(input, clean.text);
+    if (blocked) return blocked;
   } catch {
-    outcome = { result: fixedResult(UNAVAILABLE_MESSAGE), persist: true };
+    return fixedResult(UNAVAILABLE_MESSAGE);
   }
-  if (outcome.persist) {
-    await persistTurns(input.db, input.admin, input.userId, clean.text, outcome.result.response);
+  let result: GuideTurnResult;
+  try {
+    result = (await screen(input, clean.text)) ?? (await answer(input, clean.text));
+  } catch {
+    result = fixedResult(UNAVAILABLE_MESSAGE);
   }
-  return outcome.result;
+  await persistAssistantTurn(input.admin, input.userId, result.response);
+  return result;
 }

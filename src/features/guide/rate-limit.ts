@@ -38,3 +38,20 @@ export async function checkRateLimit(
     return { allowed: false, retryAfterSec: RETRY_AFTER_MINUTE_SEC };
   return { allowed: true, retryAfterSec: 0 };
 }
+
+const tails = new Map<string, Promise<unknown>>();
+
+/**
+ * Runs `fn` after any earlier call for the same user has finished, so the count and the insert
+ * of one turn cannot interleave with another turn from the same server instance. It narrows the
+ * race but cannot close it across instances.
+ */
+export function serializePerUser<T>(userId: string, fn: () => Promise<T>): Promise<T> {
+  const run = (tails.get(userId) ?? Promise.resolve()).then(fn, fn);
+  const tail = run.catch(() => undefined);
+  tails.set(userId, tail);
+  void tail.then(() => {
+    if (tails.get(userId) === tail) tails.delete(userId);
+  });
+  return run;
+}

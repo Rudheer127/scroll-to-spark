@@ -7,10 +7,14 @@ export class FakeLlm implements LlmClient {
   calls: LlmRequest[] = [];
   private used = new Map<string, number>();
 
-  constructor(private script: Record<string, Reply[]>) {}
+  constructor(
+    private script: Record<string, Reply[]>,
+    private log: { client: string; table: string; row: Record<string, unknown> }[] = [],
+  ) {}
 
   async complete(req: LlmRequest): Promise<LlmResult> {
     this.calls.push(req);
+    this.log.push({ client: "llm", table: "complete", row: {} });
     const list = this.script[req.schemaName] ?? [];
     const n = this.used.get(req.schemaName) ?? 0;
     this.used.set(req.schemaName, n + 1);

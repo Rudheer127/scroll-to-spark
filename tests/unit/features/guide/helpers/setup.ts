@@ -5,11 +5,11 @@ import { FakeLlm } from "./fake-llm";
 type Script = ConstructorParameters<typeof FakeLlm>[0];
 type DbOpts = Partial<Omit<FakeDbOptions, "label" | "log">>;
 
-export function setup(script: Script, dbOpts: DbOpts = {}) {
+export function setup(script: Script, dbOpts: DbOpts = {}, adminOpts: DbOpts = {}) {
   const log: Insert[] = [];
-  const llm = new FakeLlm(script);
+  const llm = new FakeLlm(script, log);
   const db = fakeSupabase({ label: "db", log, ...dbOpts });
-  const admin = fakeSupabase({ label: "admin", log });
+  const admin = fakeSupabase({ label: "admin", log, ...adminOpts });
   const run = (message: string) =>
     runGuideTurn({
       userId: "u1",

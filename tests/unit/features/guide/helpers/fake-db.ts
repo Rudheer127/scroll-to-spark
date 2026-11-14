@@ -28,19 +28,26 @@ export const taskRow = (id: string, over: Record<string, unknown> = {}) => ({
 /** The ONE place a fake query builder is cast to the typed client. */
 export function fakeSupabase(opts: FakeDbOptions) {
   const tablesRead: string[] = [];
+  const eqCalls: [string, unknown][] = [];
   const from = (table: string) => {
     if (opts.throwOnTable === table) throw new Error("secret db detail");
     tablesRead.push(table);
     let gte: string | null = null;
     let counting = false;
+    const filters: Record<string, unknown> = {};
     const builder: Record<string, unknown> = {
       then: (resolve: (v: unknown) => unknown) => {
         if (counting) {
           const recent = gte !== null && Date.now() - new Date(gte).getTime() < 120_000;
-          return resolve({
-            count: recent ? (opts.minuteCount ?? 0) : (opts.dayCount ?? 0),
-            error: null,
-          });
+          const seeded = recent ? (opts.minuteCount ?? 0) : (opts.dayCount ?? 0);
+          const mine = filters.user_id !== undefined && filters.role === "user";
+          const inserted = opts.log.filter(
+            (i) =>
+              i.table === "guide_messages" &&
+              i.row.user_id === filters.user_id &&
+              i.row.role === filters.role,
+          ).length;
+          return resolve({ count: mine ? seeded + inserted : 0, error: null });
         }
         return resolve({ data: opts.tasks ?? [], error: null });
       },
@@ -58,8 +65,13 @@ export function fakeSupabase(opts: FakeDbOptions) {
         return Promise.resolve({ data: null, error });
       },
     };
-    for (const m of ["eq", "in", "or", "order", "limit"]) builder[m] = () => builder;
+    builder.eq = (col: string, value: unknown) => {
+      eqCalls.push([col, value]);
+      filters[col] = value;
+      return builder;
+    };
+    for (const m of ["in", "or", "order", "limit"]) builder[m] = () => builder;
     return builder;
   };
-  return { client: { from } as unknown as SupabaseClient<Database>, tablesRead };
+  return { client: { from } as unknown as SupabaseClient<Database>, tablesRead, eqCalls };
 }
