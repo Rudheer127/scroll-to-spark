@@ -7,11 +7,16 @@ import { signOut } from "@/features/auth/actions";
 /** The signed-in person, pinned to the bottom of the rail: account menu on the left, theme toggle and sign out on the right. */
 export async function UserBlock() {
   const [profile, user] = await Promise.all([getCurrentProfile(), getCurrentUser()]);
-  const name = profile?.username ?? "Account";
+  const name = profile?.display_name ?? profile?.username ?? "Account";
 
   return (
     <div className="-mx-6 -mb-6 flex items-center gap-3 border-t border-border px-6 py-4">
-      <AccountMenu name={name} email={user?.email} signOut={signOut} />
+      <AccountMenu
+        name={name}
+        avatarUrl={profile?.avatar_url}
+        email={user?.email}
+        signOut={signOut}
+      />
       <div className="flex min-w-0 flex-1 flex-col leading-tight">
         <p className="truncate text-sm font-semibold">{name}</p>
         <p className="text-xs text-muted">Signed in</p>

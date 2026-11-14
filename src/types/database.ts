@@ -340,6 +340,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_color: string;
+          avatar_url: string | null;
           created_at: string;
           display_name: string | null;
           id: string;
@@ -348,6 +349,7 @@ export type Database = {
         };
         Insert: {
           avatar_color?: string;
+          avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
           id: string;
@@ -356,6 +358,7 @@ export type Database = {
         };
         Update: {
           avatar_color?: string;
+          avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
           id?: string;

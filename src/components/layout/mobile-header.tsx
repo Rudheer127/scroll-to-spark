@@ -17,7 +17,12 @@ export async function MobileHeader() {
       </Link>
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <AccountMenu name={profile?.username ?? "Account"} email={user?.email} signOut={signOut} />
+        <AccountMenu
+          name={profile?.display_name ?? profile?.username ?? "Account"}
+          avatarUrl={profile?.avatar_url}
+          email={user?.email}
+          signOut={signOut}
+        />
       </div>
     </header>
   );
