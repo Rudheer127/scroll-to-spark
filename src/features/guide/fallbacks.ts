@@ -12,5 +12,8 @@ export const RATE_LIMIT_MESSAGE =
 export const EMPTY_MESSAGE =
   "I'm here whenever you're ready. Tell me a little more, like how much time you have or something you already did.";
 
+export const EMPTY_ENGAGEMENT_MESSAGE =
+  "There is no log here yet, and that is completely fine. Whenever you like, tell me about something small you already did, or ask me for one tiny step to try.";
+
 export const NO_MATCH_MESSAGE =
   "I couldn't find an open step that fits right now. Try widening the time or the topic, and I'll look again.";

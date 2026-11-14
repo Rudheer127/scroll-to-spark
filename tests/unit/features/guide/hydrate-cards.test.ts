@@ -45,3 +45,41 @@ describe("hydrateCards", () => {
     expect(out).toHaveLength(1);
   });
 });
+
+describe("hydrateCards: contributions", () => {
+  const mine = {
+    id: "c1",
+    user_id: "u1",
+    title: "Food drive",
+    description: "secret text",
+    minutes: 180,
+    occurred_on: "2026-11-08",
+    verification: "self_reported",
+    created_at: "2026-11-08T00:00:00Z",
+  };
+
+  it("builds a contribution card from fetched rows with only display fields", () => {
+    const response = {
+      ...fixedResponse("x"),
+      cards: [{ kind: "contribution" as const, id: "c1" }],
+    };
+    expect(hydrateCards(response, [], [mine])).toEqual([
+      {
+        kind: "contribution",
+        id: "c1",
+        title: "Food drive",
+        minutes: 180,
+        occurred_on: "2026-11-08",
+        verification: "self_reported",
+      },
+    ]);
+  });
+
+  it("drops contribution ids with no fetched row", () => {
+    const response = {
+      ...fixedResponse("x"),
+      cards: [{ kind: "contribution" as const, id: "zz" }],
+    };
+    expect(hydrateCards(response, [], [mine])).toEqual([]);
+  });
+});

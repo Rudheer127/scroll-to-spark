@@ -9,6 +9,7 @@ describe("fixed messages", () => {
   it("covers every fixed message", () => {
     expect(messages.map(([k]) => k).sort()).toEqual([
       "CRISIS_MESSAGE",
+      "EMPTY_ENGAGEMENT_MESSAGE",
       "EMPTY_MESSAGE",
       "NO_MATCH_MESSAGE",
       "RATE_LIMIT_MESSAGE",

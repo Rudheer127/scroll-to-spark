@@ -8,6 +8,7 @@ import {
   UNAVAILABLE_MESSAGE,
 } from "./fallbacks";
 import { fixedResponse } from "./fixed-response";
+import { AI_LABEL } from "./constants";
 import { checkOutput } from "./guard/check-output";
 import { detectCrisis } from "./guard/crisis";
 import { detectInjectionSignals, type InjectionSignal } from "./guard/injection-signals";
@@ -15,6 +16,7 @@ import { sanitizeInput } from "./guard/sanitize-input";
 import { newCanary, newNonce } from "./guard/untrusted";
 import { handleGeneral } from "./handlers/general";
 import { handleOpportunities } from "./handlers/opportunities";
+import { handleRecognition } from "./handlers/recognition";
 import { ProviderFailure, staticOutput } from "./handlers/shared";
 import type { HandlerContext, HandlerOutput } from "./handlers/types";
 import { hydrateCards } from "./hydrate-cards";
@@ -23,7 +25,8 @@ import type { LlmClient } from "./llm/types";
 import { insertUserTurn, persistAssistantTurn } from "./persist";
 import { checkRateLimit, serializePerUser } from "./rate-limit";
 import { routeIntent } from "./router";
-import type { GuideTurnResult, Intent } from "./types";
+import type { GuideResponse } from "./schemas";
+import type { CheckResult, GuideTurnResult, Intent } from "./types";
 
 export type GuideTurnInput = {
   userId: string;
@@ -55,9 +58,19 @@ export function dispatchHandler(intent: Intent, ctx: HandlerContext): Promise<Ha
     case "chitchat":
     case "out_of_scope":
       return handleGeneral(ctx, intent);
+    case "recognize_contribution":
+    case "my_engagement":
+      return handleRecognition(ctx, intent);
     default:
       return Promise.resolve(staticOutput(ctx, REDIRECT_MESSAGE));
   }
+}
+
+function checkAll(out: HandlerOutput, response: GuideResponse): CheckResult {
+  const base = checkOutput(response, out.context);
+  const extra = out.extraCheck?.(response) ?? null;
+  if (!extra) return base;
+  return { ok: false, violations: [...(base.ok ? [] : base.violations), extra] };
 }
 
 /** Guards model output, makes one repair attempt, then falls back. Fixed copy skips the guard. */
@@ -65,15 +78,15 @@ async function guardedResult(input: GuideTurnInput, out: HandlerOutput): Promise
   if (out.source === "fallback") {
     return {
       response: out.response,
-      cards: hydrateCards(out.response, out.rows),
+      cards: hydrateCards(out.response, out.rows, out.contributions),
       source: "fallback",
     };
   }
   let response = out.response;
-  let check = checkOutput(response, out.context);
+  let check = checkAll(out, response);
   if (!check.ok) {
     response = await out.retry(check.violations);
-    check = checkOutput(response, out.context);
+    check = checkAll(out, response);
   }
   if (!check.ok) {
     await logGuideEvent(input.admin, input.userId, "output_blocked", {
@@ -81,7 +94,12 @@ async function guardedResult(input: GuideTurnInput, out: HandlerOutput): Promise
     });
     return fixedResult(REDIRECT_MESSAGE);
   }
-  return { response, cards: hydrateCards(response, out.rows), source: "ai" };
+  return {
+    response,
+    cards: hydrateCards(response, out.rows, out.contributions),
+    source: "ai",
+    label: AI_LABEL,
+  };
 }
 
 async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnResult> {

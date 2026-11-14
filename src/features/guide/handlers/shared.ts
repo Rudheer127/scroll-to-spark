@@ -4,7 +4,7 @@ import { callStructured } from "../llm/structured";
 import type { ChatMessage } from "../llm/types";
 import { buildSystemPrompt } from "../prompts/system";
 import { guideResponseSchema, type GuideResponse } from "../schemas";
-import type { Intent, OpportunityRow, Violation } from "../types";
+import type { ContributionRow, Intent, OpportunityRow, Violation } from "../types";
 import type { HandlerContext, HandlerOutput } from "./types";
 
 /** The model could not give a usable answer. Carries a reason code only, never provider text. */
@@ -60,6 +60,7 @@ type Grounding = {
   allowedIds: Iterable<string>;
   extraNumbers: Iterable<string>;
   rows: OpportunityRow[];
+  contributions?: ContributionRow[];
 };
 
 /** Runs the main model call and packages what the pipeline needs to guard and repair it. */
@@ -73,6 +74,7 @@ export async function answerWithModel(
   return {
     response,
     rows: grounding.rows,
+    contributions: grounding.contributions,
     source: "ai",
     context: {
       allowedIds: new Set(grounding.allowedIds),

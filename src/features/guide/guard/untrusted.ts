@@ -1,4 +1,5 @@
-export type UntrustedLabel = "user_message" | "opportunity" | "evidence" | "contribution";
+export type UntrustedLabel =
+  "user_message" | "opportunity" | "evidence" | "contribution" | "policy";
 
 /** 12 hex chars from the platform CSPRNG. */
 export function newNonce(): string {

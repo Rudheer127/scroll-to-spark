@@ -17,7 +17,8 @@ export const guideResponseSchema = z.object({
   proposed_contribution: z
     .object({
       title: z.string(),
-      minutes: z.number().int().min(1).max(600),
+      // The handler validates the range with contributionInputSchemaFor and drops a bad proposal.
+      minutes: z.number().int(),
       occurred_on: z.string(),
       description: z.string(),
     })
@@ -46,3 +47,29 @@ export const opportunityFiltersSchema = z.object({
 });
 
 export type OpportunityFiltersOutput = z.infer<typeof opportunityFiltersSchema>;
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+function isRealDate(value: string): boolean {
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
+/**
+ * What a person may save as a contribution. Pure: pass today's ISO date (YYYY-MM-DD) so the
+ * "not in the future" rule is testable. The guide handler and the save Server Action both use it.
+ */
+export function contributionInputSchemaFor(today: string) {
+  return z.object({
+    title: z.string().min(1).max(120),
+    description: z.string().max(500),
+    minutes: z.number().int().min(1).max(1440),
+    occurred_on: z
+      .string()
+      .regex(ISO_DATE)
+      .refine(isRealDate, "not a real date")
+      .refine((d) => d <= today, "date is in the future"),
+  });
+}
+
+export type ContributionInput = z.infer<ReturnType<typeof contributionInputSchemaFor>>;

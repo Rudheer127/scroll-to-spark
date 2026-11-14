@@ -20,6 +20,9 @@ export const MAX_MESSAGE_CHARS = 600;
 /** Most cards a single guide response may carry. */
 export const MAX_CARDS = 5;
 
+/** Shown next to every AI answer. The app never speaks as a real person or group. */
+export const AI_LABEL = "From the app (AI)";
+
 /** Every intent the router and the guide can produce. */
 export const INTENTS = [
   "find_opportunity",

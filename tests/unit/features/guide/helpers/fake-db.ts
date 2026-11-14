@@ -7,6 +7,7 @@ export type FakeDbOptions = {
   label: string;
   log: Insert[];
   tasks?: unknown[];
+  contributions?: unknown[];
   minuteCount?: number;
   dayCount?: number;
   throwOnTable?: string;
@@ -49,7 +50,8 @@ export function fakeSupabase(opts: FakeDbOptions) {
           ).length;
           return resolve({ count: mine ? seeded + inserted : 0, error: null });
         }
-        return resolve({ data: opts.tasks ?? [], error: null });
+        const data = table === "contributions" ? opts.contributions : opts.tasks;
+        return resolve({ data: data ?? [], error: null });
       },
       select: (_cols: string, o?: { head?: boolean }) => {
         counting = o?.head === true;
@@ -75,3 +77,15 @@ export function fakeSupabase(opts: FakeDbOptions) {
   };
   return { client: { from } as unknown as SupabaseClient<Database>, tablesRead, eqCalls };
 }
+
+export const contributionRow = (id: string, over: Record<string, unknown> = {}) => ({
+  id,
+  user_id: "u1",
+  title: `Did ${id}`,
+  description: null,
+  minutes: 60,
+  occurred_on: "2026-11-01",
+  verification: "self_reported",
+  created_at: "2026-11-01T00:00:00Z",
+  ...over,
+});

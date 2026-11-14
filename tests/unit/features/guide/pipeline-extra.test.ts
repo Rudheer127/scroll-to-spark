@@ -86,8 +86,8 @@ describe("runGuideTurn: more behavior", () => {
     expect(t.events()).toContain("crisis");
   });
 
-  it("recognize, engagement and fact_check temporarily redirect without a handler call", async () => {
-    for (const intent of ["recognize_contribution", "my_engagement", "fact_check"]) {
+  it("fact_check temporarily redirects without a handler call", async () => {
+    for (const intent of ["fact_check"]) {
       const t = setup({ router_output: [routerReply(intent)] });
       const res = await t.run("I did something");
       expect(res.source).toBe("fallback");

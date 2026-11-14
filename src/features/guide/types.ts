@@ -1,6 +1,6 @@
 import type { Effort, Place } from "@/features/steps/constants";
 import type { Tables } from "@/types/database";
-import type { INTENTS } from "./constants";
+import type { AI_LABEL, INTENTS } from "./constants";
 import type { GuideResponse } from "./schemas";
 
 export type Intent = (typeof INTENTS)[number];
@@ -21,7 +21,8 @@ export type Violation =
   | "canary_leak"
   | "too_long"
   | "claims_human"
-  | "unsupported_verdict";
+  | "unsupported_verdict"
+  | "claims_verification";
 
 export type CheckResult = { ok: true } | { ok: false; violations: Violation[] };
 
@@ -66,10 +67,17 @@ export type ContributionSummary = {
 };
 
 /** An opportunity card built from a database row fetched this turn, never from model text. */
-export type HydratedCard = { kind: "opportunity" } & OpportunityRow;
+export type HydratedCard =
+  | ({ kind: "opportunity" } & OpportunityRow)
+  | ({ kind: "contribution" } & Pick<
+      ContributionRow,
+      "id" | "title" | "minutes" | "occurred_on" | "verification"
+    >);
 
 export type GuideTurnResult = {
   response: GuideResponse;
   cards: HydratedCard[];
   source: "ai" | "fallback";
+  /** Set on AI answers so the UI can show where the words came from. */
+  label?: typeof AI_LABEL;
 };
