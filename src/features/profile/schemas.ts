@@ -7,8 +7,7 @@ export const updateUsernameSchema = z.object({
   username: z
     .string()
     .trim()
-    .toLowerCase()
-    .regex(/^[a-z0-9_]+$/, "Use only lowercase letters, numbers and underscores.")
+    .regex(/^[A-Za-z0-9_.-]+$/, "Use only letters, numbers, underscores, dots and hyphens.")
     .min(USERNAME_MIN, `Use at least ${USERNAME_MIN} characters.`)
     .max(USERNAME_MAX, `Use ${USERNAME_MAX} characters or fewer.`),
 });

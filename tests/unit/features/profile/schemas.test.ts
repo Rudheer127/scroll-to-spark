@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import { updateUsernameSchema } from "@/features/profile/schemas";
 
 describe("updateUsernameSchema", () => {
-  it("accepts lowercase letters, numbers and underscores", () => {
-    expect(updateUsernameSchema.safeParse({ username: "maya_r2" }).success).toBe(true);
+  it("accepts letters, numbers, underscores, dots and hyphens", () => {
+    expect(updateUsernameSchema.safeParse({ username: "Maya_R2.k-1" }).success).toBe(true);
   });
 
-  it("lowercases and trims what was typed", () => {
+  it("keeps capitals and trims what was typed", () => {
     const result = updateUsernameSchema.safeParse({ username: "  Maya_R  " });
-    expect(result.success && result.data.username).toBe("maya_r");
+    expect(result.success && result.data.username).toBe("Maya_R");
   });
 
   it("rejects spaces and symbols", () => {

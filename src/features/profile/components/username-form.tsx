@@ -15,7 +15,7 @@ export function UsernameForm({ username }: { username: string }) {
       <Field
         label="Username"
         htmlFor="username"
-        hint="Other people see this name. Lowercase letters, numbers and underscores."
+        hint="Other people see this name. Letters, numbers, underscores, dots and hyphens."
         error={fieldError(state, "username")}
       >
         <input
