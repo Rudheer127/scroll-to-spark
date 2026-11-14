@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
@@ -39,12 +38,6 @@ export function SignupForm() {
       <Button type="submit" variant="brand" disabled={pending}>
         {pending ? "Creating account" : "Create account"}
       </Button>
-      <p className="text-sm text-muted">
-        Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-action hover:underline">
-          Log in
-        </Link>
-      </p>
     </form>
   );
 }

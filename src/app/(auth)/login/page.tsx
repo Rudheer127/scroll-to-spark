@@ -1,3 +1,4 @@
+import { AuthTabs } from "@/features/auth/components/auth-tabs";
 import { LoginForm } from "@/features/auth/components/login-form";
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
@@ -5,6 +6,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <div className="flex max-w-md flex-col gap-6">
+      <AuthTabs active="login" />
       <header className="flex flex-col gap-1">
         <h2 className="text-3xl font-bold">Log in</h2>
         <p className="text-muted">Welcome back.</p>

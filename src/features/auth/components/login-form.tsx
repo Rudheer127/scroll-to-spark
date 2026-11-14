@@ -39,12 +39,6 @@ export function LoginForm() {
       <Button type="submit" variant="brand" disabled={pending}>
         {pending ? "Logging in" : "Log in"}
       </Button>
-      <p className="text-sm text-muted">
-        New here?{" "}
-        <Link href="/signup" className="font-semibold text-action hover:underline">
-          Create an account
-        </Link>
-      </p>
     </form>
   );
 }
