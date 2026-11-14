@@ -28,3 +28,11 @@ export const guideResponseSchema = z.object({
 });
 
 export type GuideResponse = z.infer<typeof guideResponseSchema>;
+
+/** Router output. Strict-compatible: both fields required, no optional values. */
+export const routerOutputSchema = z.object({
+  intent: z.enum(INTENTS),
+  safety: z.enum(["ok", "crisis"]),
+});
+
+export type RouterOutput = z.infer<typeof routerOutputSchema>;
