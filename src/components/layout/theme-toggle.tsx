@@ -17,10 +17,6 @@ export function ThemeToggle() {
     } catch {
       // Storage can be blocked. The toggle still works for this visit.
     }
-    // Leaving for a page without the toggle (the sign-in pages) drops dark. Any page with the toggle applies it again.
-    return () => {
-      delete document.documentElement.dataset.theme;
-    };
   }, []);
 
   function toggle() {

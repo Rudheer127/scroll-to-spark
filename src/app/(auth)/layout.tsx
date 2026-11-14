@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Image from "next/image";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { AuthTopBar } from "@/features/auth/components/auth-nav";
 import { PHOTOS } from "@/features/landing/content";
 
@@ -32,11 +33,16 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           </p>
         </div>
       </section>
-      <section className="flex flex-col px-(--page-gutter) py-(--page-gutter) lg:px-[clamp(2rem,6vw,6rem)]">
-        <div className="lg:hidden">
-          <AuthTopBar />
+      <section className="flex flex-col px-(--page-gutter) py-(--page-gutter)">
+        <div className="flex items-center justify-between">
+          <div className="lg:hidden">
+            <AuthTopBar />
+          </div>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </div>
-        <div className="flex flex-1 items-center py-10">
+        <div className="flex flex-1 items-center justify-center py-10">
           <div className="w-full max-w-md">
             <Suspense fallback={null}>{children}</Suspense>
           </div>

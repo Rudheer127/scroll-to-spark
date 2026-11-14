@@ -17,12 +17,7 @@ export function AuthTopBar({ onPhoto = false }: { onPhoto?: boolean }) {
   const canGoBack = WELCOME_FROM.includes(pathname);
 
   const wordmark = (
-    <span
-      className={cn(
-        "font-display text-3xl font-extrabold tracking-tight",
-        onPhoto ? "text-white" : "bg-(image:--gradient-spark) bg-clip-text text-transparent",
-      )}
-    >
+    <span className="bg-(image:--gradient-spark) bg-clip-text font-display text-3xl font-extrabold tracking-tight text-transparent">
       Spark
     </span>
   );
@@ -34,16 +29,16 @@ export function AuthTopBar({ onPhoto = false }: { onPhoto?: boolean }) {
           href="/welcome"
           aria-label="Back to the welcome page"
           className={cn(
-            "flex size-11 items-center justify-center rounded-full active:opacity-75",
+            "flex size-10 items-center justify-center rounded-full active:opacity-75",
             onPhoto
-              ? "bg-black/40 text-white backdrop-blur hover:bg-black/55"
+              ? "bg-black/45 text-white backdrop-blur-md hover:bg-black/60"
               : "border border-border bg-surface hover:bg-chip",
           )}
         >
           <ArrowLeft aria-hidden className="size-5" />
         </Link>
       ) : null}
-      {canGoBack ? (
+      {onPhoto ? null : canGoBack ? (
         <Link
           href="/welcome"
           aria-label="Spark, back to the welcome page"
