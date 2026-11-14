@@ -12,7 +12,11 @@ const MAX_BODY_BYTES = 4000;
  */
 const MAX_IMAGE_BODY_BYTES = Math.ceil((MAX_IMAGE_DECODED_BYTES * 4) / 3) + MAX_BODY_BYTES + 200;
 const IMAGE_HEADER = "x-guide-attachment";
-const bodySchema = z.object({ message: z.string(), imageDataUrl: z.string().optional() });
+const bodySchema = z.object({
+  message: z.string(),
+  imageDataUrl: z.string().optional(),
+  conversationId: z.string().max(64).optional(),
+});
 const NO_STORE = { "Cache-Control": "no-store" };
 
 /** application/json, any case, optionally with parameters such as charset. */
@@ -41,13 +45,13 @@ export async function POST(request: Request) {
     }
     const parsed = bodySchema.safeParse(json);
     if (!parsed.success) return reply({ error: "Send a JSON body with a message." }, 400);
-    const { message, imageDataUrl } = parsed.data;
+    const { message, imageDataUrl, conversationId } = parsed.data;
     const bytes = new TextEncoder().encode(raw).byteLength;
     if (imageDataUrl === undefined && bytes > MAX_BODY_BYTES) {
       return reply({ error: "That message is too long." }, 413);
     }
 
-    const turn = await runAuthenticatedGuideTurn(message, imageDataUrl);
+    const turn = await runAuthenticatedGuideTurn(message, imageDataUrl, conversationId);
     const extra: Record<string, string> = {};
     if (turn.status === 429) extra["Retry-After"] = String(turn.retryAfterSec);
     return reply(turn.body, turn.status, extra);

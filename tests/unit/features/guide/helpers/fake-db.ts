@@ -1,7 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 
-export type Insert = { client: string; table: string; row: Record<string, unknown> };
+export type Insert = {
+  client: string;
+  table: string;
+  row: Record<string, unknown>;
+  /** Missing for inserts. */
+  op?: "update" | "delete";
+};
 
 export type FakeDbOptions = {
   label: string;
@@ -13,6 +19,14 @@ export type FakeDbOptions = {
   dayCount?: number;
   throwOnTable?: string;
   insertError?: boolean;
+  /** Fails inserts into this one table only. */
+  failInsertOn?: string;
+  /** Rows of guide_conversations, filtered by eq like a real query. */
+  conversations?: Record<string, unknown>[];
+  /** Rows of guide_messages for plain selects (counting still uses the seeded counts). */
+  messages?: Record<string, unknown>[];
+  /** Makes plain selects on this table return an error. */
+  selectErrorOn?: string;
 };
 
 export const taskRow = (id: string, over: Record<string, unknown> = {}) => ({
@@ -37,6 +51,17 @@ export function fakeSupabase(opts: FakeDbOptions) {
     let gte: string | null = null;
     let counting = false;
     const filters: Record<string, unknown> = {};
+    const filtered = (list: Record<string, unknown>[]) =>
+      list.filter((row) => Object.entries(filters).every(([k, v]) => !(k in row) || row[k] === v));
+    const rows = (): unknown[] => {
+      if (table === "guide_conversations") return filtered(opts.conversations ?? []);
+      if (table === "guide_messages") return filtered(opts.messages ?? []);
+      const byTable: Record<string, unknown[] | undefined> = {
+        contributions: opts.contributions,
+        evidence_claims: opts.evidence,
+      };
+      return (table in byTable ? byTable[table] : opts.tasks) ?? [];
+    };
     const builder: Record<string, unknown> = {
       then: (resolve: (v: unknown) => unknown) => {
         if (counting) {
@@ -51,12 +76,22 @@ export function fakeSupabase(opts: FakeDbOptions) {
           ).length;
           return resolve({ count: mine ? seeded + inserted : 0, error: null });
         }
-        const byTable: Record<string, unknown[] | undefined> = {
-          contributions: opts.contributions,
-          evidence_claims: opts.evidence,
-        };
-        const data = table in byTable ? byTable[table] : opts.tasks;
-        return resolve({ data: data ?? [], error: null });
+        if (opts.selectErrorOn === table) return resolve({ data: null, error: { message: "x" } });
+        return resolve({ data: rows(), error: null });
+      },
+      maybeSingle: () => ({
+        then: (resolve: (v: unknown) => unknown) => {
+          if (opts.selectErrorOn === table) return resolve({ data: null, error: { message: "x" } });
+          return resolve({ data: rows()[0] ?? null, error: null });
+        },
+      }),
+      update: (row: Record<string, unknown>) => {
+        opts.log.push({ client: opts.label, table, row, op: "update" });
+        return builder;
+      },
+      delete: () => {
+        opts.log.push({ client: opts.label, table, row: {}, op: "delete" });
+        return builder;
       },
       select: (_cols: string, o?: { head?: boolean }) => {
         counting = o?.head === true;
@@ -68,7 +103,8 @@ export function fakeSupabase(opts: FakeDbOptions) {
       },
       insert: (row: Record<string, unknown>) => {
         opts.log.push({ client: opts.label, table, row });
-        const error = opts.insertError ? { message: "denied" } : null;
+        const failed = opts.insertError || opts.failInsertOn === table;
+        const error = failed ? { message: "denied" } : null;
         const settled = { data: error ? null : { id: "new-id" }, error };
         const chain: Record<string, unknown> = {
           then: (resolve: (v: unknown) => unknown) => resolve(settled),

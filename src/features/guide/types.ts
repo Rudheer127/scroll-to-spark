@@ -103,4 +103,15 @@ export type GuideTurnResult = {
   outcome?: "ok" | "rate_limited" | "unavailable" | "crisis";
   /** Seconds to wait, set with outcome "rate_limited". */
   retryAfterSec?: number;
+  /** The saved chat this turn belongs to. Missing when nothing was saved (crisis, empty, limited). */
+  conversationId?: string;
 };
+
+/** One saved message of a chat, as read back for the chat view. */
+export type StoredMessage = { role: "user" | "assistant"; content: string; createdAt: string };
+
+/** One row of the chat list in the sidebar. */
+export type ConversationSummary = { id: string; title: string; updatedAt: string };
+
+/** A saved chat, loaded for the guide view. */
+export type LoadedChat = { id: string; messages: StoredMessage[] };

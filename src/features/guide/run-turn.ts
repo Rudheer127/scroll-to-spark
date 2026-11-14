@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createGuideLlm } from "./llm/from-env";
 import { runGuideTurn } from "./pipeline";
+import { parseConversationId } from "./schemas";
 import type { GuideTurnResult } from "./types";
 import { checkImageRequest } from "./vision/check-image-request";
 
@@ -25,6 +26,7 @@ export const utcToday = () => new Date().toISOString().slice(0, 10);
 export async function runAuthenticatedGuideTurn(
   message: string,
   imageDataUrl?: string,
+  conversationId?: unknown,
 ): Promise<AuthenticatedTurn> {
   const db = await createClient();
   const {
@@ -43,6 +45,7 @@ export async function runAuthenticatedGuideTurn(
     llm: createGuideLlm(),
     today: utcToday(),
     imageDataUrl: image.dataUrl,
+    conversationId: parseConversationId(conversationId),
   });
   if (body.outcome === "rate_limited") {
     return { status: 429, body, retryAfterSec: body.retryAfterSec ?? DEFAULT_RETRY_AFTER_SEC };

@@ -186,6 +186,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Matches supabase/migrations/20261114180000_guide_conversations.sql, written by hand before it is applied.
+      guide_conversations: {
+        Row: {
+          created_at: string;
+          id: string;
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          title: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "guide_conversations_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
       // Regenerate the whole file with `supabase gen types` when the schema changes again.
       guide_events: {
@@ -225,6 +258,7 @@ export type Database = {
       guide_messages: {
         Row: {
           content: string;
+          conversation_id: string | null;
           created_at: string;
           id: string;
           intent: string | null;
@@ -233,6 +267,7 @@ export type Database = {
         };
         Insert: {
           content: string;
+          conversation_id?: string | null;
           created_at?: string;
           id?: string;
           intent?: string | null;
@@ -241,6 +276,7 @@ export type Database = {
         };
         Update: {
           content?: string;
+          conversation_id?: string | null;
           created_at?: string;
           id?: string;
           intent?: string | null;
@@ -248,6 +284,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "guide_messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "guide_conversations";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "guide_messages_user_id_fkey";
             columns: ["user_id"];

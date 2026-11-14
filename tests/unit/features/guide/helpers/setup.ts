@@ -10,8 +10,9 @@ export function setup(script: Script, dbOpts: DbOpts = {}, adminOpts: DbOpts = {
   const llm = new FakeLlm(script, log);
   const db = fakeSupabase({ label: "db", log, ...dbOpts });
   const admin = fakeSupabase({ label: "admin", log, ...adminOpts });
-  const run = (message: string) =>
+  const run = (message: string, conversationId?: string) =>
     runGuideTurn({
+      conversationId,
       userId: "u1",
       message,
       db: db.client,

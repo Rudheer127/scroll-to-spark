@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
-import { EMPTY_MESSAGE, RATE_LIMIT_MESSAGE, REDIRECT_MESSAGE } from "./fallbacks";
+import { admit } from "./admit";
+import { chatTitleFor } from "./chat-title";
+import { EMPTY_MESSAGE, REDIRECT_MESSAGE } from "./fallbacks";
 import { detectCrisis } from "./guard/crisis";
 import { detectInjectionSignals, type InjectionSignal } from "./guard/injection-signals";
 import { sanitizeInput } from "./guard/sanitize-input";
@@ -22,8 +24,7 @@ import { ProviderFailure } from "./handlers/shared";
 import type { HandlerContext, HandlerOutput } from "./handlers/types";
 import { logGuideEvent } from "./events";
 import type { LlmClient } from "./llm/types";
-import { insertUserTurn, persistAssistantTurn } from "./persist";
-import { checkRateLimit, serializePerUser } from "./rate-limit";
+import { persistAssistantTurn } from "./persist";
 import { routeIntent } from "./router";
 import type { GuideTurnResult, Intent } from "./types";
 import { IMAGE_UNREADABLE_MESSAGE } from "./vision/constants";
@@ -39,6 +40,8 @@ export type GuideTurnInput = {
   today: string;
   /** An image already checked by checkImageDataUrl. Read once, never stored. */
   imageDataUrl?: string;
+  /** The chat the browser is continuing. Untrusted: admit checks it belongs to the caller. */
+  conversationId?: string;
 };
 
 const STRONG_SIGNALS: InjectionSignal[] = [
@@ -96,34 +99,6 @@ async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnRes
   }
 }
 
-/**
- * Rate limit, then write the user row before any model call so the turn counts and a failed
- * write fails closed. Returns a result to send back now, or null to continue.
- */
-async function admit(input: GuideTurnInput, text: string): Promise<GuideTurnResult | null> {
-  const { userId, admin, db } = input;
-  return serializePerUser(userId, async () => {
-    let rate: Awaited<ReturnType<typeof checkRateLimit>>;
-    try {
-      rate = await checkRateLimit(db, userId);
-    } catch {
-      await logGuideEvent(admin, userId, "provider_failure", { stage: "rate_limit" });
-      return unavailableResult();
-    }
-    if (!rate.allowed) {
-      await logGuideEvent(admin, userId, "rate_limited", { retryAfterSec: rate.retryAfterSec });
-      return {
-        ...fixedResult(RATE_LIMIT_MESSAGE),
-        outcome: "rate_limited",
-        retryAfterSec: rate.retryAfterSec,
-      };
-    }
-    if (await insertUserTurn(db, userId, text)) return null;
-    await logGuideEvent(admin, userId, "provider_failure", { reason: "user_row_insert" });
-    return unavailableResult();
-  });
-}
-
 /** Strong injection checks. Returns a fixed result, or null to continue. */
 async function screen(input: GuideTurnInput, text: string): Promise<GuideTurnResult | null> {
   const { userId, admin } = input;
@@ -165,13 +140,17 @@ export async function runGuideTurn(input: GuideTurnInput): Promise<GuideTurnResu
   const clean = sanitizeInput(input.message);
   if (clean.empty && !hasImage) return fixedResult(EMPTY_MESSAGE);
   if (detectCrisis(clean.text)) {
-    // Before the rate limit and any database read or write: never limited, never stored.
+    // Before the rate limit and any database read or write: never limited, never stored, and no
+    // chat is created for it.
     await logGuideEvent(input.admin, input.userId, "crisis", { source: "input" });
     return crisisResult();
   }
+  let conversationId: string;
   try {
-    const blocked = await admit(input, storedUserText(clean.text, hasImage));
-    if (blocked) return blocked;
+    const title = chatTitleFor(clean.text, hasImage);
+    const admission = await admit(input, storedUserText(clean.text, hasImage), title);
+    if (!admission.ok) return admission.result;
+    conversationId = admission.conversationId;
   } catch {
     return unavailableResult();
   }
@@ -185,6 +164,6 @@ export async function runGuideTurn(input: GuideTurnInput): Promise<GuideTurnResu
   } catch {
     result = unavailableResult();
   }
-  await persistAssistantTurn(input.admin, input.userId, result.response);
-  return result;
+  await persistAssistantTurn(input.admin, input.userId, result.response, conversationId);
+  return { ...result, conversationId };
 }

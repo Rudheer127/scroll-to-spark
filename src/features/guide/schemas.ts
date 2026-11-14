@@ -33,6 +33,15 @@ export const guideResponseSchema = z.object({
 
 export type GuideResponse = z.infer<typeof guideResponseSchema>;
 
+/** A chat id sent by the browser. Only the shape is checked here; ownership is checked in the database. */
+export const conversationIdSchema = z.uuid();
+
+/** The id when it is a well formed uuid, otherwise undefined (a new chat is started). */
+export function parseConversationId(value: unknown): string | undefined {
+  const parsed = conversationIdSchema.safeParse(value);
+  return parsed.success ? parsed.data : undefined;
+}
+
 /** Router output. Strict-compatible: both fields required, no optional values. */
 export const routerOutputSchema = z.object({
   intent: z.enum(INTENTS),

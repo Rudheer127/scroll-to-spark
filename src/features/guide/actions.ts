@@ -2,9 +2,10 @@
 
 import { fail, type ActionResult } from "@/lib/result";
 import { createClient } from "@/lib/supabase/server";
-import { contributionInputSchemaFor } from "./schemas";
+import { loadChatForCaller } from "./load-chat";
+import { contributionInputSchemaFor, parseConversationId } from "./schemas";
 import { runAuthenticatedGuideTurn, SIGN_IN_MESSAGE, utcToday } from "./run-turn";
-import type { GuideTurnResult } from "./types";
+import type { GuideTurnResult, LoadedChat } from "./types";
 
 const MAX_MESSAGE_CHARS = 4000;
 
@@ -20,7 +21,8 @@ export async function sendGuideMessage(formData: FormData): Promise<ActionResult
   const image = formData.get("imageDataUrl");
   if (image !== null && typeof image !== "string") return fail("That image could not be used.");
   try {
-    const turn = await runAuthenticatedGuideTurn(message, image ?? undefined);
+    const conversationId = formData.get("conversationId") ?? undefined;
+    const turn = await runAuthenticatedGuideTurn(message, image ?? undefined, conversationId);
     if (turn.status === 401) return fail(SIGN_IN_MESSAGE);
     if (turn.status === 400) return fail(turn.body.error);
     // Rate-limited and unavailable turns carry a fixed, friendly answer, so they are shown as is.
@@ -53,4 +55,45 @@ export async function confirmContribution(input: unknown): Promise<ActionResult<
     .single();
   if (error || !data) return fail("We could not save that. Try again.");
   return { ok: true, data: { id: data.id } };
+}
+
+const CHAT_NOT_FOUND = "That chat could not be found.";
+
+/**
+ * Loads one saved chat of the signed-in person, so another view or another tab can continue it.
+ * Ownership is checked by RLS through the user session client.
+ */
+export async function loadGuideChat(id: unknown): Promise<ActionResult<LoadedChat>> {
+  try {
+    const chat = await loadChatForCaller(id);
+    return chat ? { ok: true, data: chat } : fail(CHAT_NOT_FOUND);
+  } catch {
+    return fail("The chat could not be loaded. Try again.");
+  }
+}
+
+/**
+ * Deletes one of the person's chats. Its messages go with it through the foreign key. RLS limits
+ * the delete to their own chats, so another person's id deletes nothing and reads as not found.
+ */
+export async function deleteConversation(id: unknown): Promise<ActionResult> {
+  const conversationId = parseConversationId(id);
+  if (conversationId === undefined) return fail(CHAT_NOT_FOUND);
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return fail(SIGN_IN_MESSAGE);
+    const { data, error } = await supabase
+      .from("guide_conversations")
+      .delete()
+      .eq("id", conversationId)
+      .select("id");
+    if (error) return fail("The chat could not be deleted. Try again.");
+    if (!data || data.length === 0) return fail(CHAT_NOT_FOUND);
+    return { ok: true, data: undefined };
+  } catch {
+    return fail("The chat could not be deleted. Try again.");
+  }
 }
