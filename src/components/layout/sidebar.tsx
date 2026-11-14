@@ -16,8 +16,8 @@ function isActive(pathname: string, href: string): boolean {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-/** Left navigation rail. Only links to screens that exist. */
-export function Sidebar() {
+/** Left navigation rail. Only links to screens that exist. The footer slot holds the account block. */
+export function Sidebar({ footer }: { footer: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
@@ -45,6 +45,7 @@ export function Sidebar() {
           </Link>
         );
       })}
+      <div className="mt-auto">{footer}</div>
     </nav>
   );
 }

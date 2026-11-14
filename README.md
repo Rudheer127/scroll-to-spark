@@ -8,7 +8,7 @@ Built for the Principled Innovation Academy challenge:
 
 ## Status
 
-Planning stage. This repository currently holds the project rules and documentation only. No application code has been written yet. The sections below describe what will be built, not what exists today.
+Early build. What works today: email sign-up and log-in, signed-out visitors are sent to the login page, and the Discussions area lets a signed-in person create, join, leave and delete groups. The database and its security rules are in place. Threads, comments, uploads, GIFs, the Spark Guide and the partner portal are not built yet. The list below describes the full plan, not only what exists today.
 
 ## What it will do
 
@@ -56,9 +56,19 @@ The full tree with a rule for every folder is in [docs/FILE_TREE.md](docs/FILE_T
 
 ## Getting started
 
-Application code does not exist yet, so there is nothing to run. When the app is scaffolded, this section will list the exact commands and the environment variables, which live in `.env.example`.
+Requirements: Node.js 24 or newer, npm, and a Supabase project with the migrations in `supabase/migrations` applied.
 
-Requirements for development: Node.js 24 or newer, npm, and a Supabase project.
+1. Copy `.env.example` to `.env.local` and fill in the Supabase values.
+2. Install and start:
+
+```bash
+npm install
+npm run dev
+```
+
+Other scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
+
+In the Supabase dashboard, set the Site URL and add `/auth/callback` on your site address to the allowed redirect URLs, so the email confirmation link can sign people in.
 
 ## Deployment
 
