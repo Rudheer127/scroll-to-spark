@@ -45,6 +45,31 @@ describe("POST /api/guide", () => {
     expect(t.llm.calls).toHaveLength(0);
   });
 
+  it("oversized body with no Content-Length (stream) returns 413, zero llm calls", async () => {
+    const t = arrange({ user: { id: "u1" }, script: chat });
+    const chunk = new TextEncoder().encode("a".repeat(1000));
+    let pulled = 0;
+    const body = new ReadableStream<Uint8Array>({
+      pull(c) {
+        pulled += 1;
+        c.enqueue(chunk);
+      },
+    });
+    const streamedReq = new Request("http://localhost/api/guide", {
+      method: "POST",
+      body,
+      duplex: "half",
+    } as RequestInit);
+    expect((await POST(streamedReq)).status).toBe(413);
+    expect(pulled).toBeLessThan(10);
+    expect(t.llm.calls).toHaveLength(0);
+  });
+
+  it("multibyte body over 4000 bytes returns 413", async () => {
+    arrange({ user: { id: "u1" }, script: chat });
+    expect((await POST(json("€".repeat(1400)))).status).toBe(413);
+  });
+
   it("returns 400 for invalid JSON and for a wrong shape", async () => {
     const t = arrange({ user: { id: "u1" }, script: chat });
     expect((await POST(req("{not json"))).status).toBe(400);

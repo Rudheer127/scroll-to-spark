@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { readBodyWithLimit } from "@/features/guide/read-body";
 import { runAuthenticatedGuideTurn } from "@/features/guide/run-turn";
 
 /** Cap on the whole request body in bytes. The pipeline separately caps the message text. */
@@ -12,12 +13,9 @@ const reply = (body: unknown, status: number, extra: Record<string, string> = {}
 
 export async function POST(request: Request) {
   try {
-    const declared = Number(request.headers.get("content-length") ?? 0);
-    if (declared > MAX_BODY_BYTES) return reply({ error: "That message is too long." }, 413);
-    const raw = await request.text();
-    if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) {
-      return reply({ error: "That message is too long." }, 413);
-    }
+    const body = await readBodyWithLimit(request, MAX_BODY_BYTES);
+    if (!body.ok) return reply({ error: "That message is too long." }, 413);
+    const raw = body.text;
     let json: unknown;
     try {
       json = JSON.parse(raw);
