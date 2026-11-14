@@ -24,6 +24,7 @@ const SEND_ERROR = "The guide could not answer. Your message is still here.";
 export function GuideChat({ variant, inputId }: { variant: "popup" | "page"; inputId?: string }) {
   const generatedId = useId();
   const fieldId = inputId ?? generatedId;
+  const hintId = `${fieldId}-send-hint`;
   const [items, setItems] = useState<Item[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -105,8 +106,8 @@ export function GuideChat({ variant, inputId }: { variant: "popup" | "page"; inp
               />
             ),
           )}
+          {sending ? <MessageBubblePending /> : null}
         </div>
-        {sending ? <MessageBubblePending /> : null}
         {error ? (
           <div role="alert" className="flex max-w-[70ch] flex-col items-start gap-2">
             <p className="text-sm text-danger">{error.text}</p>
@@ -143,11 +144,16 @@ export function GuideChat({ variant, inputId }: { variant: "popup" | "page"; inp
           className={cn(inputClass, "resize-none")}
         />
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Button type="submit" variant="brand" disabled={blockReason !== null}>
+          <Button
+            type="submit"
+            variant="brand"
+            disabled={blockReason !== null}
+            aria-describedby={hintId}
+          >
             <Send aria-hidden className="size-4" />
             Send
           </Button>
-          <p className="text-sm text-muted">
+          <p id={hintId} className="text-sm text-muted">
             {blockReason ?? "Enter sends. Shift and Enter adds a line."}
           </p>
           <p className="text-sm text-muted sm:ml-auto">{characterCount(input)}</p>

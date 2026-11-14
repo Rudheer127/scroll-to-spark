@@ -47,7 +47,8 @@ export function MessageBubblePending() {
           <Bot aria-hidden className="size-3.5" />
           AI
         </span>
-        <span>Thinking</span>
+        <span aria-hidden>Thinking</span>
+        <span className="sr-only">The guide is thinking</span>
       </div>
       <div className="flex max-w-[70ch] animate-pulse flex-col gap-2 rounded-(--radius-card) border border-border bg-surface px-4 py-4">
         <div className="h-4 w-3/4 rounded-lg bg-chip" />
