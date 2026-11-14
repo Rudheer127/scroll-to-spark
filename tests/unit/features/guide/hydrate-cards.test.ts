@@ -83,3 +83,35 @@ describe("hydrateCards: contributions", () => {
     expect(hydrateCards(response, [], [mine])).toEqual([]);
   });
 });
+
+describe("hydrateCards: evidence", () => {
+  const ev = {
+    id: "e1",
+    claim: "secret claim text",
+    source_name: "Census",
+    source_url: null,
+    year: 2023,
+    population: "All Americans",
+    strength: "weak",
+    verified_at: "2026-10-01T00:00:00Z",
+    caveat: "Limits.",
+  };
+  const res = { ...fixedResponse("x"), cards: [{ kind: "evidence" as const, id: "e1" }] };
+
+  it("builds an evidence card from fetched rows only, with verified as a boolean", () => {
+    expect(hydrateCards(res, [], [], [ev])).toEqual([
+      {
+        kind: "evidence",
+        id: "e1",
+        source_name: "Census",
+        source_url: null,
+        year: 2023,
+        population: "All Americans",
+        strength: "weak",
+        caveat: "Limits.",
+        verified: true,
+      },
+    ]);
+    expect(hydrateCards(res, [], [], [])).toEqual([]);
+  });
+});

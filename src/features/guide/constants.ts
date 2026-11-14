@@ -49,3 +49,14 @@ export const BANNED_PHRASES = [
 /** Most user messages one person may send to the guide per minute and per day. */
 export const RATE_PER_MINUTE = 6;
 export const RATE_PER_DAY = 60;
+
+/**
+ * Where a person can look for a primary source on their own. Homepages only. Exact report links
+ * must be re-checked by a person before they are cited. Messages may name these, never link them.
+ */
+export const KNOWN_PRIMARY_SOURCES: { name: string; url: string }[] = [
+  { name: "U.S. Census Bureau", url: "https://www.census.gov" },
+  { name: "AmeriCorps", url: "https://americorps.gov" },
+  { name: "Gallup", url: "https://www.gallup.com" },
+  { name: "Pew Research Center", url: "https://www.pewresearch.org" },
+];

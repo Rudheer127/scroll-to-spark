@@ -22,7 +22,9 @@ export type Violation =
   | "too_long"
   | "claims_human"
   | "unsupported_verdict"
-  | "claims_verification";
+  | "claims_verification"
+  | "missing_unverified_note"
+  | "missing_caveat";
 
 export type CheckResult = { ok: true } | { ok: false; violations: Violation[] };
 
@@ -72,6 +74,10 @@ export type HydratedCard =
   | ({ kind: "contribution" } & Pick<
       ContributionRow,
       "id" | "title" | "minutes" | "occurred_on" | "verification"
+    >)
+  | ({ kind: "evidence"; verified: boolean } & Pick<
+      EvidenceRow,
+      "id" | "source_name" | "source_url" | "year" | "population" | "strength" | "caveat"
     >);
 
 export type GuideTurnResult = {

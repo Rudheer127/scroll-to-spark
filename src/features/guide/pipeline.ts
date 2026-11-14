@@ -14,10 +14,11 @@ import { detectCrisis } from "./guard/crisis";
 import { detectInjectionSignals, type InjectionSignal } from "./guard/injection-signals";
 import { sanitizeInput } from "./guard/sanitize-input";
 import { newCanary, newNonce } from "./guard/untrusted";
+import { handleFactCheck } from "./handlers/fact-check";
 import { handleGeneral } from "./handlers/general";
 import { handleOpportunities } from "./handlers/opportunities";
 import { handleRecognition } from "./handlers/recognition";
-import { ProviderFailure, staticOutput } from "./handlers/shared";
+import { ProviderFailure } from "./handlers/shared";
 import type { HandlerContext, HandlerOutput } from "./handlers/types";
 import { hydrateCards } from "./hydrate-cards";
 import { logGuideEvent } from "./events";
@@ -50,7 +51,7 @@ const fixedResult = (message: string): GuideTurnResult => ({
   source: "fallback",
 });
 
-/** Tasks 8 and 9 replace the redirect branch with real handlers. */
+/** Every intent has its own handler. */
 export function dispatchHandler(intent: Intent, ctx: HandlerContext): Promise<HandlerOutput> {
   switch (intent) {
     case "find_opportunity":
@@ -61,8 +62,8 @@ export function dispatchHandler(intent: Intent, ctx: HandlerContext): Promise<Ha
     case "recognize_contribution":
     case "my_engagement":
       return handleRecognition(ctx, intent);
-    default:
-      return Promise.resolve(staticOutput(ctx, REDIRECT_MESSAGE));
+    case "fact_check":
+      return handleFactCheck(ctx);
   }
 }
 
@@ -78,7 +79,7 @@ async function guardedResult(input: GuideTurnInput, out: HandlerOutput): Promise
   if (out.source === "fallback") {
     return {
       response: out.response,
-      cards: hydrateCards(out.response, out.rows, out.contributions),
+      cards: hydrateCards(out.response, out.rows, out.contributions, out.evidence),
       source: "fallback",
     };
   }
@@ -96,7 +97,7 @@ async function guardedResult(input: GuideTurnInput, out: HandlerOutput): Promise
   }
   return {
     response,
-    cards: hydrateCards(response, out.rows, out.contributions),
+    cards: hydrateCards(response, out.rows, out.contributions, out.evidence),
     source: "ai",
     label: AI_LABEL,
   };

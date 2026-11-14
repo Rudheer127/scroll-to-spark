@@ -8,6 +8,7 @@ export type FakeDbOptions = {
   log: Insert[];
   tasks?: unknown[];
   contributions?: unknown[];
+  evidence?: unknown[];
   minuteCount?: number;
   dayCount?: number;
   throwOnTable?: string;
@@ -50,7 +51,11 @@ export function fakeSupabase(opts: FakeDbOptions) {
           ).length;
           return resolve({ count: mine ? seeded + inserted : 0, error: null });
         }
-        const data = table === "contributions" ? opts.contributions : opts.tasks;
+        const byTable: Record<string, unknown[] | undefined> = {
+          contributions: opts.contributions,
+          evidence_claims: opts.evidence,
+        };
+        const data = table in byTable ? byTable[table] : opts.tasks;
         return resolve({ data: data ?? [], error: null });
       },
       select: (_cols: string, o?: { head?: boolean }) => {
@@ -72,7 +77,7 @@ export function fakeSupabase(opts: FakeDbOptions) {
       filters[col] = value;
       return builder;
     };
-    for (const m of ["in", "or", "order", "limit"]) builder[m] = () => builder;
+    for (const m of ["in", "or", "order", "limit", "textSearch"]) builder[m] = () => builder;
     return builder;
   };
   return { client: { from } as unknown as SupabaseClient<Database>, tablesRead, eqCalls };
@@ -87,5 +92,18 @@ export const contributionRow = (id: string, over: Record<string, unknown> = {}) 
   occurred_on: "2026-11-01",
   verification: "self_reported",
   created_at: "2026-11-01T00:00:00Z",
+  ...over,
+});
+
+export const evidenceRow = (id: string, over: Record<string, unknown> = {}) => ({
+  id,
+  claim: "About 54% of Americans informally helped neighbors in 2023.",
+  source_name: "U.S. Census Bureau and AmeriCorps",
+  source_url: "https://www.census.gov",
+  year: 2023,
+  population: "All Americans",
+  strength: "moderate",
+  verified_at: null,
+  caveat: "All Americans, not 18 to 24.",
   ...over,
 });
