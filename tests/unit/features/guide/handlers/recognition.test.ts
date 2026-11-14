@@ -229,3 +229,39 @@ describe("recognition labeling", () => {
     expect(res.label).toBeUndefined();
   });
 });
+
+describe("user numbers are not grounding (I5)", () => {
+  it("my_engagement: a typed 500 hours cannot become the logged total", async () => {
+    const llm = new FakeLlm({
+      guide_response: [
+        guideReply({ intent: "my_engagement", message: "You've logged 500 hours." }),
+      ],
+    });
+    const rows = [contributionRow("c1", { minutes: 120 })];
+    const out = await handleRecognition(
+      ctxFor(llm, rows, "I've done 500 hours, right?"),
+      "my_engagement",
+    );
+    expect(out.context.allowedNumbers.has("500")).toBe(false);
+    expect(checkOutput(out.response, out.context)).toEqual({
+      ok: false,
+      violations: ["ungrounded_number"],
+    });
+  });
+
+  it("recognize_contribution: 'I spent 3 hours' still lets the reply say 3 hours", async () => {
+    const llm = new FakeLlm({
+      guide_response: [recognise({ message: "Thank you for the 3 hours you gave." })],
+    });
+    const out = await handleRecognition(ctxFor(llm, [], "I spent 3 hours helping out"));
+    expect(checkOutput(out.response, out.context)).toEqual({ ok: true });
+  });
+
+  it("recognize_contribution: a number without a time unit is not grounded", async () => {
+    const llm = new FakeLlm({
+      guide_response: [recognise({ message: "You helped 40 families." })],
+    });
+    const out = await handleRecognition(ctxFor(llm, [], "I helped 40 families today"));
+    expect(checkOutput(out.response, out.context)).toMatchObject({ ok: false });
+  });
+});

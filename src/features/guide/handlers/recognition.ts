@@ -5,6 +5,7 @@ import { contributionInputSchemaFor, type GuideResponse } from "../schemas";
 import { getMyContributions, summarizeContributions } from "../tools/get-contributions";
 import type { ContributionRow, ContributionSummary, Intent } from "../types";
 import { answerWithModel, numbersIn, staticOutput, wrapUser } from "./shared";
+import { timedNumbersIn } from "./user-numbers";
 import type { HandlerContext, HandlerOutput } from "./types";
 
 const MAX_SHOWN = 10;
@@ -65,6 +66,8 @@ export async function handleRecognition(
       String(summary.totalMinutes),
       String(summary.totalHours),
       ...shown.map((r) => String(r.minutes)),
+      // my_engagement reflects the log only, so a typed "500 hours" is never grounding.
+      ...(intent === "recognize_contribution" ? timedNumbersIn(ctx.text) : []),
     ],
     rows: [],
     contributions: shown,

@@ -7,6 +7,7 @@ import { opportunityFiltersSchema } from "../schemas";
 import { searchOpportunities } from "../tools/search-opportunities";
 import type { OpportunityFilters, OpportunityRow } from "../types";
 import { answerWithModel, staticOutput, wrapUser } from "./shared";
+import { timedNumbersIn } from "./user-numbers";
 import type { HandlerContext, HandlerOutput } from "./types";
 
 const NO_FILTERS: OpportunityFilters = { effort: null, remoteOnly: false, keyword: null };
@@ -52,7 +53,10 @@ export async function handleOpportunities(ctx: HandlerContext): Promise<HandlerO
   const content = [wrapUser(ctx), ...rows.map((row) => rowBlock(row, ctx.nonce))].join("\n\n");
   const out = await answerWithModel(ctx, "find_opportunity", content, {
     allowedIds: rows.map((r) => r.id),
-    extraNumbers: rows.flatMap((r) => [String(r.minutes), String(r.reply_within_hours)]),
+    extraNumbers: [
+      ...rows.flatMap((r) => [String(r.minutes), String(r.reply_within_hours)]),
+      ...timedNumbersIn(ctx.text),
+    ],
     rows,
   });
   return { ...out, extraCheck: claimsVerification };

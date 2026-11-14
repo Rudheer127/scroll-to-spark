@@ -13,7 +13,7 @@ import {
   mentionsUnverified,
   verifiedOnlyIfChecked,
 } from "./fact-check-rules";
-import { answerWithModel, wrapUser } from "./shared";
+import { answerWithModel, numbersIn, wrapUser } from "./shared";
 import type { HandlerContext, HandlerOutput } from "./types";
 
 const NO_EVIDENCE_MESSAGE = `We have no evidence on file for that claim, and we will not guess. To check it yourself, a good place to start is a primary source such as ${KNOWN_PRIMARY_SOURCES.map((s) => s.name).join(", ")}.`;
@@ -64,7 +64,8 @@ export async function handleFactCheck(ctx: HandlerContext): Promise<HandlerOutpu
   const content = [wrapUser(ctx), ...rows.map((r) => evidenceBlock(r, ctx.nonce))].join("\n\n");
   const out = await answerWithModel(ctx, "fact_check", content, {
     allowedIds: rows.map((r) => r.id),
-    extraNumbers: evidenceNumbers(rows),
+    // The person's numbers are allowed only as quoted echoes: see echoOnly below.
+    extraNumbers: [...evidenceNumbers(rows), ...numbersIn(ctx.text)],
     rows: [],
   });
   const rules = [

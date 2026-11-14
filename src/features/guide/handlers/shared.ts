@@ -59,12 +59,16 @@ async function askModel(
 
 type Grounding = {
   allowedIds: Iterable<string>;
+  /** Numbers from rows fetched this turn, plus any user numbers the handler chose to allow. */
   extraNumbers: Iterable<string>;
   rows: OpportunityRow[];
   contributions?: ContributionRow[];
 };
 
-/** Runs the main model call and packages what the pipeline needs to guard and repair it. */
+/**
+ * Runs the main model call and packages what the pipeline needs to guard and repair it. Numbers
+ * the person typed are NOT allowed here: each handler adds only the ones it can justify.
+ */
 export async function answerWithModel(
   ctx: HandlerContext,
   intent: Intent,
@@ -79,11 +83,7 @@ export async function answerWithModel(
     source: "ai",
     context: {
       allowedIds: new Set(grounding.allowedIds),
-      allowedNumbers: new Set([
-        ...grounding.extraNumbers,
-        ...numbersIn(ctx.text),
-        ...CRISIS_LINE_NUMBERS,
-      ]),
+      allowedNumbers: new Set([...grounding.extraNumbers, ...CRISIS_LINE_NUMBERS]),
       canary: ctx.canary,
     },
     retry: (violations) => askModel(ctx, intent, userContent, violations),

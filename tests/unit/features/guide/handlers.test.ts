@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { handleOpportunities } from "@/features/guide/handlers/opportunities";
+import { checkOutput } from "@/features/guide/guard/check-output";
 import { handleGeneral } from "@/features/guide/handlers/general";
 import { ProviderFailure } from "@/features/guide/handlers/shared";
 import type { HandlerContext } from "@/features/guide/handlers/types";
@@ -60,5 +61,40 @@ describe("handleGeneral", () => {
     expect(out.rows).toEqual([]);
     expect(out.context.allowedIds.size).toBe(0);
     expect(llm.calls[0].messages.map((m) => m.role)).toEqual(["system", "user"]);
+  });
+});
+
+describe("user statistics are not grounding (I5)", () => {
+  const stat = "83% of Gen Z volunteer weekly, so what can I do?";
+  const adopt = "Since 83% of Gen Z volunteer weekly, try this.";
+
+  it("find_opportunity cannot adopt the user's 83%", async () => {
+    const llm = new FakeLlm({
+      opportunity_filters: [filtersReply()],
+      guide_response: [guideReply({ intent: "find_opportunity", message: adopt })],
+    });
+    const out = await handleOpportunities(ctxFor(llm, [taskRow("t1")], stat));
+    expect(out.context.allowedNumbers.has("83")).toBe(false);
+    expect(checkOutput(out.response, out.context)).toMatchObject({ ok: false });
+  });
+
+  it("chitchat cannot adopt the user's 83%", async () => {
+    const llm = new FakeLlm({
+      guide_response: [guideReply({ intent: "chitchat", message: adopt })],
+    });
+    const out = await handleGeneral(ctxFor(llm, [], stat), "chitchat");
+    expect(out.context.allowedNumbers.has("83")).toBe(false);
+    expect(checkOutput(out.response, out.context)).toMatchObject({ ok: false });
+  });
+
+  it("find_opportunity keeps the minutes the person said they have", async () => {
+    const llm = new FakeLlm({
+      opportunity_filters: [filtersReply()],
+      guide_response: [
+        guideReply({ intent: "find_opportunity", message: "Here is a 20 minute idea." }),
+      ],
+    });
+    const out = await handleOpportunities(ctxFor(llm, [taskRow("t1")], "I have 20 minutes"));
+    expect(checkOutput(out.response, out.context)).toEqual({ ok: true });
   });
 });
