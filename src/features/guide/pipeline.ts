@@ -7,7 +7,9 @@ import { sanitizeInput } from "./guard/sanitize-input";
 import { newCanary, newNonce } from "./guard/untrusted";
 import {
   crisisResult,
+  failureDetail,
   fixedResult,
+  providerLimitResult,
   guardedResult,
   unavailableResult,
   type LogEvent,
@@ -24,6 +26,9 @@ import { insertUserTurn, persistAssistantTurn } from "./persist";
 import { checkRateLimit, serializePerUser } from "./rate-limit";
 import { routeIntent } from "./router";
 import type { GuideTurnResult, Intent } from "./types";
+import { IMAGE_UNREADABLE_MESSAGE } from "./vision/constants";
+import { storedUserText } from "./vision/fold-description";
+import { textWithImage } from "./vision/image-turn";
 
 export type GuideTurnInput = {
   userId: string;
@@ -32,6 +37,8 @@ export type GuideTurnInput = {
   admin: SupabaseClient<Database>;
   llm: LlmClient;
   today: string;
+  /** An image already checked by checkImageDataUrl. Read once, never stored. */
+  imageDataUrl?: string;
 };
 
 const STRONG_SIGNALS: InjectionSignal[] = [
@@ -64,7 +71,7 @@ const loggerFor =
 
 async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnResult> {
   const log = loggerFor(input);
-  const onStageFailure = (stage: "router" | "filters") => log("provider_failure", { stage });
+  const onStageFailure = (stage: "router") => log("provider_failure", { stage });
   const nonce = newNonce();
   const route = await routeIntent(input.llm, text, nonce, onStageFailure);
   if (route.safety === "crisis") {
@@ -83,10 +90,9 @@ async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnRes
   try {
     return await guardedResult(log, await dispatchHandler(route.intent, ctx));
   } catch (error) {
-    if (error instanceof ProviderFailure) {
-      await log("provider_failure", { reason: error.reason });
-    }
-    return unavailableResult();
+    if (!(error instanceof ProviderFailure)) return unavailableResult();
+    await log("provider_failure", { reason: failureDetail(error.reason) });
+    return error.reason === "rate_limited" ? providerLimitResult() : unavailableResult();
   }
 }
 
@@ -127,24 +133,55 @@ async function screen(input: GuideTurnInput, text: string): Promise<GuideTurnRes
   return signals.some((s) => STRONG_SIGNALS.includes(s)) ? fixedResult(REDIRECT_MESSAGE) : null;
 }
 
+/**
+ * Reads the image (if any) into the message. The folded text gets the same crisis check as typed
+ * text. Returns the text to answer, or a fixed result to send back now.
+ */
+async function messageText(
+  input: GuideTurnInput,
+  ownText: string,
+): Promise<string | GuideTurnResult> {
+  if (input.imageDataUrl === undefined) return ownText;
+  const image = await textWithImage(input.llm, ownText, input.imageDataUrl);
+  if (!image.ok) {
+    await logGuideEvent(input.admin, input.userId, "provider_failure", {
+      stage: "vision",
+      reason: failureDetail(image.reason),
+    });
+    return image.reason === "rate_limited"
+      ? providerLimitResult()
+      : fixedResult(IMAGE_UNREADABLE_MESSAGE);
+  }
+  if (detectCrisis(image.text)) {
+    await logGuideEvent(input.admin, input.userId, "crisis", { source: "image" });
+    return crisisResult();
+  }
+  return image.text;
+}
+
 /** One guide turn. Never throws: every failure becomes a safe, fixed answer. */
 export async function runGuideTurn(input: GuideTurnInput): Promise<GuideTurnResult> {
+  const hasImage = input.imageDataUrl !== undefined;
   const clean = sanitizeInput(input.message);
-  if (clean.empty) return fixedResult(EMPTY_MESSAGE);
+  if (clean.empty && !hasImage) return fixedResult(EMPTY_MESSAGE);
   if (detectCrisis(clean.text)) {
     // Before the rate limit and any database read or write: never limited, never stored.
     await logGuideEvent(input.admin, input.userId, "crisis", { source: "input" });
     return crisisResult();
   }
   try {
-    const blocked = await admit(input, clean.text);
+    const blocked = await admit(input, storedUserText(clean.text, hasImage));
     if (blocked) return blocked;
   } catch {
     return unavailableResult();
   }
   let result: GuideTurnResult;
   try {
-    result = (await screen(input, clean.text)) ?? (await answer(input, clean.text));
+    const text = await messageText(input, clean.text);
+    result =
+      typeof text === "string"
+        ? ((await screen(input, text)) ?? (await answer(input, text)))
+        : text;
   } catch {
     result = unavailableResult();
   }

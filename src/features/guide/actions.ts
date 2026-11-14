@@ -8,14 +8,21 @@ import type { GuideTurnResult } from "./types";
 
 const MAX_MESSAGE_CHARS = 4000;
 
+/**
+ * Sends one message. An optional imageDataUrl gets the same strict checks as on the route, but
+ * Next.js caps Server Action bodies at 1 MB, so the browser sends images through the route.
+ */
 export async function sendGuideMessage(formData: FormData): Promise<ActionResult<GuideTurnResult>> {
   const message = formData.get("message");
   if (typeof message !== "string" || message.length > MAX_MESSAGE_CHARS) {
     return fail("Write a shorter message and try again.");
   }
+  const image = formData.get("imageDataUrl");
+  if (image !== null && typeof image !== "string") return fail("That image could not be used.");
   try {
-    const turn = await runAuthenticatedGuideTurn(message);
+    const turn = await runAuthenticatedGuideTurn(message, image ?? undefined);
     if (turn.status === 401) return fail(SIGN_IN_MESSAGE);
+    if (turn.status === 400) return fail(turn.body.error);
     // Rate-limited and unavailable turns carry a fixed, friendly answer, so they are shown as is.
     return { ok: true, data: turn.body };
   } catch {
