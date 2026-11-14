@@ -18,4 +18,16 @@ describe("retryTarget", () => {
     expect(retryTarget(items, 2)).toBeNull();
     expect(retryTarget([{ id: 5, role: "assistant" }], 5)).toBeNull();
   });
+
+  it("carries the image of the user message so a retry resends it", () => {
+    const withImage = [
+      { id: 0, role: "user", text: "", imageDataUrl: "data:image/jpeg;base64,AAAA" },
+      { id: 1, role: "assistant" },
+    ] as const;
+    expect(retryTarget(withImage, 1)).toEqual({
+      text: "",
+      replaceId: 1,
+      imageDataUrl: "data:image/jpeg;base64,AAAA",
+    });
+  });
 });

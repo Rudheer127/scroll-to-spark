@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  COUNTER_THRESHOLD,
+  shouldShowCount,
   characterCount,
   sendBlockReason,
   STARTER_PROMPTS,
@@ -35,5 +37,19 @@ describe("STARTER_PROMPTS", () => {
       expect(s.message.length).toBeLessThanOrEqual(MAX_INPUT_CHARS);
       expect(s.message).not.toContain(String.fromCharCode(8212));
     }
+  });
+});
+
+describe("composer draft rules", () => {
+  it("allows an image with no text, and blocks while the image is being prepared", () => {
+    expect(sendBlockReason("", false, { hasImage: true })).toBeNull();
+    expect(sendBlockReason("hi", false, { imageBusy: true })).toBe("Getting your image ready.");
+    expect(sendBlockReason("", true, { hasImage: true })).toBe("Waiting for the guide to answer.");
+  });
+
+  it("shows the counter only near the limit", () => {
+    expect(shouldShowCount("a".repeat(COUNTER_THRESHOLD - 1))).toBe(false);
+    expect(shouldShowCount("a".repeat(COUNTER_THRESHOLD))).toBe(true);
+    expect(COUNTER_THRESHOLD).toBeLessThan(MAX_INPUT_CHARS);
   });
 });

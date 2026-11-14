@@ -1,5 +1,5 @@
-import { Bot } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { AiChip } from "./ai-chip";
 
 type MessageBubbleProps = {
   role: "user" | "assistant";
@@ -16,10 +16,7 @@ export function MessageBubble({ role, label, children }: MessageBubbleProps) {
       <div className="flex items-center gap-2 text-sm text-muted">
         {assistant ? (
           <>
-            <span className="inline-flex items-center gap-1 rounded-full bg-chip px-2.5 py-0.5 text-xs font-semibold text-ink">
-              <Bot aria-hidden className="size-3.5" />
-              AI
-            </span>
+            <AiChip />
             {label ? <span>{label}</span> : null}
           </>
         ) : (
@@ -43,14 +40,11 @@ export function MessageBubblePending() {
   return (
     <div aria-busy="true" className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2 text-sm text-muted">
-        <span className="inline-flex items-center gap-1 rounded-full bg-chip px-2.5 py-0.5 text-xs font-semibold text-ink">
-          <Bot aria-hidden className="size-3.5" />
-          AI
-        </span>
+        <AiChip />
         <span aria-hidden>Thinking</span>
         <span className="sr-only">The guide is thinking</span>
       </div>
-      <div className="flex max-w-[70ch] animate-pulse flex-col gap-2 rounded-(--radius-card) border border-border bg-surface px-4 py-4">
+      <div className="flex max-w-[70ch] motion-safe:animate-pulse flex-col gap-2 rounded-(--radius-card) border border-border bg-surface px-4 py-4">
         <div className="h-4 w-3/4 rounded-lg bg-chip" />
         <div className="h-4 w-1/2 rounded-lg bg-chip" />
       </div>
