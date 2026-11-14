@@ -10,8 +10,9 @@ export function Hero() {
 
   return (
     <section
+      id="top"
       aria-labelledby="hero-heading"
-      className="relative isolate overflow-hidden rounded-b-[48px] bg-ink text-background"
+      className="relative isolate overflow-hidden rounded-b-[48px] bg-background text-ink"
     >
       <Image
         src={PHOTOS.hero}
@@ -21,17 +22,17 @@ export function Hero() {
         sizes="100vw"
         className="-z-20 object-cover object-[55%_center]"
       />
-      <div aria-hidden className="absolute inset-0 -z-10 bg-ink/55" />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-background/60" />
       <div aria-hidden className="landing-glow absolute inset-0 -z-10" />
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-linear-to-r from-ink/85 to-transparent"
+        className="absolute inset-0 -z-10 bg-linear-to-r from-background/90 to-transparent"
       />
 
-      <div className="grid min-h-[calc(100svh-4.5rem)] items-center gap-10 px-6 pb-16 pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-12">
+      <div className="grid min-h-svh items-center gap-10 px-6 pb-16 pt-28 lg:grid-cols-[1.05fr_0.95fr] lg:px-12">
         <div className="flex flex-col items-start gap-8">
           <p
-            className="landing-rise rounded-(--radius-control) border border-white/25 bg-white/5 px-4 py-1.5 text-sm font-semibold backdrop-blur"
+            className="landing-rise rounded-(--radius-control) border border-ink/20 bg-ink/5 px-4 py-1.5 text-sm font-semibold backdrop-blur"
             style={step(0)}
           >
             {HERO.tagline}
@@ -52,7 +53,7 @@ export function Hero() {
             ))}
           </h1>
           <p
-            className="landing-rise max-w-[46ch] text-lg text-background/90 sm:text-xl"
+            className="landing-rise max-w-[46ch] text-lg text-ink/85 sm:text-xl"
             style={step(words.length + 1)}
           >
             {HERO.support}
@@ -63,7 +64,7 @@ export function Hero() {
           >
             <MainCta
               signedOutLabel={HERO.primaryCta}
-              className="min-h-12 bg-sun px-7 text-base text-ink hover:opacity-90"
+              className="min-h-12 bg-sun px-7 text-base text-on-sun hover:opacity-90"
             />
             <a
               href="#how-it-works"
@@ -72,7 +73,7 @@ export function Hero() {
               {HERO.secondaryCta}
             </a>
           </div>
-          <p className="landing-rise text-sm text-background/80" style={step(words.length + 3)}>
+          <p className="landing-rise text-sm text-ink/75" style={step(words.length + 3)}>
             {HERO.note}
           </p>
         </div>

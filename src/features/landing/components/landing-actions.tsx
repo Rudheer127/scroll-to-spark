@@ -63,21 +63,25 @@ export function NavActions() {
           <ButtonLink
             href={SIGN_IN_HREF}
             variant="ghost"
-            className="hidden hover:bg-white/10 sm:inline-flex"
+            className="hidden hover:bg-ink/10 sm:inline-flex"
           >
             Sign in
           </ButtonLink>
           <ButtonLink
             href={SIGN_UP_HREF}
             variant="primary"
-            className="bg-sun text-ink hover:opacity-90"
+            className="whitespace-nowrap bg-sun text-on-sun hover:opacity-90"
           >
             Get started
           </ButtonLink>
         </>
       }
       signedIn={
-        <ButtonLink href={APP_HREF} variant="primary" className="bg-sun text-ink hover:opacity-90">
+        <ButtonLink
+          href={APP_HREF}
+          variant="primary"
+          className="whitespace-nowrap bg-sun text-on-sun hover:opacity-90"
+        >
           Open the app
         </ButtonLink>
       }
@@ -107,7 +111,7 @@ export function ContactActions({
           <ButtonLink
             href={SIGN_IN_HREF}
             variant="ghost"
-            className="min-h-12 border border-white/30 px-7 text-base hover:bg-white/10"
+            className="min-h-12 border border-ink/25 px-7 text-base hover:bg-ink/10"
           >
             {secondaryLabel}
           </ButtonLink>

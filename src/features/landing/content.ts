@@ -1,6 +1,7 @@
 /** All landing page copy in one place. Short on purpose: a visitor should get it from headings and buttons alone. */
 
 export const NAV_LINKS = [
+  { id: "top", label: "Home" },
   { id: "how-it-works", label: "How it works" },
   { id: "features", label: "Features" },
   { id: "about", label: "About" },

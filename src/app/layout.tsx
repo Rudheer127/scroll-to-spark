@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "@fontsource-variable/inter";
 import "./globals.css";
 
-/** Runs before first paint so a saved dark choice never flashes light. The landing page stays light. */
-const THEME_SCRIPT = `try{if(localStorage.getItem("theme")==="dark"&&location.pathname.indexOf("/welcome")!==0)document.documentElement.dataset.theme="dark"}catch(e){}`;
+/** Runs before first paint so a saved dark choice never flashes light. The landing page follows it too. */
+const THEME_SCRIPT = `try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}`;
 
 export const metadata: Metadata = {
   title: "Scroll to Spark",

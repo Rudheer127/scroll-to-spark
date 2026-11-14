@@ -5,7 +5,7 @@ import { ContactSection } from "@/features/landing/components/contact-section";
 import { FeaturesGrid } from "@/features/landing/components/features-grid";
 import { Hero } from "@/features/landing/components/hero";
 import { HowItWorks } from "@/features/landing/components/how-it-works";
-import { LandingNav } from "@/features/landing/components/landing-nav";
+import { LandingHeader } from "@/features/landing/components/landing-header";
 import { NavActions } from "@/features/landing/components/landing-actions";
 import { MarqueeBand } from "@/features/landing/components/marquee-band";
 import { SiteFooter } from "@/features/landing/components/site-footer";
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default function WelcomePage() {
   return (
     <div className="landing-root">
-      <LandingNav actions={<NavActions />} />
+      <LandingHeader actions={<NavActions />} />
       <main>
         <Hero />
         <MarqueeBand />

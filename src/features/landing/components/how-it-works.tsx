@@ -2,7 +2,7 @@ import { HERO, STEPS } from "../content";
 import { MainCta } from "./landing-actions";
 import { Reveal } from "./reveal";
 
-const BADGES = ["bg-sun text-ink", "bg-coral text-white", "bg-teal text-white"] as const;
+const BADGES = ["bg-sun text-on-sun", "bg-coral text-white", "bg-teal text-white"] as const;
 
 /** Three steps, one sentence each, then the main action again. */
 export function HowItWorks() {

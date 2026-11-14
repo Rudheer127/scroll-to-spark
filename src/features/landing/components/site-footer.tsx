@@ -7,9 +7,9 @@ const LINK = "inline-flex min-h-11 items-center text-sm font-semibold hover:unde
 /** Quiet footer: a few links and a large decorative wordmark. Account links match the sign-in state. */
 export function SiteFooter() {
   return (
-    <footer className="overflow-hidden bg-ink px-6 text-background lg:px-12">
-      <div className="flex flex-wrap items-start justify-between gap-8 border-t border-white/15 py-10">
-        <p className="text-sm text-background/80">{FOOTER.note}</p>
+    <footer className="overflow-hidden bg-background px-6 text-ink lg:px-12">
+      <div className="flex flex-wrap items-start justify-between gap-8 border-t border-border py-10">
+        <p className="text-sm text-ink/75">{FOOTER.note}</p>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-1">
           {NAV_LINKS.map((link) => (
             <a key={link.id} href={`#${link.id}`} className={LINK}>
@@ -37,7 +37,7 @@ export function SiteFooter() {
       </div>
       <p
         aria-hidden
-        className="select-none text-[26vw] font-bold leading-[0.8] text-white/10 lg:text-[20vw]"
+        className="select-none text-[26vw] font-bold leading-[0.8] text-ink/10 lg:text-[20vw]"
       >
         Spark
       </p>

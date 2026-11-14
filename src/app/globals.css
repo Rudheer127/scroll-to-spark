@@ -14,6 +14,8 @@
   --color-ink: #262626;
   /* Text on top of an ink-filled control. It flips in dark mode with ink. */
   --color-on-ink: #ffffff;
+  /* Text on the orange sun fill. It stays dark in both themes. */
+  --color-on-sun: #1b1b1b;
   --color-muted: #6b6b6b;
   --color-chip: #f0f0f0;
 

@@ -5,7 +5,7 @@ import { Reveal } from "./reveal";
 
 const ICONS: Record<FeatureIcon, { Icon: LucideIcon; tile: string }> = {
   steps: { Icon: Sprout, tile: "bg-teal-soft text-teal-ink" },
-  thanks: { Icon: HeartHandshake, tile: "bg-sun text-ink" },
+  thanks: { Icon: HeartHandshake, tile: "bg-sun text-on-sun" },
   guide: { Icon: Sparkles, tile: "bg-lavender-soft text-lavender-ink" },
   private: { Icon: ShieldCheck, tile: "bg-chip text-ink" },
 };

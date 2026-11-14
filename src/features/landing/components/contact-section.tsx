@@ -10,7 +10,7 @@ export function ContactSection() {
     <section
       id="contact"
       aria-labelledby="contact-heading"
-      className="relative isolate scroll-mt-20 overflow-hidden rounded-t-[48px] bg-ink px-6 pb-12 pt-20 text-background lg:px-12 lg:pt-28"
+      className="relative isolate scroll-mt-20 overflow-hidden rounded-t-[48px] bg-background px-6 pb-12 pt-20 text-ink lg:px-12 lg:pt-28"
     >
       <Image
         src={PHOTOS.contact}
@@ -19,22 +19,20 @@ export function ContactSection() {
         sizes="100vw"
         className="-z-20 object-cover object-center"
       />
-      <div aria-hidden className="absolute inset-0 -z-10 bg-ink/80" />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-background/80" />
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-linear-to-r from-ink/90 to-transparent"
+        className="absolute inset-0 -z-10 bg-linear-to-r from-background/90 to-transparent"
       />
 
       <Reveal className="flex max-w-[44rem] flex-col items-start gap-6">
-        <p className="text-sm font-semibold text-background/80">Contact</p>
+        <p className="text-sm font-semibold text-ink/75">Contact</p>
         <h2 id="contact-heading" className="text-4xl font-bold sm:text-5xl">
           {CONTACT.heading}
         </h2>
         <WithAuth
-          signedOut={<p className="max-w-[52ch] text-lg text-background/90">{CONTACT.body}</p>}
-          signedIn={
-            <p className="max-w-[52ch] text-lg text-background/90">{CONTACT.signedInBody}</p>
-          }
+          signedOut={<p className="max-w-[52ch] text-lg text-ink/85">{CONTACT.body}</p>}
+          signedIn={<p className="max-w-[52ch] text-lg text-ink/85">{CONTACT.signedInBody}</p>}
         />
         <ContactActions
           primaryLabel={CONTACT.primaryCta}

@@ -1,21 +1,14 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
+import { isDarkNow, useDarkMode } from "./use-dark-mode";
 
 const KEY = "theme";
 
-function subscribe(onChange: () => void) {
-  const observer = new MutationObserver(onChange);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  return () => observer.disconnect();
-}
-
-const isDark = () => document.documentElement.dataset.theme === "dark";
-
 /** Switches between light (the default) and dark, and remembers the choice on this device. */
 export function ThemeToggle() {
-  const dark = useSyncExternalStore(subscribe, isDark, () => false);
+  const dark = useDarkMode();
 
   useEffect(() => {
     // Client-side navigation can arrive here without the head script having run, so apply it again.
@@ -24,14 +17,14 @@ export function ThemeToggle() {
     } catch {
       // Storage can be blocked. The toggle still works for this visit.
     }
-    // The landing page is always light, so leave dark behind when leaving the app.
+    // Leaving for a page without the toggle (the sign-in pages) drops dark. Any page with the toggle applies it again.
     return () => {
       delete document.documentElement.dataset.theme;
     };
   }, []);
 
   function toggle() {
-    const next = isDark() ? "light" : "dark";
+    const next = isDarkNow() ? "light" : "dark";
     if (next === "dark") document.documentElement.dataset.theme = "dark";
     else delete document.documentElement.dataset.theme;
     try {

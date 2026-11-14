@@ -8,7 +8,7 @@ const SPARKS = [
   { left: "62%", size: "size-1.5", color: "bg-lavender", d: "0.6s", t: "6.5s" },
   { left: "42%", size: "size-1.5", color: "bg-lavender", d: "3s", t: "5s" },
   { left: "58%", size: "size-2", color: "bg-sun", d: "3.8s", t: "6s" },
-  { left: "50%", size: "size-1", color: "bg-background", d: "1.8s", t: "7s" },
+  { left: "50%", size: "size-1", color: "bg-ink", d: "1.8s", t: "7s" },
   { left: "66%", size: "size-2", color: "bg-coral", d: "4.4s", t: "5.5s" },
 ] as const;
 
@@ -29,11 +29,11 @@ export function HeroScene() {
         <div
           key={card.className}
           style={{ "--r": card.r, "--d": card.d } as React.CSSProperties}
-          className={`landing-float absolute rounded-(--radius-input) border border-white/15 bg-white/10 p-4 ${card.className}`}
+          className={`landing-float absolute rounded-(--radius-input) border border-ink/15 bg-ink/10 p-4 ${card.className}`}
         >
-          <div className="mb-3 h-2.5 w-3/4 rounded-full bg-white/30" />
-          <div className="mb-2 h-2 w-full rounded-full bg-white/20" />
-          <div className="h-2 w-2/3 rounded-full bg-white/20" />
+          <div className="mb-3 h-2.5 w-3/4 rounded-full bg-ink/25" />
+          <div className="mb-2 h-2 w-full rounded-full bg-ink/15" />
+          <div className="h-2 w-2/3 rounded-full bg-ink/15" />
         </div>
       ))}
 
@@ -45,7 +45,7 @@ export function HeroScene() {
         />
       ))}
 
-      <div className="absolute bottom-[34%] left-[44%] flex size-16 items-center justify-center rounded-full bg-sun text-ink landing-pulse">
+      <div className="absolute bottom-[34%] left-[44%] flex size-16 items-center justify-center rounded-full bg-sun text-on-sun landing-pulse">
         <Sparkles className="size-7" />
       </div>
 
