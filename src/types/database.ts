@@ -99,6 +99,164 @@ export type Database = {
           },
         ];
       };
+      // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
+      // Regenerate the whole file with `supabase gen types` when the schema changes again.
+      contributions: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          id: string;
+          minutes: number;
+          occurred_on: string;
+          title: string;
+          user_id: string;
+          verification: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          minutes: number;
+          occurred_on: string;
+          title: string;
+          user_id: string;
+          verification?: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          minutes?: number;
+          occurred_on?: string;
+          title?: string;
+          user_id?: string;
+          verification?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contributions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
+      // Regenerate the whole file with `supabase gen types` when the schema changes again.
+      evidence_claims: {
+        Row: {
+          caveat: string | null;
+          claim: string;
+          created_at: string;
+          fts: unknown;
+          id: string;
+          population: string | null;
+          source_name: string;
+          source_url: string | null;
+          strength: string;
+          verified_at: string | null;
+          year: number | null;
+        };
+        Insert: {
+          caveat?: string | null;
+          claim: string;
+          created_at?: string;
+          fts?: never;
+          id?: string;
+          population?: string | null;
+          source_name: string;
+          source_url?: string | null;
+          strength: string;
+          verified_at?: string | null;
+          year?: number | null;
+        };
+        Update: {
+          caveat?: string | null;
+          claim?: string;
+          created_at?: string;
+          fts?: never;
+          id?: string;
+          population?: string | null;
+          source_name?: string;
+          source_url?: string | null;
+          strength?: string;
+          verified_at?: string | null;
+          year?: number | null;
+        };
+        Relationships: [];
+      };
+      // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
+      // Regenerate the whole file with `supabase gen types` when the schema changes again.
+      guide_events: {
+        Row: {
+          created_at: string;
+          detail: Json | null;
+          id: string;
+          kind: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          detail?: Json | null;
+          id?: string;
+          kind: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          detail?: Json | null;
+          id?: string;
+          kind?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "guide_events_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
+      // Regenerate the whole file with `supabase gen types` when the schema changes again.
+      guide_messages: {
+        Row: {
+          content: string;
+          created_at: string;
+          id: string;
+          intent: string | null;
+          role: string;
+          user_id: string;
+        };
+        Insert: {
+          content: string;
+          created_at?: string;
+          id?: string;
+          intent?: string | null;
+          role: string;
+          user_id: string;
+        };
+        Update: {
+          content?: string;
+          created_at?: string;
+          id?: string;
+          intent?: string | null;
+          role?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "guide_messages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       group_members: {
         Row: {
           group_id: string;

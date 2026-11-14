@@ -28,3 +28,6 @@ next-env.d.ts
 
 # local demo login, never commit
 .demo-account.txt
+
+# Supabase CLI scratch files
+supabase/.temp/

@@ -8,7 +8,21 @@ Built for the Principled Innovation Academy challenge:
 
 ## Status
 
-Early build. What works today: email sign-up and log-in, groups (create, edit, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, deleting your own threads and comments, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. The Spark Guide is a simple mood-to-step helper, not an AI chat. Image uploads and GIFs are not built yet. The list below describes the full plan, not only what exists today.
+Early build. What works today: email sign-up and log-in, groups (create, edit, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, deleting your own threads and comments, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. The Spark Guide chat (a popup with a text box, a maximised chat window and a full page, always labeled AI) is built. It runs on OpenRouter free models by default (cost $0, capped at about 20 requests a minute and 50 a day; a message uses 2 model calls, 3 when a repair is needed, plus 1 for an image), with Cerebras and Groq as failover. Free model providers may log or train on prompts, so treat this as a demo setup. Voice input uses the browser's own speech recognition and shows only where the browser supports it. Image reading is on with OpenRouter (a free vision model) and otherwise needs `GUIDE_VISION_MODEL`. A red team test (72 attack and benign prompts, run in CI with a scripted model that obeys every attack) passes. Four small live checks of the free models (three structured replies and one image description) passed, but a full guide turn has NOT been run against a live provider, and the live eval has NOT been run. The guide also needs the migration `supabase/migrations/20261114160000_guide_harness.sql` applied before it can answer. Image uploads and GIFs are not built yet. The list below describes the full plan, not only what exists today.
+
+## Running the live eval
+
+The red team test in `npm test` uses a scripted model. The live eval sends a 37 prompt subset of the same corpus (`tests/evals/injection-corpus.json`) to the real provider, with fake database rows and no Supabase, and writes nothing to disk. It skips itself when no key is set.
+
+```bash
+export CEREBRAS_API_KEY=...   # or GROQ_API_KEY=...
+export LLM_PROVIDER=cerebras  # optional: cerebras (default) or groq
+npm run eval:live
+```
+
+The live eval does not use OpenRouter: 37 prompts at 2 or more calls each would use most of the free daily cap.
+
+It prints a table (entry, category, intent, source, guard events, result) and fails the run on any leak: a URL, the canary, system prompt text, an ungrounded number, a verified or certified claim, or a crisis message that was not handled. Benign messages that get blocked are shown as FAIL rows in the table but do not fail the run. Report results honestly as counts, for example "N attack prompts, M passed", and only after a real run.
 
 ## What it will do
 
@@ -16,7 +30,7 @@ Early build. What works today: email sign-up and log-in, groups (create, edit, j
 2. **Real thank-yous.** A partner group replies to each action. Every reply is labeled by who wrote it: a real group or the app.
 3. **Progress without pressure.** A private view of what a person has done. No streaks, no leaderboards, no guilt.
 4. **Discussions.** Groups people can create, join, leave and delete, with Reddit-style threaded conversations, image uploads, emojis and GIFs, in an Instagram-style look.
-5. **Spark Guide.** An AI helper that declutters options, listens, and helps a person contribute. It only suggests real partner groups and is always labeled as AI.
+5. **Spark Guide.** A labeled AI guide (served by Cerebras or Groq open models, with one fallback) that points to open tasks posted in the app (demo tasks are marked as samples), thanks people for what they report doing (self reported, never verified), and checks claims against a small evidence list. It is not live tested yet: the live eval has not been run and the chat has not been checked in a browser.
 6. **Group portal.** A separate area where partner groups post small tasks and send thank-yous.
 
 ## Tech stack
@@ -25,12 +39,12 @@ Next.js, React, TypeScript, Tailwind CSS, shadcn/ui and 21st.dev components, Sup
 
 ## Documentation
 
-| Document | What it covers |
-|---|---|
-| [docs/TECH_STACK.md](docs/TECH_STACK.md) | The fixed technology choices and what is not allowed to change |
-| [docs/BUILD_RULES.md](docs/BUILD_RULES.md) | Coding rules: what to do, what to avoid, how to reuse code |
-| [docs/UI_UX_RULES.md](docs/UI_UX_RULES.md) | Layout, copy and interaction rules for every screen |
-| [docs/FILE_TREE.md](docs/FILE_TREE.md) | The folder layout and where each kind of code lives |
+| Document                                   | What it covers                                                 |
+| ------------------------------------------ | -------------------------------------------------------------- |
+| [docs/TECH_STACK.md](docs/TECH_STACK.md)   | The fixed technology choices and what is not allowed to change |
+| [docs/BUILD_RULES.md](docs/BUILD_RULES.md) | Coding rules: what to do, what to avoid, how to reuse code     |
+| [docs/UI_UX_RULES.md](docs/UI_UX_RULES.md) | Layout, copy and interaction rules for every screen            |
+| [docs/FILE_TREE.md](docs/FILE_TREE.md)     | The folder layout and where each kind of code lives            |
 
 Read the three rule documents before writing any code.
 
@@ -84,7 +98,6 @@ The app will be deployed to Vercel. The database, sign-in and file storage run o
 ## License
 
 Not chosen yet.
-
 
 ## Demo data
 

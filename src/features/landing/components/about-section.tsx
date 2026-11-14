@@ -13,7 +13,6 @@ export function AboutSection() {
     >
       <div className="grid gap-10 lg:grid-cols-2 lg:items-stretch">
         <Reveal className="flex flex-col items-start gap-6">
-          <p className="text-sm font-semibold text-muted">About</p>
           <h2 id="about-heading" className="text-4xl font-bold sm:text-5xl">
             {ABOUT.heading}
           </h2>

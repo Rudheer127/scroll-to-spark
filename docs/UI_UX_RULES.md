@@ -76,6 +76,7 @@ All colors, fonts and spacing come from design tokens defined once in the Tailwi
 - A persistent left navigation rail: Home, Discussions, My steps, Messages, Notifications, Profile.
 - The current location is always visible and the way back is always one click.
 - The Spark Guide opens as a popup, and can expand to a full page with history, like a chat app. Both views use the same component and the same data.
+- The popup's Expand button opens a maximised chat window: a modal over almost the whole screen (all of it on a phone) with the title, the AI label, New chat, Minimize and Close. Escape closes it, focus stays inside and returns to the launcher, and the page behind does not scroll. Message text keeps a reading width of about 70 characters while the window uses the full space. The composer sits at the bottom; the mic shows only when the browser supports speech recognition, and the attach button only when image reading is on.
 - Group partners use a separate portal area with its own navigation.
 
 ## Discussions

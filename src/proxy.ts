@@ -18,11 +18,16 @@ function matches(pathname: string, paths: string[]): boolean {
 
 /**
  * Signed-out visitors see the landing page at "/" (the address stays "/"), and are sent to the login
- * page for everything else that is private. Signed-in people go to the app and away from the sign-in pages.
+ * page for everything else that is private. Signed-out calls to "/api/" get a 401 JSON instead of a
+ * redirect. Signed-in people go to the app and away from the sign-in pages.
  */
 export async function proxy(request: NextRequest) {
   const { response, user } = await updateSession(request);
   const { pathname } = request.nextUrl;
+
+  if (!user && pathname.startsWith("/api/")) {
+    return NextResponse.json({ error: "Please sign in." }, { status: 401 });
+  }
 
   if (!user && pathname === "/") {
     const landing = NextResponse.rewrite(new URL(LANDING_PATH, request.url));

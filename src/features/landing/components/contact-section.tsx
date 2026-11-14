@@ -26,7 +26,6 @@ export function ContactSection() {
       />
 
       <Reveal className="flex max-w-[44rem] flex-col items-start gap-6">
-        <p className="text-sm font-semibold text-ink/75">Contact</p>
         <h2 id="contact-heading" className="text-4xl font-bold sm:text-5xl">
           {CONTACT.heading}
         </h2>
