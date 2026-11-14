@@ -29,7 +29,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <main className="min-w-0 px-10 py-8">
           <Suspense fallback={<PageSkeleton />}>{children}</Suspense>
         </main>
-        <GuidePopup />
+        <Suspense fallback={null}>
+          <GuidePopup />
+        </Suspense>
       </div>
     </GuideProvider>
   );
