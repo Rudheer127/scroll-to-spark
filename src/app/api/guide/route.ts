@@ -8,11 +8,17 @@ const MAX_BODY_BYTES = 4000;
 const bodySchema = z.object({ message: z.string() });
 const NO_STORE = { "Cache-Control": "no-store" };
 
+/** application/json, any case, optionally with parameters such as charset. */
+const isJson = (type: string | null) => /^application\/json\s*(?:;|$)/i.test(type?.trim() ?? "");
+
 const reply = (body: unknown, status: number, extra: Record<string, string> = {}) =>
   NextResponse.json(body, { status, headers: { ...NO_STORE, ...extra } });
 
 export async function POST(request: Request) {
   try {
+    if (!isJson(request.headers.get("content-type"))) {
+      return reply({ error: "Send the message as JSON." }, 415);
+    }
     const body = await readBodyWithLimit(request, MAX_BODY_BYTES);
     if (!body.ok) return reply({ error: "That message is too long." }, 413);
     const raw = body.text;

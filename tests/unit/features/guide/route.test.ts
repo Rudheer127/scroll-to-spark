@@ -15,7 +15,11 @@ vi.mock("@/features/guide/llm/from-env", () => ({ createGuideLlm: () => mocks.ll
 import { POST } from "@/app/api/guide/route";
 
 const req = (body: string, headers: Record<string, string> = {}) =>
-  new Request("http://localhost/api/guide", { method: "POST", body, headers });
+  new Request("http://localhost/api/guide", {
+    method: "POST",
+    body,
+    headers: { "content-type": "application/json", ...headers },
+  });
 const json = (message: string) => req(JSON.stringify({ message }));
 const chat = {
   router_output: [routerReply("chitchat")],
@@ -58,6 +62,7 @@ describe("POST /api/guide", () => {
     const streamedReq = new Request("http://localhost/api/guide", {
       method: "POST",
       body,
+      headers: { "content-type": "application/json" },
       duplex: "half",
     } as RequestInit);
     expect((await POST(streamedReq)).status).toBe(413);
@@ -121,5 +126,24 @@ describe("POST /api/guide", () => {
     const text = await res.text();
     expect(text).not.toMatch(/SECRET|stack|at \w+ \(/);
     expect(res.headers.get("Cache-Control")).toBe("no-store");
+  });
+});
+
+describe("POST /api/guide content type (minor c)", () => {
+  it.each(["text/plain", "application/x-www-form-urlencoded", ""])(
+    "returns 415 for content type %j with zero llm calls",
+    async (type) => {
+      const t = arrange({ user: { id: "u1" }, script: chat });
+      const res = await POST(req(JSON.stringify({ message: "hi" }), { "content-type": type }));
+      expect(res.status).toBe(415);
+      expect(t.getUser).not.toHaveBeenCalled();
+      expect(t.llm.calls).toHaveLength(0);
+    },
+  );
+
+  it.each(["application/json; charset=utf-8", "Application/JSON"])("accepts %s", async (type) => {
+    arrange({ user: { id: "u1" }, script: chat });
+    const res = await POST(req(JSON.stringify({ message: "hi" }), { "content-type": type }));
+    expect(res.status).toBe(200);
   });
 });
