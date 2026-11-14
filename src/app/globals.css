@@ -66,6 +66,16 @@
       transform: translateY(0.375rem);
     }
   }
+
+  /* The guide's avatar drifts up and down a few pixels. Use it with motion-safe. */
+  --animate-float: float 4.5s ease-in-out infinite;
+  --animate-float-fast: float 1.4s ease-in-out infinite;
+
+  @keyframes float {
+    50% {
+      transform: translateY(-0.25rem);
+    }
+  }
 }
 
 /* Dark mode. Light is the default; a person opts in with the toggle and the choice is remembered. */

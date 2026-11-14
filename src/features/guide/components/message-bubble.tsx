@@ -1,40 +1,34 @@
 import { cn } from "@/lib/cn";
-import { AiChip } from "./ai-chip";
+import { GuideAvatar } from "./guide-avatar";
 
 type MessageBubbleProps = {
   role: "user" | "assistant";
-  /** Where the words came from, for example "From the app (AI)". Shown next to the AI chip. */
+  /** Where the words came from, for example "From the app (AI)". Read aloud by screen readers. */
   label?: string | null;
   children: React.ReactNode;
 };
 
 /**
  * One message, in the familiar chat layout: your words in a soft bubble on the right, the guide's
- * words as plain text on the left. Every assistant message carries an AI chip, so app text never
- * looks like a person.
+ * words as plain text on the left beside its eagle avatar. The avatar is the label, and screen readers
+ * also get a line saying the answer is from the app and is AI, so app text never looks like a person.
  */
 export function MessageBubble({ role, label, children }: MessageBubbleProps) {
-  const assistant = role === "assistant";
-  return (
-    <div className={cn("flex flex-col gap-1.5", assistant ? "items-start" : "items-end")}>
-      <div className="flex items-center gap-2 text-sm text-muted">
-        {assistant ? (
-          <>
-            <AiChip />
-            {label ? <span>{label}</span> : null}
-          </>
-        ) : (
-          <span className="font-semibold">You</span>
-        )}
+  if (role === "user") {
+    return (
+      <div className="flex flex-col items-end gap-1.5">
+        <span className="text-sm font-semibold text-muted">You</span>
+        <div className="max-w-[min(70ch,85%)] rounded-3xl bg-chip px-4 py-2.5 text-base leading-relaxed break-words whitespace-pre-wrap">
+          {children}
+        </div>
       </div>
-      <div
-        className={cn(
-          "text-base leading-relaxed break-words whitespace-pre-wrap",
-          assistant
-            ? "w-full max-w-[70ch]"
-            : "max-w-[min(70ch,85%)] rounded-3xl bg-chip px-4 py-2.5",
-        )}
-      >
+    );
+  }
+  return (
+    <div className="flex items-start gap-3">
+      <GuideAvatar />
+      <div className="min-w-0 w-full max-w-[70ch] pt-1.5 text-base leading-relaxed break-words whitespace-pre-wrap">
+        <span className="sr-only">{label ?? "From the app (AI)"}. </span>
         {children}
       </div>
     </div>
@@ -44,13 +38,10 @@ export function MessageBubble({ role, label, children }: MessageBubbleProps) {
 /** A placeholder with the same layout as an answer, shown while the guide works. */
 export function MessageBubblePending() {
   return (
-    <div aria-busy="true" className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-2 text-sm text-muted">
-        <AiChip />
-        <span aria-hidden>Thinking</span>
+    <div aria-busy="true" className="flex items-start gap-3">
+      <GuideAvatar busy />
+      <div className={cn("flex w-full max-w-[70ch] flex-col gap-2 pt-3 motion-safe:animate-pulse")}>
         <span className="sr-only">The guide is thinking</span>
-      </div>
-      <div className="flex w-full max-w-[70ch] flex-col gap-2 py-1 motion-safe:animate-pulse">
         <div className="h-4 w-3/4 rounded-lg bg-chip" />
         <div className="h-4 w-1/2 rounded-lg bg-chip" />
       </div>

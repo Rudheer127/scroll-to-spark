@@ -69,7 +69,7 @@ All colors, fonts and spacing come from design tokens defined once in the Tailwi
 - Plain, short and kind. Write as you would talk to a friend.
 - No guilt, no pressure and no fake urgency. Never "You are about to lose your streak".
 - Say what will happen before it happens: "A real person from the group will reply within 48 hours."
-- Label who wrote a message: "From a real group" or "From the app". Never let app text look like it came from a person.
+- Label who wrote a message: "From a real group" or "From the app". Never let app text look like it came from a person. In the guide chat the label is the eagle avatar next to each answer (a cartoon, never a person). Its accessible name and a screen reader line say the answer is from the app and is AI, and the caption under the composer says it too.
 - Say that the guide is AI everywhere it appears.
 - Sample content is labeled as sample content.
 
