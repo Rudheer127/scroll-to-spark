@@ -141,6 +141,7 @@ export type Database = {
           created_at: string;
           description: string | null;
           id: string;
+          is_demo: boolean;
           is_private: boolean;
           name: string;
           owner_id: string;
@@ -151,6 +152,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           id?: string;
+          is_demo?: boolean;
           is_private?: boolean;
           name: string;
           owner_id: string;
@@ -161,6 +163,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           id?: string;
+          is_demo?: boolean;
           is_private?: boolean;
           name?: string;
           owner_id?: string;
@@ -182,6 +185,7 @@ export type Database = {
           created_at: string;
           display_name: string | null;
           id: string;
+          is_demo: boolean;
           username: string;
         };
         Insert: {
@@ -189,6 +193,7 @@ export type Database = {
           created_at?: string;
           display_name?: string | null;
           id: string;
+          is_demo?: boolean;
           username: string;
         };
         Update: {
@@ -196,6 +201,7 @@ export type Database = {
           created_at?: string;
           display_name?: string | null;
           id?: string;
+          is_demo?: boolean;
           username?: string;
         };
         Relationships: [];
@@ -277,6 +283,144 @@ export type Database = {
             columns: ["group_id"];
             isOneToOne: false;
             referencedRelation: "groups";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tasks: {
+        Row: {
+          created_at: string;
+          created_by: string;
+          description: string | null;
+          effort: string;
+          group_id: string;
+          id: string;
+          is_open: boolean;
+          minutes: number;
+          place: string;
+          reply_within_hours: number;
+          title: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by: string;
+          description?: string | null;
+          effort: string;
+          group_id: string;
+          id?: string;
+          is_open?: boolean;
+          minutes: number;
+          place?: string;
+          reply_within_hours?: number;
+          title: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string;
+          description?: string | null;
+          effort?: string;
+          group_id?: string;
+          id?: string;
+          is_open?: boolean;
+          minutes?: number;
+          place?: string;
+          reply_within_hours?: number;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tasks_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "groups";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      task_completions: {
+        Row: {
+          created_at: string;
+          id: string;
+          note: string | null;
+          task_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          note?: string | null;
+          task_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          note?: string | null;
+          task_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "task_completions_task_id_fkey";
+            columns: ["task_id"];
+            isOneToOne: false;
+            referencedRelation: "tasks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "task_completions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      thank_yous: {
+        Row: {
+          body: string | null;
+          completion_id: string;
+          created_at: string;
+          from_user_id: string;
+          id: string;
+          kind: string;
+        };
+        Insert: {
+          body?: string | null;
+          completion_id: string;
+          created_at?: string;
+          from_user_id: string;
+          id?: string;
+          kind: string;
+        };
+        Update: {
+          body?: string | null;
+          completion_id?: string;
+          created_at?: string;
+          from_user_id?: string;
+          id?: string;
+          kind?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "thank_yous_completion_id_fkey";
+            columns: ["completion_id"];
+            isOneToOne: true;
+            referencedRelation: "task_completions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "thank_yous_from_user_id_fkey";
+            columns: ["from_user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
