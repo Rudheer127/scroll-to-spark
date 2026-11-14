@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EFFORTS } from "@/features/steps/constants";
 import { INTENTS, MAX_CARDS, MAX_MESSAGE_CHARS } from "./constants";
 
 /** Strict structured output: every field required, optional values use nullable. */
@@ -36,3 +37,12 @@ export const routerOutputSchema = z.object({
 });
 
 export type RouterOutput = z.infer<typeof routerOutputSchema>;
+
+/** Filters the opportunity handler asks the model to pull out of the message. Strict-compatible. */
+export const opportunityFiltersSchema = z.object({
+  effort: z.enum(EFFORTS).nullable(),
+  remoteOnly: z.boolean(),
+  keyword: z.string().max(100).nullable(),
+});
+
+export type OpportunityFiltersOutput = z.infer<typeof opportunityFiltersSchema>;

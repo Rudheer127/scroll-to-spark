@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { callStructured } from "@/features/guide/llm/structured";
+import { callStructured, stripUnsupportedKeywords } from "@/features/guide/llm/structured";
 import type { LlmClient, LlmResult } from "@/features/guide/llm/types";
 
 const schema = z.object({ answer: z.string(), note: z.string().nullable() });
@@ -45,5 +45,46 @@ describe("callStructured", () => {
       base,
     );
     expect(res).toEqual({ ok: false, reason: "rate_limited" });
+  });
+});
+
+describe("schema keyword stripping (R15)", () => {
+  const constrained = z.object({
+    message: z.string().max(10).min(1),
+    list: z.array(z.object({ id: z.string() })).max(3),
+    count: z.number().int().min(1).max(600),
+    when: z.string().regex(/^\d+$/),
+    kind: z.enum(["a", "b"]),
+    maybe: z.string().max(5).nullable(),
+    format: z.string(),
+  });
+
+  it("removes unsupported constraint keywords at every depth", () => {
+    const stripped = JSON.stringify(stripUnsupportedKeywords(z.toJSONSchema(constrained)));
+    for (const key of ["maxLength", "minLength", "maxItems", "minimum", "maximum", "pattern"]) {
+      expect(stripped).not.toContain(`"${key}"`);
+    }
+  });
+
+  it("keeps structure, enums, nullability and a field that is itself named format", () => {
+    const stripped = stripUnsupportedKeywords(z.toJSONSchema(constrained)) as {
+      required: string[];
+      additionalProperties: boolean;
+      properties: Record<string, unknown>;
+    };
+    expect(stripped.additionalProperties).toBe(false);
+    expect(stripped.required).toContain("format");
+    expect(Object.keys(stripped.properties)).toContain("format");
+    expect(JSON.stringify(stripped.properties.kind)).toContain('"enum":["a","b"]');
+    expect(JSON.stringify(stripped.properties.maybe)).toContain("anyOf");
+  });
+
+  it("sends the stripped schema but still enforces limits locally", async () => {
+    const client = clientReturning(text('{"message":"far too long for the limit"}'));
+    const local = z.object({ message: z.string().max(10) });
+    const res = await callStructured(client, local, base);
+    expect(res).toEqual({ ok: false, reason: "invalid_json" });
+    const sent = vi.mocked(client.complete).mock.calls[0][0];
+    expect(JSON.stringify(sent.jsonSchema)).not.toContain("maxLength");
   });
 });

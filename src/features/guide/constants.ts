@@ -42,3 +42,7 @@ export const BANNED_PHRASES = [
   "last chance",
   "hurry",
 ] as const;
+
+/** Most user messages one person may send to the guide per minute and per day. */
+export const RATE_PER_MINUTE = 6;
+export const RATE_PER_DAY = 60;

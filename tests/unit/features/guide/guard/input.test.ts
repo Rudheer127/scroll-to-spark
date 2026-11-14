@@ -9,7 +9,7 @@ import {
 import { detectCrisis } from "@/features/guide/guard/crisis";
 import { detectInjectionSignals } from "@/features/guide/guard/injection-signals";
 import { sanitizeInput } from "@/features/guide/guard/sanitize-input";
-import { newNonce, wrapUntrusted } from "@/features/guide/guard/untrusted";
+import { newCanary, newNonce, wrapUntrusted } from "@/features/guide/guard/untrusted";
 
 const ZW = "​";
 
@@ -165,5 +165,13 @@ describe("fallback messages", () => {
     expect(REDIRECT_MESSAGE).toMatch(/\bAI\b/);
     expect(UNAVAILABLE_MESSAGE).toContain("try again in a minute");
     expect(RATE_LIMIT_MESSAGE).toMatch(/breather/);
+  });
+});
+
+describe("newCanary", () => {
+  it("returns CANARY- plus 16 hex chars and varies", () => {
+    const a = newCanary();
+    expect(a).toMatch(/^CANARY-[0-9a-f]{16}$/);
+    expect(newCanary()).not.toBe(a);
   });
 });
