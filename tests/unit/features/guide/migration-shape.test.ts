@@ -57,4 +57,25 @@ describe("guide harness migration", () => {
     expect(lower).toMatch(/verified_at[^;]*null/);
     expect(sql).toContain("Link needs a re-check.");
   });
+
+  it("lets clients insert only user-role guide messages with limited columns", () => {
+    const policy = lower.match(/create policy "add own guide messages"[^;]*;/)?.[0] ?? "";
+    expect(policy).toContain("role = 'user'");
+    const grant = lower.match(
+      /grant insert \(([^)]*)\) on public\.guide_messages to authenticated/,
+    );
+    expect(grant).not.toBeNull();
+    const cols = (grant?.[1] ?? "").split(",").map((c) => c.trim());
+    expect(cols).toEqual(["user_id", "role", "content"]);
+    expect(lower).not.toMatch(/grant[^;]*\binsert\b(?! \()[^;]*on public\.guide_messages/);
+  });
+
+  it("locks down the future-date trigger function", () => {
+    const fn =
+      lower.match(/create function private\.reject_future_contribution[\s\S]*?\$\$;/)?.[0] ?? "";
+    expect(fn).toContain("set search_path = ''");
+    expect(lower).toMatch(
+      /revoke execute on function private\.reject_future_contribution\(\) from public, anon, authenticated/,
+    );
+  });
 });

@@ -78,11 +78,14 @@ create index guide_messages_user_id_created_at_idx on public.guide_messages (use
 
 alter table public.guide_messages enable row level security;
 revoke all on public.guide_messages from anon, authenticated;
-grant select, insert on public.guide_messages to authenticated;
+grant select on public.guide_messages to authenticated;
+-- Clients may only write their own user turns. Assistant rows and intent are written by the
+-- service role, which bypasses RLS and grants, so a client can never forge a guide reply.
+grant insert (user_id, role, content) on public.guide_messages to authenticated;
 create policy "read own guide messages" on public.guide_messages
   for select to authenticated using (user_id = (select auth.uid()));
 create policy "add own guide messages" on public.guide_messages
-  for insert to authenticated with check (user_id = (select auth.uid()));
+  for insert to authenticated with check (user_id = (select auth.uid()) and role = 'user');
 
 -- guide_events: safety signals, written by the server only (detail holds signal names, never text)
 create table public.guide_events (
