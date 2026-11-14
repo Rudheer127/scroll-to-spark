@@ -47,14 +47,15 @@ const PATTERNS: Record<InjectionSignal, RegExp[]> = {
   ],
   reveal_prompt: [
     /\b(?:print|show|reveal|repeat|output|display|tell|give|leak|share|write|recite|dump)\b(?:\W+\w+){0,4}?\W+(?:system|initial|hidden|original|developer|secret|internal)\W+(?:prompt|instructions?|message|rules)\b/i,
-    /\bwhat\s+(?:is|are|were)\s+your\s+(?:(?:system|initial|original|hidden)\s+)?(?:prompt|instructions?|rules)\b/i,
+    /\bwhat\s+(?:is|are|were)\s+your\s+(?:(?:system|initial|original|hidden|secret)\s+(?:prompt|instructions?|rules)|prompt)\b/i,
+    /\b(?:(?:reveal|show|print|repeat|output|dump|leak|display)(?:\s+me)?|tell\s+me)\s+(?:your|the)\s+(?:(?:system|hidden|secret|initial|full|entire)\s+)?(?:prompt|instructions?|rules)\b/i,
     /\b(?:system|developer)\s+prompt\b/i,
     /\b(?:muestra|revela|imprime|repite|dime|dame|di|comparte)\b(?:\W+\w+){0,4}?\W+(?:prompt|instrucciones)\s+(?:del\s+sistema|iniciales|ocultas|originales|internas)/i,
     /\b(?:revela|muestra|repite|imprime)\b(?:\W+\w+){0,2}?\W+(?:tu|su)\s+prompt\b/i,
   ],
   role_override: [
     /\byou\s+are\s+now\b(?!\s+my\s+(?:favou?rite|best|good)\b)/i,
-    /\bfrom\s+now\s+on\s*,?\s+you\b/i,
+    /\bfrom\s+now\s+on\s*,?\s+(?:you\s+(?:are|will|must|shall)\b|you['’]re\b|(?:you\s+)?(?:act|respond|reply)\s+as\b|(?:you\s+)?(?:pretend|behave)\b)/i,
     /\bdo\s+anything\s+now\b/i,
     /\b(?:developer|god|jailbreak|jailbroken|unrestricted)\s+mode\b/i,
     /\bjailbreak(?:ed)?\b/i,
@@ -80,7 +81,9 @@ const PATTERNS: Record<InjectionSignal, RegExp[]> = {
     /\b(?:drop|truncate)\s+table\b/i,
     /\bdelete\s+from\s+\w+/i,
     /\bselect\s+\*\s+from\b/i,
-    /\bsend\s+(?:an?\s+)?(?:email|message|request)\s+to\b(?!\s+(?:my|our)\b)/i,
+    // Sending is ordinary civic help. Only an explicit exfil target (a link, an address, a domain
+    // or "the attacker") counts; the output guard and the lack of tools cover the rest.
+    /\bsend\b(?:\W+\w+){0,4}?\W+to\s+(?:https?:\/\/|www\.|\S+@\S+\.\w|(?:the\s+)?attacker\b|[a-z0-9-]+\.(?:example|com|net|org|io|xyz|ru|top)\b)/i,
   ],
 };
 
