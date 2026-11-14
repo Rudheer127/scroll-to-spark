@@ -56,7 +56,14 @@ export async function guardedResult(log: LogEvent, out: HandlerOutput): Promise<
   let response = out.response;
   let check = checkAll(out, response);
   if (!check.ok) {
-    response = await out.retry(check.violations);
+    const first = check.violations;
+    try {
+      response = await out.retry(first);
+    } catch (error) {
+      // The repair failed, but the first answer was still blocked: record why.
+      await log("output_blocked", { violations: first.join(",") });
+      throw error;
+    }
     check = checkAll(out, response);
   }
   if (!check.ok) {

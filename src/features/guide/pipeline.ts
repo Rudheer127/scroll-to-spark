@@ -97,7 +97,13 @@ async function answer(input: GuideTurnInput, text: string): Promise<GuideTurnRes
 async function admit(input: GuideTurnInput, text: string): Promise<GuideTurnResult | null> {
   const { userId, admin, db } = input;
   return serializePerUser(userId, async () => {
-    const rate = await checkRateLimit(db, userId);
+    let rate: Awaited<ReturnType<typeof checkRateLimit>>;
+    try {
+      rate = await checkRateLimit(db, userId);
+    } catch {
+      await logGuideEvent(admin, userId, "provider_failure", { stage: "rate_limit" });
+      return unavailableResult();
+    }
     if (!rate.allowed) {
       await logGuideEvent(admin, userId, "rate_limited", { retryAfterSec: rate.retryAfterSec });
       return {

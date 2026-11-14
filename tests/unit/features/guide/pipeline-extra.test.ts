@@ -286,3 +286,33 @@ describe("runGuideTurn: router and filter failures are logged (I7)", () => {
     expect(t.llm.callsFor("opportunity_filters")[0].maxTokens).toBe(1000);
   });
 });
+
+describe("runGuideTurn: failure logging (minor d)", () => {
+  it("a repair that fails still logs the original output_blocked violations", async () => {
+    const t = setup(
+      {
+        router_output: [routerReply("find_opportunity")],
+        opportunity_filters: [filtersReply()],
+        guide_response: [
+          guideReply({ intent: "find_opportunity", message: "See https://x.org now" }),
+          fail("timeout"),
+        ],
+      },
+      { tasks: [taskRow("t1")] },
+    );
+    const res = await t.run("something small");
+    expect(res.outcome).toBe("unavailable");
+    const blocked = t.log.find((i) => i.row.kind === "output_blocked");
+    expect(JSON.stringify(blocked?.row.detail)).toContain("url_in_text");
+    expect(t.events()).toContain("provider_failure");
+  });
+
+  it("a rate limit read error logs provider_failure with stage rate_limit", async () => {
+    const t = setup(chat(), { throwOnTable: "guide_messages" });
+    const res = await t.run("hello");
+    expect(res.outcome).toBe("unavailable");
+    expect(t.llm.calls).toHaveLength(0);
+    const failure = t.log.find((i) => i.row.kind === "provider_failure");
+    expect(failure?.row.detail).toEqual({ stage: "rate_limit" });
+  });
+});
