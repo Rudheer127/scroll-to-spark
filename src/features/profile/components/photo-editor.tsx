@@ -105,7 +105,8 @@ export function PhotoEditor({ userId, currentUrl, onSaved, onCancel }: PhotoEdit
     if (!file) return;
     setError(null);
     if (!file.type.startsWith("image/")) return setError("Pick an image file.");
-    if (file.size > MAX_PICKED_BYTES) return setError("That image is over 10 MB. Pick a smaller one.");
+    if (file.size > MAX_PICKED_BYTES)
+      return setError("That image is over 10 MB. Pick a smaller one.");
     try {
       adopt(await readFile(file));
     } catch {
@@ -167,7 +168,11 @@ export function PhotoEditor({ userId, currentUrl, onSaved, onCancel }: PhotoEdit
       if (!context) throw new Error("no canvas");
       drawCrop(context, source.bitmap, source.width, source.height, crop, AVATAR_SIZE_PX);
       const blob = await new Promise<Blob>((resolve, reject) =>
-        canvas.toBlob((made) => (made ? resolve(made) : reject(new Error("no blob"))), "image/webp", 0.88),
+        canvas.toBlob(
+          (made) => (made ? resolve(made) : reject(new Error("no blob"))),
+          "image/webp",
+          0.88,
+        ),
       );
       const path = `${userId}/avatar-${Date.now()}.webp`;
       const { error: uploadError } = await createClient()
@@ -225,7 +230,9 @@ export function PhotoEditor({ userId, currentUrl, onSaved, onCancel }: PhotoEdit
         >
           <ImagePlus aria-hidden className="size-8 text-muted" />
           <span className="font-semibold">{loading ? "Opening your photo" : "Choose a photo"}</span>
-          <span className="text-sm text-muted">Or drop one here. JPG, PNG or WebP, up to 10 MB.</span>
+          <span className="text-sm text-muted">
+            Or drop one here. JPG, PNG or WebP, up to 10 MB.
+          </span>
         </button>
         {picker}
         {error ? (
@@ -312,7 +319,9 @@ export function PhotoEditor({ userId, currentUrl, onSaved, onCancel }: PhotoEdit
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
-            onClick={() => change({ rotation: (((crop.rotation + 90) % 360) as CropState["rotation"]) })}
+            onClick={() =>
+              change({ rotation: ((crop.rotation + 90) % 360) as CropState["rotation"] })
+            }
           >
             <RotateCw aria-hidden className="size-4" />
             Rotate

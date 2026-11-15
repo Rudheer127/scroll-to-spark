@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { getCurrentProfile, getCurrentUser } from "@/features/auth/queries";
-import { DisplayNameForm } from "@/features/profile/components/display-name-form";
+import { EditableName } from "@/features/profile/components/editable-name";
 import { EmailForm } from "@/features/profile/components/email-form";
 import { PasswordForm } from "@/features/profile/components/password-form";
 import { ProfilePhotoActions } from "@/features/profile/components/profile-photo-actions";
@@ -22,7 +22,11 @@ export default async function SettingsPage() {
       <header className="flex flex-col gap-5 rounded-(--radius-card) border border-border bg-surface p-6 shadow-card sm:flex-row sm:items-center">
         <UserAvatar name={shownName} url={profile.avatar_url} className="size-20 text-3xl" />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <h1 className="truncate text-3xl font-bold">{shownName}</h1>
+          <EditableName
+            shownName={shownName}
+            displayName={profile.display_name}
+            username={profile.username}
+          />
           <p className="truncate text-muted">
             @{profile.username} &middot; {user.email}
           </p>
@@ -34,12 +38,6 @@ export default async function SettingsPage() {
         <ProfilePhotoActions userId={user.id} url={profile.avatar_url} />
       </header>
 
-      <SettingsSection
-        title="Display name"
-        description="The name people see first. Your username stays as your handle."
-      >
-        <DisplayNameForm displayName={profile.display_name} />
-      </SettingsSection>
       <SettingsSection
         title="Username"
         description="Your unique handle. Capitals are fine, and so are dots and hyphens."
