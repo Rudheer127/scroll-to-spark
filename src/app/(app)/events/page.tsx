@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { getPublicEnv } from "@/lib/env";
 import { EventsExplorer } from "@/features/events/components/events-explorer";
 import { getEvents } from "@/features/events/source";
 import { getMyRsvps } from "@/features/events/queries";
@@ -8,7 +9,13 @@ export const metadata: Metadata = { title: "Events" };
 
 async function EventsContent() {
   const [feed, rsvps] = await Promise.all([getEvents(null), getMyRsvps()]);
-  return <EventsExplorer initialFeed={feed} initialRsvps={rsvps} />;
+  return (
+    <EventsExplorer
+      initialFeed={feed}
+      initialRsvps={rsvps}
+      mapKey={getPublicEnv().NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY}
+    />
+  );
 }
 
 function EventsSkeleton() {

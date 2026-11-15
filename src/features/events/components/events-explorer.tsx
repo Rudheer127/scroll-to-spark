@@ -45,10 +45,10 @@ function writeSavedZip(zip: string | null) {
   }
 }
 
-type Props = { initialFeed: EventFeed; initialRsvps: Rsvp[] };
+type Props = { initialFeed: EventFeed; initialRsvps: Rsvp[]; mapKey?: string };
 
 /** The Events screen: where you are, what kind of event, a search box, and the list. */
-export function EventsExplorer({ initialFeed, initialRsvps }: Props) {
+export function EventsExplorer({ initialFeed, initialRsvps, mapKey }: Props) {
   const [feed, setFeed] = useState(initialFeed);
   const [location, setLocation] = useState<EventLocation | null>(null);
   const [zipInput, setZipInput] = useState("");
@@ -364,6 +364,7 @@ export function EventsExplorer({ initialFeed, initialRsvps }: Props) {
                   status={rsvps.get(event.key)?.status ?? null}
                   distanceMiles={eventDistance(event, center)}
                   onStatusChange={changeStatus}
+                  mapKey={mapKey}
                 />
               ))}
             </ul>

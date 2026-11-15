@@ -15,6 +15,7 @@ type EventCardProps = {
   distanceMiles: number | null;
   /** Called with the new status, or null once the RSVP is removed. */
   onStatusChange: (eventKey: string, next: RsvpStatus | null) => void;
+  mapKey?: string;
 };
 
 function DateTile({ event }: { event: CivicEvent }) {
@@ -38,7 +39,13 @@ function DateTile({ event }: { event: CivicEvent }) {
 }
 
 /** One event as a row: picture, when and where, who runs it, and what you can do about it. */
-export function EventCard({ event, status, distanceMiles, onStatusChange }: EventCardProps) {
+export function EventCard({
+  event,
+  status,
+  distanceMiles,
+  onStatusChange,
+  mapKey,
+}: EventCardProps) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -141,7 +148,7 @@ export function EventCard({ event, status, distanceMiles, onStatusChange }: Even
         {event.summary ? <p className="line-clamp-2 text-sm">{event.summary}</p> : null}
 
         {event.lat !== null && event.lng !== null && !event.isSample ? (
-          <EventMap lat={event.lat} lng={event.lng} title={event.title} />
+          <EventMap lat={event.lat} lng={event.lng} title={event.title} embedKey={mapKey} />
         ) : null}
 
         {event.isSample ? (

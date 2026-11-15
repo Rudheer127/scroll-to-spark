@@ -3,6 +3,15 @@ import { z } from "zod";
 const publicSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+  /**
+   * Google Maps Embed API key for the map preview on Events. Optional: without it the preview uses
+   * Google's keyless embed. The key ships to the browser by design, so restrict it in Google Cloud
+   * to the Maps Embed API and to this site's address.
+   */
+  NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().min(1).optional(),
+  ),
 });
 
 const blankToUndefined = (v: unknown) => (v === "" ? undefined : v);
@@ -67,6 +76,7 @@ export function getPublicEnv() {
   return publicSchema.parse({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY,
   });
 }
 
@@ -92,6 +102,7 @@ export function getServerEnv(): ServerEnv {
   return serverSchema.parse({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     ...llmValues(),
     GIF_API_KEY: process.env.GIF_API_KEY,

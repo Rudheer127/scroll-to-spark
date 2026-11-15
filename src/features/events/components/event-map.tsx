@@ -4,16 +4,24 @@ import { useState } from "react";
 import { ExternalLink, Map as MapIcon } from "lucide-react";
 import { buttonClasses } from "@/components/ui/button";
 
-type EventMapProps = { lat: number; lng: number; title: string };
+type EventMapProps = { lat: number; lng: number; title: string; embedKey?: string };
+
+/** The Maps Embed API when a key is set, otherwise Google's keyless embed. */
+export function mapEmbedUrl(lat: number, lng: number, embedKey?: string): string {
+  const place = `${lat},${lng}`;
+  return embedKey
+    ? `https://www.google.com/maps/embed/v1/place?key=${encodeURIComponent(embedKey)}&q=${place}&zoom=15`
+    : `https://maps.google.com/maps?q=${place}&z=15&output=embed`;
+}
 
 /**
  * A Google Maps preview of the event's public venue. Nothing is sent to Google until the person
  * opens it, and only the venue's coordinates are sent, never the person's own location.
  */
-export function EventMap({ lat, lng, title }: EventMapProps) {
+export function EventMap({ lat, lng, title, embedKey }: EventMapProps) {
   const [open, setOpen] = useState(false);
   const place = `${lat},${lng}`;
-  const embed = `https://maps.google.com/maps?q=${place}&z=15&output=embed`;
+  const embed = mapEmbedUrl(lat, lng, embedKey);
   const link = `https://www.google.com/maps/search/?api=1&query=${place}`;
 
   return (

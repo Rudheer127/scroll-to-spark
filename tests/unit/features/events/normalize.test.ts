@@ -164,3 +164,13 @@ describe("event pictures", () => {
     expect(safeImageUrl(null)).toBeNull();
   });
 });
+
+describe("mapEmbedUrl", () => {
+  it("uses the keyed Embed API when a key is set and the keyless embed otherwise", async () => {
+    const { mapEmbedUrl } = await import("@/features/events/components/event-map");
+    expect(mapEmbedUrl(33.4, -111.9, "K EY")).toBe(
+      "https://www.google.com/maps/embed/v1/place?key=K%20EY&q=33.4,-111.9&zoom=15",
+    );
+    expect(mapEmbedUrl(33.4, -111.9)).toContain("output=embed");
+  });
+});
