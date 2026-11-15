@@ -24,6 +24,8 @@ export type CivicEvent = {
   lng: number | null;
   /** The organizer's own sign-up page. Always null for sample events. */
   url: string | null;
+  /** The organizer's picture for the event, only from Mobilize's own image hosts. */
+  imageUrl: string | null;
   isSample: boolean;
 };
 

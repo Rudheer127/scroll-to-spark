@@ -154,3 +154,13 @@ describe("sampleEvents", () => {
     }
   });
 });
+
+describe("event pictures", () => {
+  it("keeps pictures from Mobilize hosts only", async () => {
+    const { safeImageUrl } = await import("@/features/events/normalize");
+    expect(safeImageUrl("https://mobilizeamerica.imgix.net/uploads/a.jpg")).not.toBeNull();
+    expect(safeImageUrl("https://evil.example/a.jpg")).toBeNull();
+    expect(safeImageUrl("http://mobilizeamerica.imgix.net/a.jpg")).toBeNull();
+    expect(safeImageUrl(null)).toBeNull();
+  });
+});

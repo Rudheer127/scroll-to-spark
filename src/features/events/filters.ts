@@ -3,6 +3,13 @@ import type { Coords, CivicEvent } from "@/features/events/types";
 export const EVENT_MODES = ["all", "near", "online", "inperson"] as const;
 export type EventMode = (typeof EVENT_MODES)[number];
 
+export const WHEN_OPTIONS = [
+  { value: "any", label: "Any date" },
+  { value: "week", label: "Next 7 days" },
+  { value: "month", label: "Next 30 days" },
+] as const;
+export type EventWhen = (typeof WHEN_OPTIONS)[number]["value"];
+
 export const RADIUS_OPTIONS = [10, 25, 50] as const;
 
 export type EventFilters = {
@@ -11,6 +18,9 @@ export type EventFilters = {
   /** Centre of the chosen ZIP code. Null until the person shares a place. */
   center: Coords | null;
   radiusMiles: number;
+  /** Optional date window, counted from `now`. Leave out for any date. */
+  when?: EventWhen;
+  now?: Date;
 };
 
 const EARTH_RADIUS_MILES = 3958.8;
@@ -51,6 +61,14 @@ function matchesQuery(event: CivicEvent, query: string): boolean {
   return words.every((word) => haystack.includes(word));
 }
 
+const DAY_MS = 86_400_000;
+
+function withinWhen(event: CivicEvent, when: EventWhen, now: Date): boolean {
+  if (when === "any") return true;
+  const days = when === "week" ? 7 : 30;
+  return new Date(event.startsAt).getTime() <= now.getTime() + days * DAY_MS;
+}
+
 /**
  * Applies the mode, the search words and the distance limit.
  * "near" needs a centre: with none it returns nothing, and the page asks for a place instead.
@@ -59,6 +77,7 @@ function matchesQuery(event: CivicEvent, query: string): boolean {
 export function filterEvents(events: CivicEvent[], filters: EventFilters): CivicEvent[] {
   return events.filter((event) => {
     if (!matchesQuery(event, filters.query)) return false;
+    if (!withinWhen(event, filters.when ?? "any", filters.now ?? new Date())) return false;
     switch (filters.mode) {
       case "online":
         return event.isVirtual;

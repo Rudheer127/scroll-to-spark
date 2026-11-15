@@ -79,6 +79,7 @@ export function sampleEvents(now: Date = new Date()): CivicEvent[] {
       lat: seed.lat ?? null,
       lng: seed.lng ?? null,
       url: null,
+      imageUrl: null,
       isSample: true,
     };
   });

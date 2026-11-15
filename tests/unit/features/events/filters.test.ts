@@ -20,6 +20,7 @@ function event(overrides: Partial<CivicEvent>): CivicEvent {
     lat: null,
     lng: null,
     url: "https://www.mobilize.us/x/event/1/",
+    imageUrl: null,
     isSample: false,
     ...overrides,
   };
@@ -117,5 +118,24 @@ describe("isEventMode", () => {
     expect(isEventMode("near")).toBe(true);
     expect(isEventMode("nearby")).toBe(false);
     expect(isEventMode(undefined)).toBe(false);
+  });
+});
+
+describe("filterEvents by date", () => {
+  const now = new Date("2026-12-01T00:00:00Z");
+  const soon = event({ key: "mobilize:7:7", startsAt: "2026-12-05T00:00:00Z" });
+  const later = event({ key: "mobilize:8:8", startsAt: "2026-12-20T00:00:00Z" });
+  const far = event({ key: "mobilize:9:9", startsAt: "2027-02-01T00:00:00Z" });
+  const list = [soon, later, far];
+
+  it("keeps everything for any date", () => {
+    expect(filterEvents(list, { ...base, when: "any", now })).toHaveLength(3);
+  });
+  it("limits to the next 7 or 30 days", () => {
+    expect(keys(filterEvents(list, { ...base, when: "week", now }))).toEqual([soon.key]);
+    expect(keys(filterEvents(list, { ...base, when: "month", now }))).toEqual([
+      soon.key,
+      later.key,
+    ]);
   });
 });

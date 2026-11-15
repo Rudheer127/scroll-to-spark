@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { LocateFixed, Search } from "lucide-react";
+import { ChevronDown, LocateFixed, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
@@ -10,6 +10,8 @@ import { EventCard } from "@/features/events/components/event-card";
 import { formatEventTime } from "@/features/events/components/format";
 import {
   RADIUS_OPTIONS,
+  WHEN_OPTIONS,
+  type EventWhen,
   eventDistance,
   filterEvents,
   type EventMode,
@@ -54,6 +56,8 @@ export function EventsExplorer({ initialFeed, initialRsvps }: Props) {
   const [mode, setMode] = useState<EventMode>("all");
   const [query, setQuery] = useState("");
   const [radius, setRadius] = useState<number>(25);
+  const [when, setWhen] = useState<EventWhen>("any");
+  const [placeOpen, setPlaceOpen] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [finding, startFinding] = useTransition();
   const [rsvps, setRsvps] = useState(() => new Map(initialRsvps.map((r) => [r.eventKey, r])));
@@ -70,6 +74,7 @@ export function EventsExplorer({ initialFeed, initialRsvps }: Props) {
       setZipInput(result.data.location.zip);
       setFeed(result.data.feed);
       setMode((current) => (current === "all" ? "near" : current));
+      setPlaceOpen(false);
       writeSavedZip(keep ? result.data.location.zip : null);
     });
   }
@@ -152,13 +157,19 @@ export function EventsExplorer({ initialFeed, initialRsvps }: Props) {
 
   const center = location ? { lat: location.lat, lng: location.lng } : null;
   const visible = useMemo(
-    () => filterEvents(feed.events, { mode, query, center, radiusMiles: radius }),
+    () => filterEvents(feed.events, { mode, query, center, radiusMiles: radius, when }),
     // center is rebuilt from location each render, so depend on location itself
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [feed.events, mode, query, location, radius],
+    [feed.events, mode, query, location, radius, when],
   );
   const needsPlace = mode === "near" && !location;
   const saved = [...rsvps.values()].sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+
+  const radioClass = (active: boolean) =>
+    cn(
+      "flex min-h-11 cursor-pointer items-center gap-2.5 rounded-(--radius-input) px-3 text-sm font-semibold md:min-h-10",
+      active ? "bg-chip" : "hover:bg-chip",
+    );
 
   return (
     <div className="flex flex-col gap-6">
@@ -172,175 +183,213 @@ export function EventsExplorer({ initialFeed, initialRsvps }: Props) {
         </p>
       ) : null}
 
-      <section
-        aria-label="Your place"
-        className="flex flex-col gap-3 rounded-(--radius-card) border border-border bg-surface p-5 shadow-card"
-      >
-        <form onSubmit={submitZip} className="flex flex-wrap items-end gap-2">
-          <div className="flex min-w-0 flex-1 basis-40 flex-col gap-1.5">
-            <label htmlFor="events-zip" className="text-sm font-semibold">
-              ZIP code
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-card sm:flex-row sm:rounded-full">
+          <div className="relative flex-1">
+            <Search
+              aria-hidden
+              className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted"
+            />
+            <label htmlFor="events-search" className="sr-only">
+              Search events
             </label>
             <input
-              id="events-zip"
-              value={zipInput}
-              onChange={(e) => setZipInput(e.target.value.replace(/\D/g, "").slice(0, 5))}
-              inputMode="numeric"
-              autoComplete="postal-code"
-              placeholder="85281"
-              className={inputClass}
+              id="events-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search events, groups or cities"
+              className="h-12 w-full bg-transparent pl-12 pr-4 text-base outline-offset-[-2px]"
             />
           </div>
-          <Button type="submit" variant="primary" disabled={finding || zipInput.length !== 5}>
-            Find events
-          </Button>
-          <Button variant="outline" onClick={useBrowserLocation} disabled={finding}>
-            <LocateFixed aria-hidden className="size-4" />
-            Use my location
-          </Button>
-        </form>
-        <p className="text-xs text-muted">
-          Your browser location, if you share it, is rounded and used once to find a ZIP code. It is
-          not saved. The ZIP code is only kept on this device if you tick the box below.
-        </p>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={remember}
-            onChange={(e) => changeRemember(e.target.checked)}
-            className="size-4"
-          />
-          Remember my ZIP code on this device
-        </label>
+          <button
+            type="button"
+            aria-expanded={placeOpen}
+            aria-controls="events-place"
+            onClick={() => setPlaceOpen((v) => !v)}
+            className="flex h-12 items-center gap-2 border-t border-border px-4 text-left text-base font-semibold hover:bg-chip sm:w-72 sm:border-l sm:border-t-0"
+          >
+            <MapPin aria-hidden className="size-5 shrink-0 text-muted" />
+            <span className="flex-1 truncate">
+              {location ? `${location.city}, ${location.region}` : "Add your location"}
+            </span>
+            <ChevronDown
+              aria-hidden
+              className={cn("size-4 shrink-0 transition-transform", placeOpen && "rotate-180")}
+            />
+          </button>
+        </div>
+
+        {placeOpen ? (
+          <section
+            id="events-place"
+            aria-label="Your place"
+            className="flex flex-col gap-3 rounded-(--radius-card) border border-border bg-surface p-4 shadow-card"
+          >
+            <form onSubmit={submitZip} className="flex flex-wrap items-end gap-2">
+              <div className="flex w-32 flex-col gap-1.5">
+                <label htmlFor="events-zip" className="text-sm font-semibold">
+                  ZIP code
+                </label>
+                <input
+                  id="events-zip"
+                  value={zipInput}
+                  onChange={(e) => setZipInput(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  placeholder="85281"
+                  className={inputClass}
+                />
+              </div>
+              <Button type="submit" disabled={finding || zipInput.length !== 5}>
+                Find events
+              </Button>
+              <Button variant="outline" onClick={useBrowserLocation} disabled={finding}>
+                <LocateFixed aria-hidden className="size-4" />
+                Use my location
+              </Button>
+              {location ? (
+                <button
+                  type="button"
+                  onClick={clearLocation}
+                  className="px-2 text-sm font-semibold text-action hover:underline"
+                >
+                  Clear place
+                </button>
+              ) : null}
+            </form>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => changeRemember(e.target.checked)}
+                className="size-4"
+              />
+              Remember my ZIP code on this device
+            </label>
+            <p className="text-xs text-muted">
+              Your browser location, if you share it, is rounded and used once to find a ZIP code.
+              It is not saved.
+            </p>
+          </section>
+        ) : null}
         {finding ? (
-          <p role="status" className="text-sm text-muted">
+          <p role="status" className="px-2 text-sm text-muted">
             Looking for events near you…
           </p>
         ) : null}
         {locationError ? (
-          <p role="alert" className="text-sm text-danger">
+          <p role="alert" className="px-2 text-sm text-danger">
             {locationError}
           </p>
         ) : null}
-        {location ? (
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <p>
-              Near{" "}
-              <span className="font-semibold">
-                {location.city}, {location.region} {location.zip}
-              </span>
-            </p>
-            <label className="flex items-center gap-2">
-              Within
+      </div>
+
+      <div className="grid items-start gap-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
+        <aside aria-label="Filters" className="flex flex-col gap-4 lg:sticky lg:top-8">
+          <fieldset className="flex flex-col gap-1">
+            <legend className="mb-1 text-lg font-bold">Kind of event</legend>
+            <div className="flex flex-wrap gap-1 lg:flex-col">
+              {MODES.map(({ value, label }) => (
+                <label key={value} className={radioClass(mode === value)}>
+                  <input
+                    type="radio"
+                    name="events-mode"
+                    checked={mode === value}
+                    onChange={() => setMode(value)}
+                    className="size-4"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset className="flex flex-col gap-1">
+            <legend className="mb-1 text-lg font-bold">Date</legend>
+            <div className="flex flex-wrap gap-1 lg:flex-col">
+              {WHEN_OPTIONS.map(({ value, label }) => (
+                <label key={value} className={radioClass(when === value)}>
+                  <input
+                    type="radio"
+                    name="events-when"
+                    checked={when === value}
+                    onChange={() => setWhen(value)}
+                    className="size-4"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          {location ? (
+            <label className="flex flex-col gap-1.5 text-sm font-semibold">
+              Distance from {location.zip}
               <select
                 value={radius}
                 onChange={(e) => setRadius(Number(e.target.value))}
-                className={cn(inputClass, "w-auto py-1.5")}
+                className={inputClass}
               >
                 {RADIUS_OPTIONS.map((miles) => (
                   <option key={miles} value={miles}>
-                    {miles} miles
+                    Within {miles} miles
                   </option>
                 ))}
               </select>
             </label>
-            <button
-              type="button"
-              onClick={clearLocation}
-              className="font-semibold text-action hover:underline"
-            >
-              Clear place
-            </button>
-          </div>
-        ) : null}
-      </section>
+          ) : null}
+        </aside>
 
-      <div className="flex flex-col gap-3">
-        <div role="group" aria-label="Kind of event" className="flex flex-wrap gap-2">
-          {MODES.map(({ value, label }) => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={mode === value}
-              onClick={() => setMode(value)}
-              className={cn(
-                "min-h-11 rounded-full border px-4 text-sm font-semibold active:opacity-75 md:min-h-10",
-                mode === value
-                  ? "border-ink bg-ink text-on-ink"
-                  : "border-border bg-surface hover:bg-chip",
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="relative">
-          <Search
-            aria-hidden
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
-          />
-          <label htmlFor="events-search" className="sr-only">
-            Search events
-          </label>
-          <input
-            id="events-search"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by title, group or city"
-            className={cn(inputClass, "pl-10")}
-          />
+        <div className="flex min-w-0 flex-col gap-4">
+          <p role="status" className="text-sm text-muted">
+            {needsPlace
+              ? "Add your location above to see events near you."
+              : `${visible.length} ${visible.length === 1 ? "event" : "events"}${feed.kind === "sample" ? " (samples)" : ""}`}
+          </p>
+
+          {needsPlace ? null : visible.length === 0 ? (
+            <div className="rounded-(--radius-card) border border-border bg-surface p-6 shadow-card">
+              <p className="font-semibold">Nothing matches right now.</p>
+              <p className="mt-1 text-sm text-muted">
+                {mode === "near"
+                  ? "Try a wider distance, or look at online events."
+                  : "Try fewer words, or switch to All."}
+              </p>
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-4">
+              {visible.map((event) => (
+                <EventCard
+                  key={event.key}
+                  event={event}
+                  status={rsvps.get(event.key)?.status ?? null}
+                  distanceMiles={eventDistance(event, center)}
+                  onStatusChange={changeStatus}
+                />
+              ))}
+            </ul>
+          )}
+
+          {saved.length > 0 ? (
+            <section aria-label="Your list" className="flex flex-col gap-2 pt-2">
+              <h2 className="text-lg font-semibold">Your list</h2>
+              <ul className="flex flex-col gap-1.5 text-sm">
+                {saved.map((item) => (
+                  <li
+                    key={item.eventKey}
+                    className="flex flex-wrap justify-between gap-2 rounded-(--radius-input) bg-chip px-3.5 py-2.5"
+                  >
+                    <span className="font-semibold">{item.title}</span>
+                    <span className="text-muted">
+                      {item.status === "attended" ? "You said you went · " : ""}
+                      {formatEventTime(item)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
         </div>
       </div>
-
-      <p role="status" className="text-sm text-muted">
-        {needsPlace
-          ? "Add your ZIP code or share your location to see events near you."
-          : `${visible.length} ${visible.length === 1 ? "event" : "events"}${feed.kind === "sample" ? " (samples)" : ""}`}
-      </p>
-
-      {needsPlace ? null : visible.length === 0 ? (
-        <div className="rounded-(--radius-card) border border-border bg-surface p-6 shadow-card">
-          <p className="font-semibold">Nothing matches right now.</p>
-          <p className="mt-1 text-sm text-muted">
-            {mode === "near"
-              ? "Try a wider distance, or look at online events."
-              : "Try fewer words, or switch to All."}
-          </p>
-        </div>
-      ) : (
-        <ul className="grid gap-4 md:grid-cols-2">
-          {visible.map((event) => (
-            <EventCard
-              key={event.key}
-              event={event}
-              status={rsvps.get(event.key)?.status ?? null}
-              distanceMiles={eventDistance(event, center)}
-              onStatusChange={changeStatus}
-            />
-          ))}
-        </ul>
-      )}
-
-      {saved.length > 0 ? (
-        <section aria-label="Your list" className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold">Your list</h2>
-          <ul className="flex flex-col gap-1.5 text-sm">
-            {saved.map((item) => (
-              <li
-                key={item.eventKey}
-                className="flex flex-wrap justify-between gap-2 rounded-(--radius-input) bg-chip px-3.5 py-2.5"
-              >
-                <span className="font-semibold">{item.title}</span>
-                <span className="text-muted">
-                  {item.status === "attended" ? "You said you went · " : ""}
-                  {formatEventTime(item)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
     </div>
   );
 }

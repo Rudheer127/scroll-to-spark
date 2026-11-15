@@ -15,6 +15,7 @@ const rawEventSchema = z.object({
   event_type: z.string().nullish(),
   is_virtual: z.boolean().nullish(),
   browser_url: z.string().nullish(),
+  featured_image_url: z.string().nullish(),
   timezone: z.string().nullish(),
   visibility: z.string().nullish(),
   sponsor: z.object({ name: z.string().nullish() }).nullish(),
@@ -83,6 +84,21 @@ export function safeMobilizeUrl(value: string | null | undefined): string | null
   }
 }
 
+const IMAGE_HOSTS = ["mobilizeamerica.imgix.net", "mobilize-uploads-prod.s3.amazonaws.com"];
+
+/** Only https pictures from Mobilize's own hosts are kept. */
+export function safeImageUrl(value: string | null | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && IMAGE_HOSTS.includes(url.hostname.toLowerCase())
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 function validZone(zone: string | null | undefined): string {
   if (!zone) return "UTC";
   try {
@@ -135,6 +151,7 @@ export function normalizeMobilizeEvent(raw: unknown, now: Date = new Date()): Ci
     lat: coords?.latitude ?? null,
     lng: coords?.longitude ?? null,
     url,
+    imageUrl: safeImageUrl(event.featured_image_url),
     isSample: false,
   };
 }
