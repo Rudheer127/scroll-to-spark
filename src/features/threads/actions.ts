@@ -6,7 +6,14 @@ import { createClient } from "@/lib/supabase/server";
 import { fail, type ActionResult } from "@/lib/result";
 import { fieldErrorsFromZod } from "@/lib/zod-errors";
 import { getCurrentUser } from "@/features/auth/queries";
+import { personalInfoCheck, writeFailure } from "@/features/threads/errors";
+import { isOwnImagePath } from "@/features/threads/image-rules";
+import { loose } from "@/features/threads/loose-db";
 import { createThreadSchema, voteSchema } from "@/features/threads/schemas";
+
+function nonEmpty(value: FormDataEntryValue | null): string | null {
+  return typeof value === "string" && value.trim() !== "" ? value : null;
+}
 
 export async function createThread(
   _previous: ActionResult | null,
@@ -16,6 +23,8 @@ export async function createThread(
     groupId: formData.get("groupId"),
     title: formData.get("title") ?? "",
     body: formData.get("body") ?? "",
+    imagePath: nonEmpty(formData.get("imagePath")),
+    imageAlt: nonEmpty(formData.get("imageAlt")),
   });
   if (!parsed.success)
     return fail("Check the highlighted fields.", fieldErrorsFromZod(parsed.error));
@@ -23,14 +32,28 @@ export async function createThread(
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  if (parsed.data.imagePath && !isOwnImagePath(parsed.data.imagePath, user.id))
+    return fail("That image did not upload properly. Try attaching it again.");
+
+  const nudge = personalInfoCheck(formData, parsed.data.title, parsed.data.body);
+  if (nudge) return nudge;
+
   const supabase = await createClient();
-  const { error } = await supabase.from("threads").insert({
-    group_id: parsed.data.groupId,
-    author_id: user.id,
-    title: parsed.data.title,
-    body: parsed.data.body,
-  });
-  if (error) return fail("We could not post that. Only members of the group can post threads.");
+  const { error } = await loose(supabase)
+    .from("threads")
+    .insert({
+      group_id: parsed.data.groupId,
+      author_id: user.id,
+      title: parsed.data.title,
+      body: parsed.data.body,
+      image_path: parsed.data.imagePath,
+      image_alt: parsed.data.imagePath ? parsed.data.imageAlt : null,
+    });
+  if (error)
+    return writeFailure(
+      error,
+      "We could not post that. Only members of the group can post threads.",
+    );
 
   revalidatePath("/discussions", "layout");
   return { ok: true, data: undefined, message: "Posted." };
@@ -45,6 +68,13 @@ export async function voteThread(threadId: string, value: 1 | -1): Promise<Actio
   if (!user) redirect("/login");
 
   const supabase = await createClient();
+  const { data: thread } = await supabase
+    .from("threads")
+    .select("author_id")
+    .eq("id", parsed.data.threadId)
+    .maybeSingle();
+  if (thread?.author_id === user.id) return fail("You can't vote on your own thread.");
+
   const { data: existing } = await supabase
     .from("thread_votes")
     .select("value")

@@ -12,6 +12,8 @@ import {
   GROUP_COLOR_VALUES,
   GROUP_DESCRIPTION_MAX,
   GROUP_NAME_MAX,
+  GROUP_RULES_MAX,
+  DEFAULT_GROUP_RULES,
   swatchClass,
 } from "@/features/groups/constants";
 
@@ -43,6 +45,21 @@ function CreateGroupForm({ onCancel }: { onCancel: () => void }) {
           className={inputClass}
         />
       </Field>
+      <Field
+        label="Group rules"
+        htmlFor="group-rules"
+        hint="Optional. Shown to members before they post. Leave blank to use the default."
+        error={fieldError(state, "rules")}
+      >
+        <textarea
+          id="group-rules"
+          name="rules"
+          rows={3}
+          maxLength={GROUP_RULES_MAX}
+          className={inputClass}
+          placeholder={DEFAULT_GROUP_RULES}
+        />
+      </Field>
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-semibold">Group color</legend>
         <div className="flex gap-3">
@@ -66,6 +83,20 @@ function CreateGroupForm({ onCancel }: { onCancel: () => void }) {
             </label>
           ))}
         </div>
+      </fieldset>
+      <fieldset className="flex flex-col gap-2">
+        <legend className="text-sm font-semibold">Who can see it</legend>
+        {(["public", "private"] as const).map((value) => (
+          <label key={value} className="flex items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="visibility"
+              value={value}
+              defaultChecked={value === "public"}
+            />
+            {value === "public" ? "Anyone can find and join" : "Only members can see it"}
+          </label>
+        ))}
       </fieldset>
       {formError(state) ? (
         <p role="alert" className="text-sm text-danger">

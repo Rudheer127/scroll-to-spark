@@ -8,6 +8,10 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
 import { deleteComment } from "@/features/comments/actions";
 import { CommentForm } from "@/features/comments/components/comment-form";
+import { BlockUserButton } from "@/features/threads/components/block-user-button";
+import { PostImage } from "@/features/threads/components/thread-image";
+import { ReportButton } from "@/features/threads/components/report-button";
+import { CommentVotes } from "@/features/comments/components/comment-votes";
 import { ReactionBar } from "@/features/comments/components/reaction-bar";
 import { MAX_INDENT_DEPTH } from "@/features/comments/constants";
 import type { CommentNode } from "@/features/comments/tree";
@@ -34,19 +38,51 @@ export function CommentItem({
   const [replying, setReplying] = useState(false);
   const hasReplies = node.children.length > 0;
   const canDelete = node.authorId === viewerId || isGroupOwner;
+  const isOwn = node.authorId === viewerId;
+  const concealed = node.blocked || (node.hidden && !isOwn);
   const replyDepth = Math.min(depth + 1, MAX_INDENT_DEPTH);
 
   return (
-    <li className="flex flex-col gap-2">
-      <div className="flex flex-col gap-2">
+    <li className="flex min-w-0 flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="font-bold">{node.authorName}</span>
+          <span className="min-w-0 font-bold [overflow-wrap:anywhere]">{node.authorName}</span>
           <span className="text-muted">{formatRelativeTime(node.createdAt)}</span>
         </div>
-        <p className="max-w-3xl whitespace-pre-wrap">{node.body}</p>
-        <ReactionBar commentId={node.id} reactions={node.reactions} canReact={canParticipate} />
+        {concealed ? (
+          <p className="max-w-3xl text-sm text-muted italic">
+            {node.blocked
+              ? `You blocked ${node.authorName}. Their comment is hidden.`
+              : "This comment was hidden after reports and is being reviewed."}
+          </p>
+        ) : (
+          <>
+            {node.hidden ? (
+              <p className="rounded-(--radius-input) bg-chip p-3 text-sm">
+                Hidden from others after reports. Only you can see this while it is reviewed.
+              </p>
+            ) : null}
+            {node.body ? (
+              <p className="max-w-3xl min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">
+                {node.body}
+              </p>
+            ) : null}
+            {node.imageUrl ? <PostImage url={node.imageUrl} alt={node.imageAlt} /> : null}
+            <ReactionBar commentId={node.id} reactions={node.reactions} canReact={canParticipate} />
+          </>
+        )}
         <div className="flex flex-wrap items-center gap-3">
-          {canParticipate ? (
+          {concealed ? null : (
+            <CommentVotes
+              commentId={node.id}
+              likes={node.likes}
+              dislikes={node.dislikes}
+              myVote={node.myVote}
+              canVote={canParticipate}
+              isOwn={isOwn}
+            />
+          )}
+          {canParticipate && !concealed ? (
             <Button variant="ghost" onClick={() => setReplying((value) => !value)} className="px-2">
               <Reply aria-hidden className="size-4" />
               Reply
@@ -68,6 +104,12 @@ export function CommentItem({
                 ? `Show ${node.children.length} ${node.children.length === 1 ? "reply" : "replies"}`
                 : "Hide replies"}
             </Button>
+          ) : null}
+          {!isOwn && !node.blocked ? (
+            <>
+              <ReportButton targetType="comment" targetId={node.id} noun="comment" />
+              <BlockUserButton userId={node.authorId} name={node.authorName} />
+            </>
           ) : null}
           {canDelete ? (
             <ConfirmDeleteButton

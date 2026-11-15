@@ -13,7 +13,9 @@ export function GroupStory({ name, slug, color }: { name: string; slug: string; 
           <GroupAvatar name={name} color={color} size="story" />
         </span>
       </span>
-      <span className="line-clamp-2 text-xs leading-tight font-semibold">{name}</span>
+      <span className="line-clamp-2 w-full text-xs leading-tight font-semibold [overflow-wrap:anywhere]">
+        {name}
+      </span>
     </Link>
   );
 }

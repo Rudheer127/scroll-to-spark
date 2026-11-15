@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field, inputClass } from "@/components/ui/field";
@@ -11,6 +11,8 @@ import {
   GROUP_COLOR_VALUES,
   GROUP_DESCRIPTION_MAX,
   GROUP_NAME_MAX,
+  GROUP_RULES_MAX,
+  DEFAULT_GROUP_RULES,
   swatchClass,
 } from "@/features/groups/constants";
 
@@ -21,6 +23,7 @@ type EditGroupDialogProps = {
     id: string;
     name: string;
     description: string | null;
+    rules: string | null;
     color: string;
     isPrivate: boolean;
   };
@@ -28,6 +31,10 @@ type EditGroupDialogProps = {
 
 function EditGroupForm({ group, onClose }: Omit<EditGroupDialogProps, "open">) {
   const [state, formAction, pending] = useActionState(updateGroup.bind(null, group.id), null);
+
+  useEffect(() => {
+    if (state?.ok) onClose();
+  }, [state, onClose]);
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -53,6 +60,22 @@ function EditGroupForm({ group, onClose }: Omit<EditGroupDialogProps, "open">) {
           maxLength={GROUP_DESCRIPTION_MAX}
           defaultValue={group.description ?? ""}
           className={inputClass}
+        />
+      </Field>
+      <Field
+        label="Group rules"
+        htmlFor="edit-group-rules"
+        hint="Optional. Shown to members before they post. Leave blank to use the default."
+        error={fieldError(state, "rules")}
+      >
+        <textarea
+          id="edit-group-rules"
+          name="rules"
+          rows={3}
+          maxLength={GROUP_RULES_MAX}
+          defaultValue={group.rules ?? ""}
+          className={inputClass}
+          placeholder={DEFAULT_GROUP_RULES}
         />
       </Field>
       <fieldset className="flex flex-col gap-2">

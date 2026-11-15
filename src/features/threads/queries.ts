@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/features/auth/queries";
+import { getBlockedIds } from "@/features/threads/blocks";
+import { signImagePaths } from "@/features/threads/images";
+import { loose } from "@/features/threads/loose-db";
 import type { ThreadSummary } from "@/features/threads/types";
 
 type ThreadRow = {
@@ -13,12 +16,15 @@ type ThreadRow = {
   groups: { name: string; slug: string; color: string };
   thread_votes: { value: number; user_id: string }[];
   comments: { count: number }[];
+  image_path: string | null;
+  image_alt: string | null;
+  hidden: boolean;
 };
 
 const THREAD_COLUMNS =
-  "id, group_id, author_id, title, body, created_at, profiles!threads_author_id_fkey(username), groups(name, slug, color), thread_votes(value, user_id), comments(count)";
+  "id, group_id, author_id, title, body, created_at, profiles!threads_author_id_fkey(username), groups(name, slug, color), thread_votes(value, user_id), comments(count), image_path, image_alt, hidden";
 
-function toThread(row: ThreadRow, userId: string): ThreadSummary {
+function toThread(row: ThreadRow, userId: string, imageUrls: Map<string, string>): ThreadSummary {
   const mine = row.thread_votes.find((vote) => vote.user_id === userId)?.value ?? 0;
   return {
     id: row.id,
@@ -34,7 +40,23 @@ function toThread(row: ThreadRow, userId: string): ThreadSummary {
     voteScore: row.thread_votes.reduce((sum, vote) => sum + vote.value, 0),
     myVote: mine === 1 ? 1 : mine === -1 ? -1 : 0,
     commentCount: row.comments[0]?.count ?? 0,
+    imageUrl: row.image_path ? (imageUrls.get(row.image_path) ?? null) : null,
+    imageAlt: row.image_alt,
+    hidden: row.hidden,
   };
+}
+
+/** Reported-away threads show only to their author. Threads by people you blocked never show. */
+async function shape(supabase: unknown, rows: ThreadRow[], userId: string) {
+  const blocked = await getBlockedIds(userId);
+  const visible = rows.filter(
+    (row) => !blocked.has(row.author_id) && (!row.hidden || row.author_id === userId),
+  );
+  const imageUrls = await signImagePaths(
+    supabase,
+    visible.map((row) => row.image_path),
+  );
+  return visible.map((row) => toThread(row, userId, imageUrls));
 }
 
 /** Threads in a group, highest score first, then newest. */
@@ -43,16 +65,16 @@ export async function getThreads(groupId: string): Promise<ThreadSummary[]> {
   if (!user) return [];
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, error } = await loose(supabase)
     .from("threads")
     .select(THREAD_COLUMNS)
     .eq("group_id", groupId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(`Could not load threads: ${error.message}`);
 
-  return (data as unknown as ThreadRow[])
-    .map((row) => toThread(row, user.id))
-    .sort((a, b) => b.voteScore - a.voteScore || b.createdAt.localeCompare(a.createdAt));
+  return (await shape(supabase, data as unknown as ThreadRow[], user.id)).sort(
+    (a, b) => b.voteScore - a.voteScore || b.createdAt.localeCompare(a.createdAt),
+  );
 }
 
 /** One thread, or null if it does not exist or you cannot see it. */
@@ -61,13 +83,15 @@ export async function getThread(threadId: string): Promise<ThreadSummary | null>
   if (!user) return null;
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, error } = await loose(supabase)
     .from("threads")
     .select(THREAD_COLUMNS)
     .eq("id", threadId)
     .maybeSingle();
   if (error) throw new Error(`Could not load the thread: ${error.message}`);
-  return data ? toThread(data as unknown as ThreadRow, user.id) : null;
+  if (!data) return null;
+  const [thread] = await shape(supabase, [data as unknown as ThreadRow], user.id);
+  return thread ?? null;
 }
 
 export type FeedTab = "trending" | "new" | "following";
@@ -82,13 +106,13 @@ export async function getFeed(tab: FeedTab, joinedGroupIds: Set<string>): Promis
   if (!user) return [];
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, error } = await loose(supabase)
     .from("threads")
     .select(THREAD_COLUMNS)
     .order("created_at", { ascending: false });
   if (error) throw new Error(`Could not load threads: ${error.message}`);
 
-  const threads = (data as unknown as ThreadRow[]).map((row) => toThread(row, user.id));
+  const threads = await shape(supabase, data as unknown as ThreadRow[], user.id);
   const shown =
     tab === "following" ? threads.filter((t) => joinedGroupIds.has(t.groupId)) : threads;
   return tab === "trending"

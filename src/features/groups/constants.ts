@@ -19,3 +19,8 @@ export function swatchClass(color: string): string {
 export const GROUP_NAME_MIN = 2;
 export const GROUP_NAME_MAX = 60;
 export const GROUP_DESCRIPTION_MAX = 500;
+export const GROUP_RULES_MAX = 1000;
+
+/** Shown when the owner has not written rules of their own. */
+export const DEFAULT_GROUP_RULES =
+  "Be kind. No harassment, and no sharing anyone's personal information. Report anything that crosses the line.";

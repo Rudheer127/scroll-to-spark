@@ -1,9 +1,11 @@
-import { getCurrentProfile } from "@/features/auth/queries";
+import { getCurrentProfile, getCurrentUser } from "@/features/auth/queries";
 import { CreateGroupDialog } from "@/features/groups/components/create-group-dialog";
 import { DiscoverRow } from "@/features/groups/components/discover-row";
 import { GroupAvatar } from "@/features/groups/components/group-avatar";
 import { GroupStory } from "@/features/groups/components/group-story";
 import { getGroups } from "@/features/groups/queries";
+import { BlockedList } from "@/features/threads/components/block-user-button";
+import { getBlockedUsers } from "@/features/threads/blocks";
 import { FeedTabs } from "@/features/threads/components/feed-tabs";
 import { ThreadCard } from "@/features/threads/components/thread-card";
 import { getFeed, isFeedTab } from "@/features/threads/queries";
@@ -12,7 +14,12 @@ export default async function DiscussionsPage({ searchParams }: PageProps<"/disc
   const { tab: tabParam } = await searchParams;
   const tab = isFeedTab(tabParam) ? tabParam : "trending";
 
-  const [profile, groups] = await Promise.all([getCurrentProfile(), getGroups()]);
+  const [profile, groups, user] = await Promise.all([
+    getCurrentProfile(),
+    getGroups(),
+    getCurrentUser(),
+  ]);
+  const blocked = user ? await getBlockedUsers(user.id) : [];
   const mine = groups.filter((group) => group.isMember || group.isOwner);
   const mineIds = new Set(mine.map((group) => group.id));
   const feed = await getFeed(tab, mineIds);
@@ -20,8 +27,8 @@ export default async function DiscussionsPage({ searchParams }: PageProps<"/disc
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_21rem]">
       <div className="flex min-w-0 flex-col gap-6">
-        <header className="flex items-start gap-4">
-          <div className="flex flex-1 flex-col gap-1">
+        <header className="flex flex-wrap items-start gap-4">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
             <h1 className="text-4xl font-bold">Discussions</h1>
             <p className="text-lg text-muted">
               Talk it out with people who care about the same things.
@@ -45,16 +52,21 @@ export default async function DiscussionsPage({ searchParams }: PageProps<"/disc
           </p>
         ) : (
           feed.map((thread) => (
-            <ThreadCard key={thread.id} thread={thread} canVote={mineIds.has(thread.groupId)} />
+            <ThreadCard
+              key={thread.id}
+              thread={thread}
+              canVote={mineIds.has(thread.groupId)}
+              viewerId={user?.id ?? ""}
+            />
           ))
         )}
       </div>
-      <aside className="flex h-fit flex-col gap-4 xl:sticky xl:top-8">
+      <aside className="flex h-fit min-w-0 flex-col gap-4 xl:sticky xl:top-8">
         {profile ? (
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <GroupAvatar name={profile.username} color="green" />
-            <div className="flex flex-col">
-              <p className="font-extrabold">{profile.username}</p>
+            <div className="flex min-w-0 flex-col">
+              <p className="font-extrabold [overflow-wrap:anywhere]">{profile.username}</p>
               <p className="text-sm text-muted">
                 {mine.length} {mine.length === 1 ? "group" : "groups"} joined
               </p>
@@ -73,10 +85,13 @@ export default async function DiscussionsPage({ searchParams }: PageProps<"/disc
             </ul>
           )}
         </section>
+        <BlockedList users={blocked} />
         <section className="flex flex-col gap-2 rounded-(--radius-card) border border-border bg-surface p-5 shadow-card">
           <h2 className="text-base font-semibold">Community promise</h2>
           <p className="text-sm text-muted">
-            Be kind. No guilt, no pressure. Share small wins. Every voice counts.
+            Be kind. No guilt, no pressure. Share small wins. Every voice counts. See something
+            wrong? Use Report on any thread, comment or group, or Block someone to stop seeing their
+            posts.
           </p>
         </section>
       </aside>

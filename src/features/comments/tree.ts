@@ -6,6 +6,14 @@ export type FlatComment = {
   body: string | null;
   createdAt: string;
   reactions: { emoji: string; userId: string }[];
+  /** Likes (1) and dislikes (-1). */
+  votes?: { userId: string; value: number }[];
+  imageUrl?: string | null;
+  imageAlt?: string | null;
+  /** Hidden after reports. Only its author still sees the words. */
+  hidden?: boolean;
+  /** Written by someone the viewer blocked. */
+  blocked?: boolean;
 };
 
 export type ReactionCount = { emoji: string; count: number; mine: boolean };
@@ -17,6 +25,14 @@ export type CommentNode = {
   body: string | null;
   createdAt: string;
   reactions: ReactionCount[];
+  likes: number;
+  dislikes: number;
+  /** What the viewer voted: 1 like, -1 dislike, 0 nothing. */
+  myVote: -1 | 0 | 1;
+  imageUrl: string | null;
+  imageAlt: string | null;
+  hidden: boolean;
+  blocked: boolean;
   children: CommentNode[];
 };
 
@@ -44,6 +60,18 @@ export function buildCommentTree(items: FlatComment[], userId: string): CommentN
         body: item.body,
         createdAt: item.createdAt,
         reactions: countReactions(item.reactions, userId),
+        likes: (item.votes ?? []).filter((vote) => vote.value === 1).length,
+        dislikes: (item.votes ?? []).filter((vote) => vote.value === -1).length,
+        myVote:
+          (item.votes ?? []).find((vote) => vote.userId === userId)?.value === 1
+            ? 1
+            : (item.votes ?? []).find((vote) => vote.userId === userId)?.value === -1
+              ? -1
+              : 0,
+        imageUrl: item.imageUrl ?? null,
+        imageAlt: item.imageAlt ?? null,
+        hidden: item.hidden ?? false,
+        blocked: item.blocked ?? false,
         children: [],
       },
     ]),

@@ -7,6 +7,8 @@ import { fail, type ActionResult } from "@/lib/result";
 import { buildSlug } from "@/lib/slugify";
 import { fieldErrorsFromZod } from "@/lib/zod-errors";
 import { getCurrentUser } from "@/features/auth/queries";
+import { writeFailure } from "@/features/threads/errors";
+import { loose } from "@/features/threads/loose-db";
 import { createGroupSchema, deleteGroupSchema } from "@/features/groups/schemas";
 
 const UNIQUE_VIOLATION = "23505";
@@ -23,6 +25,7 @@ export async function createGroup(
   const parsed = createGroupSchema.safeParse({
     name: formData.get("name") ?? "",
     description: formData.get("description") ?? "",
+    rules: formData.get("rules") ?? "",
     isPrivate: formData.get("visibility") === "private",
     color: formData.get("color"),
   });
@@ -33,20 +36,21 @@ export async function createGroup(
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const { name, description, isPrivate, color } = parsed.data;
-  const supabase = await createClient();
+  const { name, description, rules, isPrivate, color } = parsed.data;
+  const supabase = loose(await createClient());
 
   for (let attempt = 0; attempt < SLUG_ATTEMPTS; attempt++) {
     const slug = buildSlug(name, attempt);
     const { error } = await supabase
       .from("groups")
-      .insert({ slug, name, description, is_private: isPrivate, color, owner_id: user.id });
+      .insert({ slug, name, description, rules, is_private: isPrivate, color, owner_id: user.id });
 
     if (!error) {
       refreshGroups();
       redirect(`/discussions/${slug}`);
     }
-    if (error.code !== UNIQUE_VIOLATION) return fail("We could not create the group. Try again.");
+    if (error.code !== UNIQUE_VIOLATION)
+      return writeFailure(error, "We could not create the group. Try again.");
   }
   return fail("That name is taken. Try a different one.");
 }
@@ -115,6 +119,7 @@ export async function updateGroup(
   const parsed = createGroupSchema.safeParse({
     name: formData.get("name") ?? "",
     description: formData.get("description") ?? "",
+    rules: formData.get("rules") ?? "",
     isPrivate: formData.get("visibility") === "private",
     color: formData.get("color"),
   });
@@ -125,11 +130,11 @@ export async function updateGroup(
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const { name, description, isPrivate, color } = parsed.data;
-  const supabase = await createClient();
+  const { name, description, rules, isPrivate, color } = parsed.data;
+  const supabase = loose(await createClient());
   const { data, error } = await supabase
     .from("groups")
-    .update({ name, description, is_private: isPrivate, color })
+    .update({ name, description, rules, is_private: isPrivate, color })
     .eq("id", groupId)
     .eq("owner_id", user.id)
     .select("id");

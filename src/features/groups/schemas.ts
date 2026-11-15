@@ -4,6 +4,7 @@ import {
   GROUP_DESCRIPTION_MAX,
   GROUP_NAME_MAX,
   GROUP_NAME_MIN,
+  GROUP_RULES_MAX,
 } from "@/features/groups/constants";
 
 export const createGroupSchema = z.object({
@@ -17,6 +18,12 @@ export const createGroupSchema = z.object({
     .trim()
     .max(GROUP_DESCRIPTION_MAX, `Use ${GROUP_DESCRIPTION_MAX} characters or fewer.`)
     .transform((value) => (value === "" ? null : value)),
+  rules: z
+    .string()
+    .trim()
+    .max(GROUP_RULES_MAX, `Use ${GROUP_RULES_MAX} characters or fewer.`)
+    .optional()
+    .transform((value) => (value ? value : null)),
   isPrivate: z.boolean(),
   color: z.enum(GROUP_COLOR_VALUES, "Pick a color."),
 });

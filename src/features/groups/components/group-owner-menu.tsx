@@ -11,6 +11,7 @@ type GroupOwnerMenuProps = {
     id: string;
     name: string;
     description: string | null;
+    rules: string | null;
     color: string;
     isPrivate: boolean;
   };

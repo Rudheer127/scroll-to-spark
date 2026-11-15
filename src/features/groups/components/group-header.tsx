@@ -2,6 +2,7 @@ import { Lock, Users } from "lucide-react";
 import { SampleBadge } from "@/components/shared/sample-badge";
 import { GroupAvatar } from "@/features/groups/components/group-avatar";
 import { GroupOwnerMenu } from "@/features/groups/components/group-owner-menu";
+import { ReportButton } from "@/features/threads/components/report-button";
 import { JoinLeaveButton } from "@/features/groups/components/join-leave-button";
 import type { GroupSummary } from "@/features/groups/types";
 
@@ -11,7 +12,7 @@ export function GroupHeader({ group }: { group: GroupSummary }) {
       <GroupAvatar name={group.name} color={group.color} size="lg" />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="truncate text-3xl font-bold">{group.name}</h1>
+          <h1 className="min-w-0 text-3xl font-bold [overflow-wrap:anywhere]">{group.name}</h1>
           {group.isDemo ? <SampleBadge /> : null}
         </div>
         <p className="flex items-center gap-4 text-sm text-muted">
@@ -33,12 +34,16 @@ export function GroupHeader({ group }: { group: GroupSummary }) {
             id: group.id,
             name: group.name,
             description: group.description,
+            rules: group.rules,
             color: group.color,
             isPrivate: group.isPrivate,
           }}
         />
       ) : (
-        <JoinLeaveButton groupId={group.id} isMember={group.isMember} />
+        <div className="flex flex-wrap items-center gap-2">
+          <ReportButton targetType="group" targetId={group.id} noun="group" />
+          <JoinLeaveButton groupId={group.id} isMember={group.isMember} />
+        </div>
       )}
     </header>
   );

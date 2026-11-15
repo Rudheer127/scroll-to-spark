@@ -12,4 +12,7 @@ export type ThreadSummary = {
   voteScore: number;
   myVote: -1 | 0 | 1;
   commentCount: number;
+  imageUrl: string | null;
+  imageAlt: string | null;
+  hidden: boolean;
 };

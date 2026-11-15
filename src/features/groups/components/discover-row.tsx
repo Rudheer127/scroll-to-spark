@@ -9,17 +9,21 @@ export function DiscoverRow({ group }: { group: GroupSummary }) {
     <li className="flex items-center gap-3">
       <GroupAvatar name={group.name} color={group.color} size="sm" />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Link href={`/discussions/${group.slug}`} className="truncate text-sm font-bold">
+        <Link
+          href={`/discussions/${group.slug}`}
+          className="text-sm font-bold [overflow-wrap:anywhere]"
+        >
           {group.name}
         </Link>
         <p className="text-xs text-muted">
           {group.memberCount} {group.memberCount === 1 ? "member" : "members"}
+          {group.isMember ? " · You joined" : ""}
         </p>
       </div>
       {group.isOwner ? (
         <span className="text-xs font-bold text-muted">Yours</span>
       ) : (
-        <JoinLeaveButton groupId={group.id} isMember={group.isMember} joinedLabel="Joined" />
+        <JoinLeaveButton groupId={group.id} isMember={group.isMember} />
       )}
     </li>
   );

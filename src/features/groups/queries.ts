@@ -1,7 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/features/auth/queries";
 import { GROUP_COLUMNS, toGroupSummary, type GroupRow } from "@/features/groups/map-group";
+import { loose } from "@/features/threads/loose-db";
 import type { GroupSummary } from "@/features/groups/types";
+
+/** Groups hidden after reports show only to their owner. */
+function isShown(group: GroupSummary): boolean {
+  return !group.hidden || group.isOwner;
+}
 
 async function getMemberGroupIds(userId: string): Promise<Set<string>> {
   const supabase = await createClient();
@@ -20,14 +26,14 @@ export async function getGroups(): Promise<GroupSummary[]> {
 
   const supabase = await createClient();
   const [groups, memberGroupIds] = await Promise.all([
-    supabase.from("groups").select(GROUP_COLUMNS).order("created_at", { ascending: false }),
+    loose(supabase).from("groups").select(GROUP_COLUMNS).order("created_at", { ascending: false }),
     getMemberGroupIds(user.id),
   ]);
   if (groups.error) throw new Error(`Could not load groups: ${groups.error.message}`);
 
-  return (groups.data as unknown as GroupRow[]).map((row) =>
-    toGroupSummary(row, user.id, memberGroupIds),
-  );
+  return (groups.data as unknown as GroupRow[])
+    .map((row) => toGroupSummary(row, user.id, memberGroupIds))
+    .filter(isShown);
 }
 
 /** One group by its address, or null when it does not exist or is not visible. */
@@ -37,11 +43,12 @@ export async function getGroupBySlug(slug: string): Promise<GroupSummary | null>
 
   const supabase = await createClient();
   const [group, memberGroupIds] = await Promise.all([
-    supabase.from("groups").select(GROUP_COLUMNS).eq("slug", slug).maybeSingle(),
+    loose(supabase).from("groups").select(GROUP_COLUMNS).eq("slug", slug).maybeSingle(),
     getMemberGroupIds(user.id),
   ]);
   if (group.error) throw new Error(`Could not load the group: ${group.error.message}`);
   if (!group.data) return null;
 
-  return toGroupSummary(group.data as unknown as GroupRow, user.id, memberGroupIds);
+  const summary = toGroupSummary(group.data as unknown as GroupRow, user.id, memberGroupIds);
+  return isShown(summary) ? summary : null;
 }
