@@ -142,6 +142,51 @@ export type Database = {
           },
         ];
       };
+      // Matches supabase/migrations/20261115050000_event_rsvps.sql (hand-written until types are regenerated).
+      event_rsvps: {
+        Row: {
+          city: string | null;
+          created_at: string;
+          event_key: string;
+          id: string;
+          is_virtual: boolean;
+          organizer: string | null;
+          source: string;
+          starts_at: string;
+          status: string;
+          timezone: string;
+          title: string;
+          url: string;
+          user_id: string;
+        };
+        Insert: {
+          city?: string | null;
+          created_at?: string;
+          event_key: string;
+          id?: string;
+          is_virtual?: boolean;
+          organizer?: string | null;
+          source?: string;
+          starts_at: string;
+          status?: string;
+          timezone?: string;
+          title: string;
+          url: string;
+          user_id: string;
+        };
+        Update: {
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       // Matches supabase/migrations/20261114160000_guide_harness.sql, applied to the live database and checked against its generated types.
       // Regenerate the whole file with `supabase gen types` when the schema changes again.
       evidence_claims: {

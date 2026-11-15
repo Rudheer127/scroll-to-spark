@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import { NAV_ITEMS } from "@/components/layout/nav-items";
 
 vi.mock("@/features/guide/actions", () => ({
   sendGuideMessage: vi.fn(),
@@ -63,7 +64,7 @@ describe("sidebar panel", () => {
   it("collapsed: labels are marked so CSS hides them, and the rail has a chats icon", () => {
     const html = render(true);
     expect(html).toContain('data-state="collapsed"');
-    expect(html.match(/<span data-sidebar-label="true" aria-hidden="true"/g)).toHaveLength(6);
+    expect(html.match(/<span data-sidebar-label="true" aria-hidden="true"/g)).toHaveLength(NAV_ITEMS.length);
     expect(html).toMatch(/<div data-sidebar-collapsed-only[^>]*>.*?aria-label="Show chats"/);
     expect(html).toMatch(/<button[^>]*aria-label="Pin sidebar open"[^>]*title="Pin sidebar open"/);
     expect(css).toMatch(/\[data-sidebar-label\]\s*\{\s*opacity: 0;/);
