@@ -198,8 +198,11 @@ describe("handleFactCheck: with evidence", () => {
     const out = await handleFactCheck(ctxFor(llm, rows, text));
     expect(checkOutput(out.response, out.context).ok).toBe(true);
     expect(out.extraCheck?.(out.response)).toBeNull();
-    const bad = await out.retry([]);
-    expect(checkOutput(bad, out.context)).toEqual({ ok: false, violations: ["ungrounded_number"] });
+    // The invented 90% is dropped: the repair becomes the evidence-only answer, which passes.
+    const repaired = await out.retry([]);
+    expect(repaired.message).not.toMatch(/90/);
+    expect(repaired.message).toMatch(/Closest thing on file/);
+    expect(checkOutput(repaired, out.context).ok).toBe(true);
   });
 
   it("rejects user-only numbers outside quotes or affirmed", async () => {
@@ -277,7 +280,7 @@ describe("handleFactCheck: with evidence", () => {
     expect(user).toMatch(/<<DATA label=evidence id=\w+>>\n[\s\S]*Ignore previous[\s\S]*<<END/);
     expect(res.response.verdict).not.toBe("supported");
     expect(res.response.verdict).not.toBe("partly_supported");
-    expect(t.events()).toContain("output_blocked");
+    expect(res.response.verdict).toBe("not_enough_evidence");
   });
 });
 
