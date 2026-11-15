@@ -92,7 +92,10 @@ describe("sidebar panel", () => {
   it("the account row has the name, the theme switch and one account menu, with one sign out", () => {
     const html = render(false);
     expect(html).not.toMatch(/signed in/i);
-    expect(html).toMatch(/<p data-sidebar-expanded-only="true" title="rudy"[^>]*>rudy<\/p>/);
+    // The name sits inside the account menu button, so the whole row opens the menu.
+    expect(html).toMatch(
+      /aria-label="Account menu".*?<span[^>]*title="rudy"[^>]*>rudy<\/span><\/button>/,
+    );
     expect(html).toMatch(/<button[^>]*aria-label="Switch to dark mode"[^>]*title="Dark mode"/);
     expect(html).toMatch(/<button[^>]*aria-label="Account menu"/);
     // Sign out lives in the account menu only, not as a second icon button beside it.
