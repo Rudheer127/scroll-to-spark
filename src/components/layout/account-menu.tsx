@@ -38,10 +38,10 @@ export function AccountMenu({
       <DropdownMenuTrigger
         aria-label="Account menu"
         className={cn(
-          "flex h-11 cursor-pointer items-center rounded-full outline-none hover:bg-chip focus-visible:ring-2 focus-visible:ring-action active:opacity-75",
+          "flex h-12 cursor-pointer items-center outline-none hover:bg-chip focus-visible:bg-chip focus-visible:ring-1 focus-visible:ring-border focus-visible:ring-inset active:opacity-75 data-[state=open]:bg-chip",
           showName
-            ? "min-w-0 flex-1 gap-2 pr-3"
-            : "w-11 shrink-0 justify-center hover:bg-transparent",
+            ? "min-w-0 flex-1 gap-3 rounded-xl px-2.5"
+            : "w-11 shrink-0 justify-center rounded-full hover:bg-transparent",
         )}
       >
         <UserAvatar name={name} url={avatarUrl} className="text-sm" />
@@ -55,7 +55,11 @@ export function AccountMenu({
           </span>
         ) : null}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" side="top">
+      <DropdownMenuContent
+        align="start"
+        side="top"
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
+      >
         <DropdownMenuLabel className="flex items-center gap-3">
           <UserAvatar name={name} url={avatarUrl} className="size-10 text-base" />
           <span className="flex min-w-0 flex-col leading-tight">

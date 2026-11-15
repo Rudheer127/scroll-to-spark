@@ -208,6 +208,15 @@ body {
   [data-sidebar-account] {
     flex-direction: column;
   }
+
+  /* The avatar-and-name button shrinks to just the round avatar. */
+  [data-sidebar-account] > button[aria-label="Account menu"] {
+    flex: none;
+    width: 2.75rem;
+    justify-content: center;
+    padding-inline: 0;
+    border-radius: 9999px;
+  }
 }
 
 /* The chat history icon is only for the icon rail. */
