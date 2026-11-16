@@ -10,7 +10,7 @@ import { reportContent } from "@/features/threads/reports";
 import { REPORT_REASONS } from "@/features/threads/schemas";
 
 type ReportButtonProps = {
-  targetType: "thread" | "comment" | "group";
+  targetType: "thread" | "comment" | "group" | "inspiration";
   targetId: string;
   /** What is being reported, in the person's words: "thread", "comment" or "group". */
   noun: string;

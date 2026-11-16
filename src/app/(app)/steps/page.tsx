@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { StepList } from "@/features/steps/components/step-list";
 import { getMyCompletions } from "@/features/steps/queries";
+import { getMySharing } from "@/features/inspire/queries";
 
 export default async function StepsPage() {
-  const completions = await getMyCompletions();
+  const [completions, sharing] = await Promise.all([getMyCompletions(), getMySharing()]);
   const replies = completions.filter((item) => item.thankYou).length;
   const minutes = completions.reduce((sum, item) => sum + item.minutes, 0);
 
@@ -49,7 +50,7 @@ export default async function StepsPage() {
               </div>
             ))}
           </dl>
-          <StepList completions={completions} />
+          <StepList completions={completions} sharing={sharing} />
         </>
       )}
     </div>

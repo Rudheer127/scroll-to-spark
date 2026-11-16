@@ -2,10 +2,18 @@ import Link from "next/link";
 import { GroupAvatar } from "@/features/groups/components/group-avatar";
 import { SampleBadge } from "@/components/shared/sample-badge";
 import { formatRelativeTime } from "@/lib/format-time";
+import { ShareToggle } from "@/features/inspire/components/share-toggle";
+import type { Sharing } from "@/features/inspire/types";
 import type { CompletionSummary } from "@/features/steps/types";
 
 /** Your steps, newest first, each with the state of the reply. */
-export function StepList({ completions }: { completions: CompletionSummary[] }) {
+export function StepList({
+  completions,
+  sharing = {},
+}: {
+  completions: CompletionSummary[];
+  sharing?: Record<string, Sharing>;
+}) {
   return (
     <ul className="flex flex-col gap-4">
       {completions.map((item) => (
@@ -41,6 +49,11 @@ export function StepList({ completions }: { completions: CompletionSummary[] }) 
                 Waiting for a reply from the group
               </p>
             )}
+            <ShareToggle
+              completionId={item.id}
+              initial={sharing[item.id] ?? { sharePublicly: false, shareThankYou: false }}
+              compact
+            />
           </div>
         </li>
       ))}
