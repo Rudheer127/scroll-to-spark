@@ -1,0 +1,45 @@
+{
+  "results": [
+    {
+      "id": "ocd-person/1",
+      "name": "Jane Roe",
+      "party": "Democratic",
+      "image": "https://example.org/jane.jpg",
+      "email": "jane@leg.example.gov",
+      "openstates_url": "https://openstates.org/person/jane-roe-1/",
+      "current_role": {
+        "title": "Senator",
+        "org_classification": "upper",
+        "district": "43"
+      },
+      "jurisdiction": {
+        "name": "Washington"
+      },
+      "offices": [
+        {
+          "voice": "360-786-0000",
+          "address": "Olympia"
+        }
+      ]
+    },
+    {
+      "id": "ocd-person/2",
+      "name": "John Doe",
+      "party": "Republican",
+      "image": "http://insecure.example/j.jpg",
+      "current_role": {
+        "title": "Representative",
+        "org_classification": "lower",
+        "district": "43"
+      }
+    },
+    {
+      "id": "ocd-person/3",
+      "name": "Gov",
+      "current_role": {
+        "title": "Governor",
+        "org_classification": "executive"
+      }
+    }
+  ]
+}

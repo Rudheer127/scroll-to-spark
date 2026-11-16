@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "employer": "NOT EMPLOYED",
+      "total": 2756205.23
+    },
+    {
+      "employer": "SELF EMPLOYED",
+      "total": 665217.72
+    },
+    {
+      "employer": "NULL",
+      "total": 238560.84
+    },
+    {
+      "employer": "T-MOBILE",
+      "total": 99267.55
+    },
+    {
+      "employer": "MICROSOFT",
+      "total": 50000
+    }
+  ]
+}

@@ -65,6 +65,8 @@ const serverSchema = publicSchema
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
     ...llmShape,
     GIF_API_KEY: z.string().min(1).optional(),
+    OPEN_STATES_API_KEY: optionalText,
+    FEC_API_KEY: optionalText,
   })
   .refine(hasAnyKey, KEY_RULE);
 
@@ -106,6 +108,19 @@ export function getServerEnv(): ServerEnv {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     ...llmValues(),
     GIF_API_KEY: process.env.GIF_API_KEY,
+    OPEN_STATES_API_KEY: process.env.OPEN_STATES_API_KEY,
+    FEC_API_KEY: process.env.FEC_API_KEY,
+  });
+}
+
+/**
+ * Keys for "Your officials". Both are optional: without OPEN_STATES_API_KEY the state legislators
+ * section is hidden, and without FEC_API_KEY funding uses FEC's rate-limited DEMO_KEY. Server code only.
+ */
+export function getOfficialsEnv() {
+  return z.object({ OPEN_STATES_API_KEY: optionalText, FEC_API_KEY: optionalText }).parse({
+    OPEN_STATES_API_KEY: process.env.OPEN_STATES_API_KEY,
+    FEC_API_KEY: process.env.FEC_API_KEY,
   });
 }
 

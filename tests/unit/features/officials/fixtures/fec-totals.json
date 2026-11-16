@@ -1,0 +1,14 @@
+{
+  "results": [
+    {
+      "cycle": 2026,
+      "coverage_start_date": "2025-01-01T00:00:00",
+      "coverage_end_date": "2026-09-30T00:00:00",
+      "receipts": 985139.34,
+      "disbursements": 1364395.83,
+      "last_cash_on_hand_end_period": 231954.7,
+      "individual_contributions": 982337.57,
+      "other_political_committee_contributions": 0
+    }
+  ]
+}

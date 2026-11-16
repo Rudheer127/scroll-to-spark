@@ -1,0 +1,66 @@
+[
+  {
+    "id": {
+      "bioguide": "C000127",
+      "fec": ["S8WA00194", "H2WA01054"]
+    },
+    "name": {
+      "first": "Maria",
+      "last": "Cantwell",
+      "official_full": "Maria Cantwell"
+    },
+    "terms": [
+      {
+        "type": "rep",
+        "start": "1993-01-05",
+        "end": "1995-01-03",
+        "state": "WA",
+        "district": 1,
+        "party": "Democrat"
+      },
+      {
+        "type": "sen",
+        "start": "2025-01-03",
+        "end": "2031-01-03",
+        "state": "WA",
+        "class": 1,
+        "party": "Democrat",
+        "url": "https://www.cantwell.senate.gov",
+        "phone": "202-224-3441",
+        "contact_form": "https://www.cantwell.senate.gov/contact/",
+        "office": "511 Hart Senate Office Building"
+      }
+    ]
+  },
+  {
+    "id": {
+      "bioguide": "S000510",
+      "fec": ["H6WA09068"]
+    },
+    "name": {
+      "first": "Adam",
+      "last": "Smith"
+    },
+    "terms": [
+      {
+        "type": "rep",
+        "start": "2025-01-03",
+        "end": "2027-01-03",
+        "state": "WA",
+        "district": 9,
+        "party": "Democrat",
+        "url": "javascript:alert(1)",
+        "phone": "202-225-8901"
+      }
+    ]
+  },
+  {
+    "id": {
+      "bioguide": "X000001"
+    },
+    "name": {
+      "first": "Bad"
+    },
+    "terms": []
+  }
+]
