@@ -148,6 +148,11 @@ export async function getStateLegislators(
     : fetchStateLegislators(lat, lng, state);
 }
 
+/** True when no real FEC key is set, so funding runs on FEC's tiny shared DEMO_KEY allowance. */
+export function usesDemoFecKey(): boolean {
+  return getOfficialsEnv().FEC_API_KEY === undefined;
+}
+
 function fecKey(): string {
   return getOfficialsEnv().FEC_API_KEY ?? "DEMO_KEY";
 }
@@ -191,4 +196,28 @@ export async function loadFunding(fecId: string, name: string): Promise<FundingS
     // Employer detail is a bonus. The totals are still worth showing without it.
   }
   return normalizeFunding(fecId, name, totals, employers);
+}
+
+// The newest good answer per candidate, kept in this server's memory. If the FEC stops answering
+// (or the shared demo key runs out) a person still sees the last figures we got, marked as such.
+const lastGoodFunding = new Map<string, FundingSummary | null>();
+
+export type FundingOutcome = {
+  funding: FundingSummary | null;
+  /** The FEC did not answer this time. `funding` may then be an older answer. */
+  unavailable: boolean;
+  /** `funding` is an older answer kept from an earlier success. */
+  stale: boolean;
+};
+
+/** Like `loadFunding`, but a failure becomes an outcome instead of a throw. */
+export async function getFundingWithFallback(fecId: string, name: string): Promise<FundingOutcome> {
+  try {
+    const funding = await loadFunding(fecId, name);
+    lastGoodFunding.set(fecId, funding);
+    return { funding, unavailable: false, stale: false };
+  } catch {
+    const kept = lastGoodFunding.get(fecId) ?? null;
+    return { funding: kept, unavailable: true, stale: kept !== null };
+  }
 }

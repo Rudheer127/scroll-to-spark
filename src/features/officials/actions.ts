@@ -8,9 +8,10 @@ import {
   districtFromCoords,
   findFederalByBioguide,
   getFederalForState,
+  getFundingWithFallback,
   getStateLegislators,
   hasOpenStatesKey,
-  loadFunding,
+  usesDemoFecKey,
 } from "@/features/officials/source";
 import { LOOKUPS_KEEP } from "@/features/officials/queries";
 import { bioguideSchema, lookupSchema, zipSchema } from "@/features/officials/schemas";
@@ -167,9 +168,16 @@ export async function clearLookupHistory(): Promise<ActionResult> {
 }
 
 /** Campaign money for a member of Congress, looked up by Bioguide id so no free-form id reaches OpenFEC. */
-export async function getFunding(
-  bioguide: unknown,
-): Promise<ActionResult<{ funding: FundingSummary | null }>> {
+export type FundingAnswer = {
+  funding: FundingSummary | null;
+  /** The FEC did not answer. `funding` may be an older answer when `stale` is true. */
+  unavailable?: true;
+  stale?: true;
+  /** No real FEC key is configured, so the shared demo allowance is what ran out. */
+  needsKey?: true;
+};
+
+export async function getFunding(bioguide: unknown): Promise<ActionResult<FundingAnswer>> {
   const { userId } = await currentUserId();
   if (!userId) return fail(SIGN_IN);
   const parsed = bioguideSchema.safeParse(bioguide);
@@ -177,11 +185,15 @@ export async function getFunding(
 
   const official = await findFederalByBioguide(parsed.data).catch(() => null);
   if (!official?.fecId) return { ok: true, data: { funding: null } };
-  try {
-    return { ok: true, data: { funding: await loadFunding(official.fecId, official.name) } };
-  } catch {
-    return fail(
-      "The FEC is not answering right now, or its hourly limit was reached. Try again later.",
-    );
-  }
+  const outcome = await getFundingWithFallback(official.fecId, official.name);
+  if (!outcome.unavailable) return { ok: true, data: { funding: outcome.funding } };
+  return {
+    ok: true,
+    data: {
+      funding: outcome.funding,
+      unavailable: true,
+      ...(outcome.stale ? { stale: true as const } : {}),
+      ...(usesDemoFecKey() ? { needsKey: true as const } : {}),
+    },
+  };
 }

@@ -1,12 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { LocateFixed, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
 import { clearLookupHistory, lookupOfficials, removeLookup } from "@/features/officials/actions";
-import { filterOfficials, levelsPresent } from "@/features/officials/filters";
+import {
+  collapseHouse,
+  filterOfficials,
+  levelsPresent,
+  orderOfficials,
+} from "@/features/officials/filters";
+import { NO_SENATOR_PLACES } from "@/features/officials/normalize";
 import {
   LEVELS,
   type Level,
@@ -29,6 +36,13 @@ function readSavedZip(): string | null {
   }
 }
 
+/** Puts the looked-up ZIP in the address bar, so a reload or Back lands on the same list. */
+function showZipInUrl(zip: string | null) {
+  const current = new URLSearchParams(window.location.search).get("zip");
+  if (current === zip) return;
+  window.history.pushState(null, "", zip ? `?zip=${zip}` : window.location.pathname);
+}
+
 function writeSavedZip(zip: string | null) {
   try {
     if (zip) window.localStorage.setItem(SAVED_ZIP_KEY, zip);
@@ -40,6 +54,8 @@ function writeSavedZip(zip: string | null) {
 
 /** The "Your officials" screen: a ZIP box, recent lookups, filters, and a grid of compact cards. */
 export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLookup[] }) {
+  const params = useSearchParams();
+  const zipParam = params.get("zip");
   const [zip, setZip] = useState("");
   const [zipError, setZipError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -51,6 +67,7 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
   const [level, setLevel] = useState<Level | null>(null);
   const [district, setDistrict] = useState<number | null>(null);
   const [open, setOpen] = useState<Official | null>(null);
+  const [showAllDistricts, setShowAllDistricts] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const [lastInput, setLastInput] = useState<{ zip: string } | { lat: number; lng: number } | null>(
     null,
@@ -69,6 +86,8 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
       if (mine.signal.aborted) return;
       setLoading(false);
       if (!outcome.ok) {
+        // An old list under a new error would look like the answer to this search.
+        setResult(null);
         if (outcome.fieldErrors?.zip) setZipError(outcome.fieldErrors.zip);
         else setApiError(outcome.error);
         return;
@@ -79,6 +98,8 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
       setDistrict(null);
       setLevel(null);
       setQuery("");
+      setShowAllDistricts(false);
+      showZipInUrl(data.location.zip);
       writeSavedZip(keep ? data.location.zip : null);
       setRecent((current) =>
         [data.location, ...current.filter((item) => item.zip !== data.location.zip)].slice(0, 10),
@@ -130,10 +151,30 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
     setZipError(null);
     setRemember(false);
     writeSavedZip(null);
+    showZipInUrl(null);
   }
 
-  // A ZIP the person chose to remember on this device is looked up again on arrival.
+  // The address bar leads: a ZIP in it is looked up (on arrival, reload, Back or Forward), and no
+  // ZIP there means a clean screen. A ZIP the person chose to remember on this device comes second.
   useEffect(() => {
+    if (zipParam && /^\d{5}$/.test(zipParam)) {
+      if (result?.location.zip === zipParam) return;
+      const timer = setTimeout(() => {
+        setZip(zipParam);
+        lookup({ zip: zipParam }, remember);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+    if (result) {
+      const timer = setTimeout(() => {
+        cancel();
+        setZip("");
+        setResult(null);
+        setApiError(null);
+        setZipError(null);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
     const saved = readSavedZip();
     if (!saved) return;
     const timer = setTimeout(() => {
@@ -142,12 +183,30 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
       lookup({ zip: saved }, true);
     }, 0);
     return () => clearTimeout(timer);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reacts to the address bar only
+  }, [zipParam]);
 
-  const visible = useMemo(
-    () => (result ? filterOfficials(result.officials, { level, query, district }) : []),
+  const ordered = useMemo(
+    () =>
+      result
+        ? orderOfficials(
+            filterOfficials(result.officials, { level, query, district }),
+            result.likelyDistrict,
+          )
+        : [],
     [result, level, query, district],
   );
+  // Fold the other districts away until asked, but never while a filter is narrowing the list.
+  const { shown: visible, hidden: hiddenDistricts } = collapseHouse(ordered, {
+    likelyDistrict: result?.likelyDistrict ?? null,
+    collapse:
+      result?.houseMode === "choose" &&
+      !showAllDistricts &&
+      district === null &&
+      query.trim() === "" &&
+      level !== "state",
+  });
+  const noSenatorPlace = result ? NO_SENATOR_PLACES[result.location.state] : undefined;
   const levels = result ? levelsPresent(result.officials) : [];
   const houseDistricts = useMemo(
     () =>
@@ -386,10 +445,15 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
               above, or use your location for an exact answer.
             </p>
           ) : null}
+          {noSenatorPlace ? (
+            <p className="text-xs text-muted">
+              {noSenatorPlace.name} has no U.S. senators. It sends a non-voting{" "}
+              {noSenatorPlace.office.toLowerCase()} to the House of Representatives.
+            </p>
+          ) : null}
           {result.stateStatus === "missing-key" ? (
             <p role="status" className="text-xs text-muted">
-              State legislators are switched off because no Open States key is set up on this app
-              yet. Federal officials are shown below.
+              State legislators are coming soon.
             </p>
           ) : null}
           {result.stateStatus === "down" ? (
@@ -429,6 +493,24 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
               ))}
             </ul>
           )}
+          {hiddenDistricts > 0 ? (
+            <div className="flex justify-center">
+              <Button variant="outline" onClick={() => setShowAllDistricts(true)}>
+                Show {hiddenDistricts} other {hiddenDistricts === 1 ? "district" : "districts"}
+              </Button>
+            </div>
+          ) : null}
+          {showAllDistricts && result.houseMode === "choose" && result.likelyDistrict !== null ? (
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowAllDistricts(false)}
+                className="text-sm font-semibold text-action hover:underline"
+              >
+                Show only my likely district
+              </button>
+            </div>
+          ) : null}
           <p className="text-xs text-muted">
             Federal data: unitedstates/congress-legislators (public domain). State data: Open
             States. Funding: FEC. This is information, not an endorsement of anyone.

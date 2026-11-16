@@ -71,6 +71,16 @@ export function socialUrl({ network, handle }: Social): string {
   return base + handle;
 }
 
+/** Places that send a non-voting member to the House and have no U.S. senators. */
+export const NO_SENATOR_PLACES: Record<string, { name: string; office: string }> = {
+  DC: { name: "Washington, D.C.", office: "Delegate" },
+  PR: { name: "Puerto Rico", office: "Resident Commissioner" },
+  GU: { name: "Guam", office: "Delegate" },
+  VI: { name: "the U.S. Virgin Islands", office: "Delegate" },
+  AS: { name: "American Samoa", office: "Delegate" },
+  MP: { name: "the Northern Mariana Islands", office: "Delegate" },
+};
+
 /** Joins the congress-legislators "current" and "social media" files into compact Officials. */
 export function normalizeFederal(legislators: unknown, social: unknown): Official[] {
   const socials = new Map<string, Social[]>();
@@ -93,7 +103,9 @@ export function normalizeFederal(legislators: unknown, social: unknown): Officia
       id: `federal:${id.bioguide}`,
       level: "federal",
       name: name.official_full ?? `${name.first} ${name.last}`,
-      office: isSenator ? "U.S. Senator" : "U.S. Representative",
+      office: isSenator
+        ? "U.S. Senator"
+        : (NO_SENATOR_PLACES[term.state]?.office ?? "U.S. Representative"),
       state: term.state,
       district: isSenator ? null : (term.district ?? 0),
       party: term.party ?? "Unknown",
@@ -228,11 +240,11 @@ export function normalizeFunding(
     cycle: t.cycle ?? (Number((t.coverage_end_date ?? "").slice(0, 4)) || 0),
     coverageStart: t.coverage_start_date?.slice(0, 10) ?? null,
     coverageEnd: t.coverage_end_date?.slice(0, 10) ?? null,
-    receipts: t.receipts ?? 0,
-    disbursements: t.disbursements ?? 0,
+    receipts: t.receipts ?? null,
+    disbursements: t.disbursements ?? null,
     cashOnHand: t.last_cash_on_hand_end_period ?? null,
-    individual: t.individual_contributions ?? 0,
-    committees: t.other_political_committee_contributions ?? 0,
+    individual: t.individual_contributions ?? null,
+    committees: t.other_political_committee_contributions ?? null,
     topEmployers,
     fecUrl: fecCandidateUrl(fecId),
   };

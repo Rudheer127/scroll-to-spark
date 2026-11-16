@@ -45,11 +45,12 @@ export type FundingSummary = {
   /** Reporting period the totals cover. */
   coverageStart: string | null;
   coverageEnd: string | null;
-  receipts: number;
-  disbursements: number;
+  /** Null when the FEC did not report that figure. Never shown as $0. */
+  receipts: number | null;
+  disbursements: number | null;
   cashOnHand: number | null;
-  individual: number;
-  committees: number;
+  individual: number | null;
+  committees: number | null;
   /** Largest employers of individual donors (FEC has no sector data). */
   topEmployers: { employer: string; total: number }[];
   fecUrl: string;

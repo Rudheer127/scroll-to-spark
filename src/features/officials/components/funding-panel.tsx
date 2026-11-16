@@ -2,20 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
-import { getFunding } from "@/features/officials/actions";
+import { getFunding, type FundingAnswer } from "@/features/officials/actions";
 import { fecCandidateUrl } from "@/features/officials/normalize";
 import { formatMoney } from "@/features/officials/filters";
 import type { FundingSummary, Official } from "@/features/officials/types";
 
 type State =
   | { kind: "loading" }
-  | { kind: "ready"; funding: FundingSummary | null }
+  | { kind: "ready"; funding: FundingSummary | null; unavailable: boolean; stale: boolean }
   | { kind: "error"; message: string };
 
 /** Campaign money from the FEC. Loads when the dialog opens, and the load is dropped if it closes first. */
 export function FundingPanel({ official }: { official: Official }) {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [attempt, setAttempt] = useState(0);
+  const [needsKey, setNeedsKey] = useState(false);
+
+  function retry() {
+    setState({ kind: "loading" });
+    setAttempt((n) => n + 1);
+  }
 
   useEffect(() => {
     if (!official.bioguide) return;
@@ -23,11 +29,18 @@ export function FundingPanel({ official }: { official: Official }) {
     // A Server Action cannot be cut off mid-flight, so the controller gates the answer instead.
     void getFunding(official.bioguide).then((result) => {
       if (controller.signal.aborted) return;
-      setState(
-        result.ok
-          ? { kind: "ready", funding: result.data.funding }
-          : { kind: "error", message: result.error },
-      );
+      if (!result.ok) {
+        setState({ kind: "error", message: result.error });
+        return;
+      }
+      const answer: FundingAnswer = result.data;
+      setState({
+        kind: "ready",
+        funding: answer.funding,
+        unavailable: answer.unavailable === true,
+        stale: answer.stale === true,
+      });
+      setNeedsKey(answer.needsKey === true);
     });
     return () => controller.abort();
   }, [official.bioguide, attempt]);
@@ -44,21 +57,38 @@ export function FundingPanel({ official }: { official: Official }) {
         </p>
       ) : null}
       {state.kind === "error" ? (
-        <p role="alert" className="text-sm text-danger">
+        <p role="alert" className="text-sm text-muted">
           {state.message}{" "}
           <button
             type="button"
-            onClick={() => {
-              setState({ kind: "loading" });
-              setAttempt((n) => n + 1);
-            }}
+            onClick={retry}
             className="font-semibold text-action hover:underline"
           >
             Try again
           </button>
         </p>
       ) : null}
-      {state.kind === "ready" && !state.funding ? (
+      {state.kind === "ready" && state.unavailable ? (
+        <div
+          role="status"
+          className="flex flex-col gap-1 rounded-(--radius-input) bg-chip p-3 text-sm"
+        >
+          <p>
+            {state.stale
+              ? "Funding details are temporarily unavailable. These are the last figures we got."
+              : "Funding details are temporarily unavailable."}{" "}
+            <button
+              type="button"
+              onClick={retry}
+              className="font-semibold text-action hover:underline"
+            >
+              Try again
+            </button>
+          </p>
+          {needsKey ? <p className="text-xs text-muted">Funding needs an FEC API key.</p> : null}
+        </div>
+      ) : null}
+      {state.kind === "ready" && !state.funding && !state.unavailable ? (
         <p className="text-sm text-muted">
           The FEC has no campaign totals on file for this person.
         </p>

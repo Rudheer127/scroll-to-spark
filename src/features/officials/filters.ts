@@ -29,12 +29,59 @@ export function levelsPresent(officials: Official[]): Level[] {
   );
 }
 
-/** "Term ends Jan 3, 2031", or null when the source has no date. */
-export function termEndLabel(termEnd: string | null): string | null {
+/**
+ * "Term ends Jan 3, 2031" while the term is still running, "Term ended Jan 3, 2027" once it is
+ * over, or null when the source has no date. Elections move terms on, so the wording follows `now`.
+ */
+export function termEndLabel(termEnd: string | null, now: Date = new Date()): string | null {
   if (!termEnd) return null;
   const date = new Date(`${termEnd}T00:00:00Z`);
   if (Number.isNaN(date.getTime())) return null;
-  return `Term ends ${date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}`;
+  const text = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  // The term runs through its end date.
+  return date.getTime() + 86_400_000 > now.getTime() ? `Term ends ${text}` : `Term ended ${text}`;
+}
+
+/**
+ * The order people read them in: senators, then the House member for the likely district, then the
+ * other House members by district number, then state legislators (senate before house, by name).
+ */
+export function orderOfficials(officials: Official[], likelyDistrict: number | null): Official[] {
+  const rank = (o: Official): number => {
+    if (o.level === "federal" && o.isSenator) return 0;
+    if (o.level === "federal")
+      return likelyDistrict !== null && o.district === likelyDistrict ? 1 : 2;
+    if (o.level === "state") return o.isSenator ? 3 : 4;
+    return 5;
+  };
+  const num = (o: Official) =>
+    typeof o.district === "number" ? o.district : Number.MAX_SAFE_INTEGER;
+  return [...officials].sort(
+    (a, b) => rank(a) - rank(b) || num(a) - num(b) || a.name.localeCompare(b.name),
+  );
+}
+
+/**
+ * Hides House members outside the likely district behind a button. Returns what to show and how
+ * many other districts are folded away. Nothing is hidden when the likely district is unknown,
+ * when the person asked to see all of them, or when it is not a "choose" lookup.
+ */
+export function collapseHouse(
+  officials: Official[],
+  { likelyDistrict, collapse }: { likelyDistrict: number | null; collapse: boolean },
+): { shown: Official[]; hidden: number } {
+  if (!collapse || likelyDistrict === null) return { shown: officials, hidden: 0 };
+  const isOther = (o: Official) =>
+    o.level === "federal" && !o.isSenator && o.district !== likelyDistrict;
+  const hidden = officials.filter(isOther).length;
+  return hidden === 0
+    ? { shown: officials, hidden: 0 }
+    : { shown: officials.filter((o) => !isOther(o)), hidden };
 }
 
 export function districtLabel(o: Official): string | null {
@@ -43,7 +90,8 @@ export function districtLabel(o: Official): string | null {
   return `${o.state}-${o.district}`;
 }
 
-export function formatMoney(value: number): string {
+export function formatMoney(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "Not reported";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",

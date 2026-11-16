@@ -57,7 +57,9 @@ export function OfficialCard({
               className={cn("size-2 shrink-0 rounded-full", PARTY_DOT[partyTone(official.party)])}
             />
             <span className="font-semibold text-ink">{official.party}</span>
-            {term ? <span>· {term.replace("Term ends", "to")}</span> : null}
+            {term ? (
+              <span>· {term.replace("Term ends", "to").replace("Term ended", "term ended")}</span>
+            ) : null}
             {likely ? (
               <span className="rounded-full bg-lavender-soft px-2 py-0.5 font-semibold text-lavender-ink">
                 Likely yours

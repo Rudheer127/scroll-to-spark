@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   bioguidePhoto,
   fecCandidateUrl,
+  NO_SENATOR_PLACES,
   normalizeFederal,
   normalizeFunding,
   normalizeOpenStates,
@@ -106,6 +107,16 @@ describe("normalizeFunding", () => {
     ]);
   });
 
+  it("keeps a figure the FEC left out as null instead of $0", () => {
+    const funding = normalizeFunding("S1", "X", { results: [{ cycle: 2026, receipts: 10 }] }, null);
+    expect(funding).toMatchObject({
+      receipts: 10,
+      disbursements: null,
+      individual: null,
+      committees: null,
+    });
+  });
+
   it("returns null with no totals, and works without employers", () => {
     expect(normalizeFunding("S1", "X", { results: [] }, null)).toBeNull();
     expect(normalizeFunding("S1", "X", totals, null)?.topEmployers).toEqual([]);
@@ -117,5 +128,23 @@ describe("partyTone", () => {
     expect(partyTone("Democrat")).toBe("blue");
     expect(partyTone("Republican")).toBe("red");
     expect(partyTone("Independent")).toBe("other");
+  });
+});
+
+describe("non-voting delegates", () => {
+  const row = (state: string) => [
+    {
+      id: { bioguide: "D000001" },
+      name: { first: "Pat", last: "Delegate" },
+      terms: [{ type: "rep", start: "2025-01-03", end: "2027-01-03", state, district: 0 }],
+    },
+  ];
+  it("labels DC and territory members by their real office", () => {
+    expect(normalizeFederal(row("DC"), [])[0].office).toBe("Delegate");
+    expect(normalizeFederal(row("PR"), [])[0].office).toBe("Resident Commissioner");
+    expect(normalizeFederal(row("WA"), [])[0].office).toBe("U.S. Representative");
+  });
+  it("lists the places with no senators", () => {
+    expect(Object.keys(NO_SENATOR_PLACES).sort()).toEqual(["AS", "DC", "GU", "MP", "PR", "VI"]);
   });
 });

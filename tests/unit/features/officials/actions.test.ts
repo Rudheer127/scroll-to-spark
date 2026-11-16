@@ -6,6 +6,9 @@ const state = vi.hoisted(() => ({
   calls: [] as Call[],
   insertError: null as { code: string } | null,
   rows: [] as { zip: string; city: string; state: string }[],
+  funding: {
+    default: { funding: null, unavailable: false, stale: false },
+  } as Record<string, { funding: unknown; unavailable: boolean; stale: boolean }>,
 }));
 
 function builder() {
@@ -51,8 +54,10 @@ vi.mock("@/features/officials/source", () => ({
   }),
   getStateLegislators: async () => [],
   hasOpenStatesKey: () => false,
-  findFederalByBioguide: async () => null,
-  loadFunding: async () => null,
+  findFederalByBioguide: async (id: string) =>
+    id === "F000001" ? { fecId: "S1", name: "Fund Er" } : null,
+  usesDemoFecKey: () => true,
+  getFundingWithFallback: async (fecId: string) => state.funding[fecId] ?? state.funding.default,
 }));
 vi.mock("@/features/officials/queries", () => ({ LOOKUPS_KEEP: 10 }));
 
@@ -135,5 +140,23 @@ describe("getFunding", () => {
   it("rejects a malformed id and returns null funding for unknown officials", async () => {
     expect(await getFunding("nope")).toMatchObject({ ok: false });
     expect(await getFunding("C000127")).toEqual({ ok: true, data: { funding: null } });
+  });
+
+  it("returns the figures when the FEC answers", async () => {
+    state.funding.S1 = { funding: { receipts: 5 }, unavailable: false, stale: false };
+    expect(await getFunding("F000001")).toEqual({ ok: true, data: { funding: { receipts: 5 } } });
+  });
+
+  it("says funding is unavailable, with older figures if we kept some, and flags the demo key", async () => {
+    state.funding.S1 = { funding: null, unavailable: true, stale: false };
+    expect(await getFunding("F000001")).toEqual({
+      ok: true,
+      data: { funding: null, unavailable: true, needsKey: true },
+    });
+    state.funding.S1 = { funding: { receipts: 5 }, unavailable: true, stale: true };
+    expect(await getFunding("F000001")).toEqual({
+      ok: true,
+      data: { funding: { receipts: 5 }, unavailable: true, stale: true, needsKey: true },
+    });
   });
 });
