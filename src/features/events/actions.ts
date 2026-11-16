@@ -3,9 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { fail, type ActionResult } from "@/lib/result";
 import { createClient } from "@/lib/supabase/server";
+import { loose } from "@/features/threads/loose-db";
 import { getEvents } from "@/features/events/source";
 import { lookupZip, zipFromCoords } from "@/features/events/location";
-import { findNearbySchema, logContributionSchema, setRsvpSchema } from "@/features/events/schemas";
+import {
+  findNearbySchema,
+  logContributionSchema,
+  searchTermSchema,
+  setRsvpSchema,
+} from "@/features/events/schemas";
 import type { EventFeed, EventLocation, RsvpStatus } from "@/features/events/types";
 
 const UNIQUE_VIOLATION = "23505";
@@ -153,4 +159,65 @@ export async function logAttendedContribution(input: unknown): Promise<ActionRes
 
   revalidatePath("/", "layout");
   return { ok: true, data: undefined, message: "Added to your contributions." };
+}
+
+const SEARCH_KEEP = 6;
+
+/** Remembers a search so it shows up as a chip next time. Searching the same words again moves them to the top. */
+export async function rememberSearch(input: unknown): Promise<ActionResult<{ terms: string[] }>> {
+  const { supabase, userId } = await currentUserId();
+  if (!userId) return fail(SIGN_IN);
+  const parsed = searchTermSchema.safeParse(input);
+  if (!parsed.success) return fail("That search cannot be saved.");
+
+  const db = loose(supabase);
+  const { error } = await db
+    .from("search_history")
+    .insert({ user_id: userId, scope: "events", term: parsed.data });
+  if (error) {
+    if (error.code !== UNIQUE_VIOLATION) return fail("We could not save that search.");
+    await db
+      .from("search_history")
+      .update({ created_at: new Date().toISOString() })
+      .eq("user_id", userId)
+      .eq("scope", "events")
+      .eq("term", parsed.data);
+  }
+  return { ok: true, data: { terms: await trimSearches(db, userId) } };
+}
+
+async function trimSearches(db: ReturnType<typeof loose>, userId: string): Promise<string[]> {
+  const { data } = await db
+    .from("search_history")
+    .select("term")
+    .eq("user_id", userId)
+    .eq("scope", "events")
+    .order("created_at", { ascending: false });
+  const terms = ((data ?? []) as { term: string }[]).map((row) => row.term);
+  const extra = terms.slice(SEARCH_KEEP);
+  if (extra.length > 0) {
+    await db
+      .from("search_history")
+      .delete()
+      .eq("user_id", userId)
+      .eq("scope", "events")
+      .in("term", extra);
+  }
+  return terms.slice(0, SEARCH_KEEP);
+}
+
+/** Forgets one remembered search, or all of them when no term is given. Safe to repeat. */
+export async function forgetSearches(term?: unknown): Promise<ActionResult> {
+  const { supabase, userId } = await currentUserId();
+  if (!userId) return fail(SIGN_IN);
+  const db = loose(supabase);
+  let query = db.from("search_history").delete().eq("user_id", userId).eq("scope", "events");
+  if (term !== undefined) {
+    const parsed = searchTermSchema.safeParse(term);
+    if (!parsed.success) return fail("That search cannot be changed.");
+    query = query.eq("term", parsed.data);
+  }
+  const { error } = await query;
+  if (error) return fail("We could not forget that. Try again.");
+  return { ok: true, data: undefined };
 }

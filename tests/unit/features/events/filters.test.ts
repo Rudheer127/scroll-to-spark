@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { distanceMiles, eventDistance, filterEvents, isEventMode } from "@/features/events/filters";
+import {
+  distanceMiles,
+  eventDistance,
+  eventKinds,
+  filterEvents,
+  isEventMode,
+  sortEvents,
+} from "@/features/events/filters";
 import type { CivicEvent } from "@/features/events/types";
 
 function event(overrides: Partial<CivicEvent>): CivicEvent {
@@ -137,5 +144,39 @@ describe("filterEvents by date", () => {
       soon.key,
       later.key,
     ]);
+  });
+});
+
+describe("kind, today and sort", () => {
+  const rally = event({ key: "mobilize:5:5", kind: "Rally", startsAt: "2026-12-03T00:00:00.000Z" });
+  const meeting = event({
+    key: "mobilize:6:6",
+    kind: "Meeting",
+    startsAt: "2026-12-01T00:00:00.000Z",
+  });
+  const base = { mode: "all" as const, query: "", center: null, radiusMiles: 25 };
+
+  it("lists each kind once, alphabetically", () => {
+    expect(eventKinds([rally, meeting, rally])).toEqual(["Meeting", "Rally"]);
+  });
+
+  it("keeps only the chosen kind", () => {
+    expect(filterEvents([rally, meeting], { ...base, kind: "Rally" })).toEqual([rally]);
+  });
+
+  it("limits to the next day for 'today'", () => {
+    const now = new Date("2026-12-01T00:00:00.000Z");
+    expect(filterEvents([rally, meeting], { ...base, when: "today", now })).toEqual([meeting]);
+  });
+
+  it("sorts soonest first", () => {
+    expect(sortEvents([rally, meeting], "soonest", null)).toEqual([meeting, rally]);
+  });
+
+  it("sorts nearest first and puts online events last", () => {
+    const near = event({ key: "mobilize:7:7", lat: 33.43, lng: -111.93 });
+    const far = event({ key: "mobilize:8:8", lat: 34.5, lng: -112.5 });
+    const web = event({ key: "mobilize:9:9", isVirtual: true });
+    expect(sortEvents([web, far, near], "nearest", TEMPE)).toEqual([near, far, web]);
   });
 });

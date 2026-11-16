@@ -3,16 +3,22 @@ import { Suspense } from "react";
 import { getPublicEnv } from "@/lib/env";
 import { EventsExplorer } from "@/features/events/components/events-explorer";
 import { getEvents } from "@/features/events/source";
-import { getMyRsvps } from "@/features/events/queries";
+import { getMyRsvps, getRecentSearches } from "@/features/events/queries";
+import { Breadcrumb } from "@/components/shared/breadcrumb";
 
 export const metadata: Metadata = { title: "Events" };
 
 async function EventsContent() {
-  const [feed, rsvps] = await Promise.all([getEvents(null), getMyRsvps()]);
+  const [feed, rsvps, searches] = await Promise.all([
+    getEvents(null),
+    getMyRsvps(),
+    getRecentSearches(),
+  ]);
   return (
     <EventsExplorer
       initialFeed={feed}
       initialRsvps={rsvps}
+      initialSearches={searches}
       mapKey={getPublicEnv().NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY}
     />
   );
@@ -35,6 +41,7 @@ function EventsSkeleton() {
 export default function EventsPage() {
   return (
     <div className="flex flex-col gap-6">
+      <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Events" }]} />
       <header className="flex flex-col gap-1">
         <h1 className="text-4xl font-bold">Events</h1>
         <p className="text-lg text-muted">

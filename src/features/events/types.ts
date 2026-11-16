@@ -48,4 +48,6 @@ export type Rsvp = {
   title: string;
   startsAt: string;
   timezone: string;
+  /** The organizer's sign-up page, kept with the RSVP. */
+  url: string | null;
 };

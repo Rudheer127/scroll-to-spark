@@ -39,3 +39,9 @@ export const logContributionSchema = z.object({
   eventKey,
   minutes: z.number().int().min(1).max(1440),
 });
+
+/** A search the person typed, trimmed and squashed to single spaces. */
+export const searchTermSchema = z
+  .string()
+  .transform((value) => value.trim().replace(/\s+/g, " "))
+  .pipe(z.string().min(2, "Type at least two letters.").max(80));

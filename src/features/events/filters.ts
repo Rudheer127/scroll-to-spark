@@ -5,12 +5,26 @@ export type EventMode = (typeof EVENT_MODES)[number];
 
 export const WHEN_OPTIONS = [
   { value: "any", label: "Any date" },
+  { value: "today", label: "Today" },
   { value: "week", label: "Next 7 days" },
   { value: "month", label: "Next 30 days" },
 ] as const;
 export type EventWhen = (typeof WHEN_OPTIONS)[number]["value"];
 
 export const RADIUS_OPTIONS = [10, 25, 50] as const;
+
+export const SORT_OPTIONS = [
+  { value: "soonest", label: "Soonest first" },
+  { value: "nearest", label: "Nearest first" },
+] as const;
+export type EventSort = (typeof SORT_OPTIONS)[number]["value"];
+
+/** Every kind of event in the list, once each and in alphabetical order, for the type filter. */
+export function eventKinds(events: CivicEvent[]): string[] {
+  return [...new Set(events.map((event) => event.kind).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+}
 
 export type EventFilters = {
   mode: EventMode;
@@ -20,6 +34,8 @@ export type EventFilters = {
   radiusMiles: number;
   /** Optional date window, counted from `now`. Leave out for any date. */
   when?: EventWhen;
+  /** Only events of this kind (an exact label from `eventKinds`). Leave out for every kind. */
+  kind?: string;
   now?: Date;
 };
 
@@ -65,7 +81,7 @@ const DAY_MS = 86_400_000;
 
 function withinWhen(event: CivicEvent, when: EventWhen, now: Date): boolean {
   if (when === "any") return true;
-  const days = when === "week" ? 7 : 30;
+  const days = when === "today" ? 1 : when === "week" ? 7 : 30;
   return new Date(event.startsAt).getTime() <= now.getTime() + days * DAY_MS;
 }
 
@@ -77,6 +93,7 @@ function withinWhen(event: CivicEvent, when: EventWhen, now: Date): boolean {
 export function filterEvents(events: CivicEvent[], filters: EventFilters): CivicEvent[] {
   return events.filter((event) => {
     if (!matchesQuery(event, filters.query)) return false;
+    if (filters.kind && event.kind !== filters.kind) return false;
     if (!withinWhen(event, filters.when ?? "any", filters.now ?? new Date())) return false;
     switch (filters.mode) {
       case "online":
@@ -90,5 +107,26 @@ export function filterEvents(events: CivicEvent[], filters: EventFilters): Civic
       default:
         return true;
     }
+  });
+}
+
+/**
+ * A sorted copy. "soonest" orders by start time. "nearest" puts the closest in-person events first
+ * and online or unplaced ones after them, each group still soonest first.
+ */
+export function sortEvents(
+  events: CivicEvent[],
+  sort: EventSort,
+  center: Coords | null,
+): CivicEvent[] {
+  const byTime = (a: CivicEvent, b: CivicEvent) => a.startsAt.localeCompare(b.startsAt);
+  if (sort === "soonest" || !center) return [...events].sort(byTime);
+  return [...events].sort((a, b) => {
+    const da = eventDistance(a, center);
+    const db = eventDistance(b, center);
+    if (da === null && db === null) return byTime(a, b);
+    if (da === null) return 1;
+    if (db === null) return -1;
+    return da - db || byTime(a, b);
   });
 }
