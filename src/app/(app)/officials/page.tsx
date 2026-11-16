@@ -13,14 +13,10 @@ async function OfficialsContent() {
 
 export default function OfficialsPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Your officials" }]} />
-      <header className="flex flex-col gap-1">
-        <h1 className="text-4xl font-bold">Your officials</h1>
-        <p className="text-lg text-muted">
-          See the people who represent you, how to reach them, and where their campaign money comes
-          from. Nonpartisan facts from public records.
-        </p>
+      <header>
+        <h1 className="text-3xl font-bold">Your officials</h1>
       </header>
       <Suspense fallback={<PageSkeleton />}>
         <OfficialsContent />

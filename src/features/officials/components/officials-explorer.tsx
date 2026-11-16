@@ -160,64 +160,144 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
     [result],
   );
 
-  const chip = (active: boolean) =>
+  const seg = (active: boolean) =>
     cn(
-      "min-h-9 rounded-full px-4 text-sm font-semibold",
-      active ? "bg-ink text-on-ink" : "bg-chip hover:opacity-80",
+      "min-h-9 rounded-lg px-3 text-sm font-semibold",
+      active ? "bg-ink text-on-ink" : "hover:bg-border",
     );
+  const filtersActive = level !== null || query !== "" || district !== null;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <form
-          onSubmit={submit}
-          noValidate
-          className="flex flex-wrap items-end gap-2 rounded-(--radius-card) border border-border bg-surface p-4 shadow-card"
-        >
-          <div className="flex w-40 flex-col gap-1.5">
-            <label htmlFor="officials-zip" className="text-sm font-semibold">
+    <div className="flex flex-col gap-4">
+      <section
+        aria-label="Find your officials"
+        className="flex flex-col gap-2.5 rounded-(--radius-card) border border-border bg-surface p-3 shadow-card"
+      >
+        <form onSubmit={submit} noValidate className="flex flex-wrap items-center gap-2">
+          <div className="relative w-32 shrink-0">
+            <label htmlFor="officials-zip" className="sr-only">
               ZIP code
             </label>
-            <div className="relative">
-              <input
-                id="officials-zip"
-                value={zip}
-                onChange={(e) => {
-                  setZip(e.target.value.replace(/\D/g, "").slice(0, 5));
-                  setZipError(null);
-                }}
-                inputMode="numeric"
-                autoComplete="postal-code"
-                placeholder="85281"
-                aria-invalid={zipError ? true : undefined}
-                aria-describedby={zipError ? "officials-zip-error" : undefined}
-                className={cn(inputClass, "pr-9")}
-              />
-              {zip ? (
-                <button
-                  type="button"
-                  aria-label="Clear ZIP code"
-                  onClick={clearAll}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted hover:bg-chip"
-                >
-                  <X aria-hidden className="size-4" />
-                </button>
-              ) : null}
-            </div>
+            <input
+              id="officials-zip"
+              value={zip}
+              onChange={(e) => {
+                setZip(e.target.value.replace(/\D/g, "").slice(0, 5));
+                setZipError(null);
+              }}
+              inputMode="numeric"
+              autoComplete="postal-code"
+              placeholder="ZIP code"
+              aria-invalid={zipError ? true : undefined}
+              aria-describedby={zipError ? "officials-zip-error" : undefined}
+              className={cn(inputClass, "min-h-11 pr-9 md:min-h-10")}
+            />
+            {zip ? (
+              <button
+                type="button"
+                aria-label="Clear ZIP code"
+                onClick={clearAll}
+                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-muted hover:bg-chip"
+              >
+                <X aria-hidden className="size-4" />
+              </button>
+            ) : null}
           </div>
-          <Button type="submit" disabled={loading}>
-            Find my officials
+          <Button type="submit" disabled={loading} className="px-4">
+            Find<span className="sr-only"> my officials</span>
           </Button>
-          <Button variant="outline" onClick={useMyLocation} disabled={loading}>
+          <Button
+            variant="outline"
+            onClick={useMyLocation}
+            disabled={loading}
+            aria-label="Use my location"
+            title="Use my location"
+            className="px-3"
+          >
             <LocateFixed aria-hidden className="size-4" />
-            Use my location
           </Button>
           {loading ? (
             <Button variant="ghost" onClick={cancel}>
               Cancel
             </Button>
           ) : null}
-          <label className="flex w-full items-center gap-2 text-sm">
+          {result && !loading ? (
+            <>
+              <div className="relative min-w-44 flex-1 basis-full sm:basis-0">
+                <Search
+                  aria-hidden
+                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted"
+                />
+                <label htmlFor="officials-search" className="sr-only">
+                  Search by name or office
+                </label>
+                <input
+                  id="officials-search"
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search name or office"
+                  className={cn(inputClass, "min-h-11 pl-9 md:min-h-10")}
+                />
+              </div>
+              {result.houseMode === "choose" ? (
+                <div className="min-w-0 flex-1 sm:flex-none">
+                  <label htmlFor="officials-district" className="sr-only">
+                    Congressional district
+                  </label>
+                  <select
+                    id="officials-district"
+                    value={district ?? ""}
+                    onChange={(e) =>
+                      setDistrict(e.target.value === "" ? null : Number(e.target.value))
+                    }
+                    className={cn(inputClass, "min-h-11 md:min-h-10")}
+                  >
+                    <option value="">All districts</option>
+                    {houseDistricts.map((d) => (
+                      <option key={d} value={d}>
+                        District {d}
+                        {d === result.likelyDistrict ? " (likely)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+              <div
+                role="group"
+                aria-label="Level of government"
+                className="flex gap-0.5 rounded-xl bg-chip p-0.5"
+              >
+                <button
+                  type="button"
+                  aria-pressed={level === null}
+                  onClick={() => setLevel(null)}
+                  className={seg(level === null)}
+                >
+                  All
+                </button>
+                {LEVELS.filter((l) => levels.includes(l.value)).map((l) => (
+                  <button
+                    key={l.value}
+                    type="button"
+                    aria-pressed={level === l.value}
+                    onClick={() => setLevel(l.value)}
+                    className={seg(level === l.value)}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </form>
+        {zipError ? (
+          <p id="officials-zip-error" role="alert" className="text-sm text-danger">
+            {zipError}
+          </p>
+        ) : null}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted">
+          <label className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={remember}
@@ -227,41 +307,36 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
               }}
               className="size-4"
             />
-            Remember my ZIP code on this device
+            Remember my ZIP on this device
           </label>
-          {zipError ? (
-            <p id="officials-zip-error" role="alert" className="w-full text-sm text-danger">
-              {zipError}
-            </p>
-          ) : null}
-        </form>
-        <RecentLookups
-          items={recent}
-          onPick={(value) => {
-            setZip(value);
-            lookup({ zip: value }, remember);
-          }}
-          onRemove={(value) => {
-            setRecent((current) => current.filter((item) => item.zip !== value));
-            void removeLookup(value);
-          }}
-          onClear={() => {
-            setRecent([]);
-            void clearLookupHistory();
-          }}
-        />
-        <p className="px-2 text-xs text-muted">
+          <RecentLookups
+            items={recent}
+            onPick={(value) => {
+              setZip(value);
+              lookup({ zip: value }, remember);
+            }}
+            onRemove={(value) => {
+              setRecent((current) => current.filter((item) => item.zip !== value));
+              void removeLookup(value);
+            }}
+            onClear={() => {
+              setRecent([]);
+              void clearLookupHistory();
+            }}
+          />
+        </div>
+        <p className="text-xs text-muted">
           Only the ZIP code is sent. A location from your browser is rounded, used once to find a
           ZIP code and district, and never saved.
         </p>
-      </div>
+      </section>
 
       {loading ? (
         <div role="status" aria-busy="true" className="flex flex-col gap-3">
           <p className="text-sm text-muted">Finding your officials…</p>
-          <div className="grid animate-pulse gap-4 md:grid-cols-2">
-            {Array.from({ length: 4 }, (_, i) => (
-              <div key={i} className="h-28 rounded-(--radius-card) bg-chip" />
+          <div className="grid animate-pulse gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="h-[4.5rem] rounded-(--radius-card) bg-chip" />
             ))}
           </div>
         </div>
@@ -282,111 +357,14 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
       ) : null}
 
       {result && !loading ? (
-        <section aria-label="Results" className="flex flex-col gap-4">
-          <h2 className="text-xl font-bold">
-            Who represents {result.location.city}, {result.location.state} {result.location.zip}
-          </h2>
-
-          {result.houseMode === "choose" ? (
-            <div className="flex flex-col gap-2 rounded-(--radius-card) border border-border bg-lavender-soft p-4 text-sm text-lavender-ink">
-              <p>
-                A ZIP code can touch more than one district, and {result.location.state} has{" "}
-                {result.districtCount}. We show every House member for the state. Pick your
-                district, or use your location for an exact answer.
-              </p>
-              <div
-                className="flex flex-wrap gap-2"
-                role="group"
-                aria-label="Congressional district"
-              >
-                <button
-                  type="button"
-                  onClick={() => setDistrict(null)}
-                  className={chip(district === null)}
-                >
-                  All
-                </button>
-                {houseDistricts.map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => setDistrict(d)}
-                    aria-pressed={district === d}
-                    className={chip(district === d)}
-                  >
-                    District {d}
-                    {d === result.likelyDistrict ? " (likely)" : ""}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {result.stateStatus === "missing-key" ? (
-            <p
-              role="status"
-              className="rounded-(--radius-card) border border-border bg-surface p-4 text-sm text-muted"
-            >
-              State legislators are switched off because no Open States key is set up on this app
-              yet. Federal officials are shown below.
-            </p>
-          ) : null}
-          {result.stateStatus === "down" ? (
-            <p
-              role="status"
-              className="rounded-(--radius-card) border border-border bg-surface p-4 text-sm text-muted"
-            >
-              We could not reach the state legislator source right now, so only federal officials
-              are shown. Try again in a few minutes.
-            </p>
-          ) : null}
-          {result.stateStatus === "ok" && result.stateApproximate ? (
-            <p className="text-xs text-muted">
-              State legislators are found from the centre of your ZIP code. If it spans districts,
-              use your location for an exact match.
-            </p>
-          ) : null}
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative min-w-60 flex-1">
-              <Search
-                aria-hidden
-                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
-              />
-              <label htmlFor="officials-search" className="sr-only">
-                Search by name or office
-              </label>
-              <input
-                id="officials-search"
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by name or office"
-                className={cn(inputClass, "pl-10")}
-              />
-            </div>
-            <div role="group" aria-label="Level of government" className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                aria-pressed={level === null}
-                onClick={() => setLevel(null)}
-                className={chip(level === null)}
-              >
-                All
-              </button>
-              {LEVELS.filter((l) => levels.includes(l.value)).map((l) => (
-                <button
-                  key={l.value}
-                  type="button"
-                  aria-pressed={level === l.value}
-                  onClick={() => setLevel(l.value)}
-                  className={chip(level === l.value)}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
-            {level !== null || query !== "" || district !== null ? (
+        <section aria-label="Results" className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h2 className="text-base font-semibold text-muted">
+              Who represents {result.location.city}, {result.location.state} {result.location.zip}
+              {" · "}
+              {visible.length} {visible.length === 1 ? "official" : "officials"}
+            </h2>
+            {filtersActive ? (
               <button
                 type="button"
                 onClick={() => {
@@ -401,6 +379,32 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
             ) : null}
           </div>
 
+          {result.houseMode === "choose" ? (
+            <p className="text-xs text-muted">
+              A ZIP code can touch more than one district, and {result.location.state} has{" "}
+              {result.districtCount}. We show every House member for the state. Pick your district
+              above, or use your location for an exact answer.
+            </p>
+          ) : null}
+          {result.stateStatus === "missing-key" ? (
+            <p role="status" className="text-xs text-muted">
+              State legislators are switched off because no Open States key is set up on this app
+              yet. Federal officials are shown below.
+            </p>
+          ) : null}
+          {result.stateStatus === "down" ? (
+            <p role="status" className="text-xs text-muted">
+              We could not reach the state legislator source right now, so only federal officials
+              are shown. Try again in a few minutes.
+            </p>
+          ) : null}
+          {result.stateStatus === "ok" && result.stateApproximate ? (
+            <p className="text-xs text-muted">
+              State legislators are found from the centre of your ZIP code. If it spans districts,
+              use your location for an exact match.
+            </p>
+          ) : null}
+
           {visible.length === 0 ? (
             <p
               role="status"
@@ -409,7 +413,7 @@ export function OfficialsExplorer({ initialRecent }: { initialRecent: RecentLook
               No officials match those filters.
             </p>
           ) : (
-            <ul className="grid gap-4 md:grid-cols-2">
+            <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {visible.map((o) => (
                 <OfficialCard
                   key={o.id}

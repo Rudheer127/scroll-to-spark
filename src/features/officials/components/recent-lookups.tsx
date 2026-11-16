@@ -17,9 +17,9 @@ export function RecentLookups({
 }) {
   if (items.length === 0) return null;
   return (
-    <section aria-label="Recent lookups" className="flex flex-wrap items-center gap-2 px-2 text-sm">
+    <section aria-label="Recent lookups" className="flex flex-wrap items-center gap-2 text-sm">
       <History aria-hidden className="size-4 text-muted" />
-      <span className="font-semibold text-muted">Recent lookups</span>
+      <span className="text-xs font-semibold text-muted">Recent</span>
       <ul className="flex flex-wrap gap-1.5">
         {items.map((item) => (
           <li
@@ -29,7 +29,7 @@ export function RecentLookups({
             <button
               type="button"
               onClick={() => onPick(item.zip)}
-              className="min-h-8 py-1 pl-3 pr-1.5 hover:underline"
+              className="min-h-8 py-1 pl-3 pr-1.5 text-xs hover:underline"
             >
               {item.zip} · {item.city}, {item.state}
             </button>
@@ -44,7 +44,11 @@ export function RecentLookups({
           </li>
         ))}
       </ul>
-      <button type="button" onClick={onClear} className="font-semibold text-action hover:underline">
+      <button
+        type="button"
+        onClick={onClear}
+        className="text-xs font-semibold text-action hover:underline"
+      >
         Clear history
       </button>
     </section>

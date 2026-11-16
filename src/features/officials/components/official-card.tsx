@@ -22,7 +22,7 @@ export function PartyChip({ party }: { party: string }) {
   );
 }
 
-/** A compact shortcut for one official. Clicking it opens the full details. */
+/** A compact shortcut for one official. The main area opens details; the icons reach them directly. */
 export function OfficialCard({
   official,
   onOpen,
@@ -34,36 +34,68 @@ export function OfficialCard({
 }) {
   const term = termEndLabel(official.termEnd);
   const place = districtLabel(official);
+  const iconLink =
+    "flex size-10 items-center justify-center rounded-full bg-chip text-ink hover:opacity-80";
   return (
-    <li className="relative">
+    <li className="flex min-w-0 items-center gap-1 rounded-(--radius-card) border border-border bg-surface pr-3 shadow-card">
       <button
         type="button"
         onClick={() => onOpen(official)}
         aria-label={`${official.name}, ${official.office}. Open details`}
-        className="flex w-full items-center gap-4 rounded-(--radius-card) border border-border bg-surface p-4 text-left shadow-card hover:bg-chip"
+        className="flex min-w-0 flex-1 items-center gap-3 rounded-(--radius-card) p-3 text-left hover:bg-chip"
       >
-        <UserAvatar name={official.name} url={official.photoUrl} className="size-16" />
-        <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="truncate text-base font-bold">{official.name}</span>
-          <span className="text-sm text-muted">
+        <UserAvatar name={official.name} url={official.photoUrl} className="size-11 shrink-0" />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="text-base font-bold [overflow-wrap:anywhere]">{official.name}</span>
+          <span className="text-sm text-muted [overflow-wrap:anywhere]">
             {official.office}
             {place ? ` · ${place}` : ""}
           </span>
-          <span className="flex flex-wrap items-center gap-2">
-            <PartyChip party={official.party} />
+          <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted">
+            <span
+              aria-hidden
+              className={cn("size-2 shrink-0 rounded-full", PARTY_DOT[partyTone(official.party)])}
+            />
+            <span className="font-semibold text-ink">{official.party}</span>
+            {term ? <span>· {term.replace("Term ends", "to")}</span> : null}
             {likely ? (
-              <span className="rounded-full bg-lavender-soft px-2.5 py-0.5 text-xs font-semibold text-lavender-ink">
+              <span className="rounded-full bg-lavender-soft px-2 py-0.5 font-semibold text-lavender-ink">
                 Likely yours
               </span>
             ) : null}
-            {term ? <span className="text-xs text-muted">{term}</span> : null}
           </span>
         </span>
-        <span aria-hidden className="flex shrink-0 flex-col gap-2 text-muted">
-          {official.phone ? <Phone className="size-4" /> : null}
-          {official.email || official.contactForm ? <Mail className="size-4" /> : null}
-        </span>
       </button>
+      <span className="flex shrink-0 gap-1.5">
+        {official.phone ? (
+          <a
+            href={`tel:${official.phone}`}
+            aria-label={`Call ${official.name}`}
+            className={iconLink}
+          >
+            <Phone aria-hidden className="size-4" />
+          </a>
+        ) : null}
+        {official.email ? (
+          <a
+            href={`mailto:${official.email}`}
+            aria-label={`Email ${official.name}`}
+            className={iconLink}
+          >
+            <Mail aria-hidden className="size-4" />
+          </a>
+        ) : official.contactForm ? (
+          <a
+            href={official.contactForm}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Contact form for ${official.name} (opens in a new tab)`}
+            className={iconLink}
+          >
+            <Mail aria-hidden className="size-4" />
+          </a>
+        ) : null}
+      </span>
     </li>
   );
 }
