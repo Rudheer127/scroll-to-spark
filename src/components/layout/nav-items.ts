@@ -2,6 +2,8 @@ import {
   Building2,
   CalendarDays,
   Home,
+  Landmark,
+  Lightbulb,
   MessagesSquare,
   Settings,
   Sparkles,
@@ -24,9 +26,11 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/steps", label: "My steps", icon: Sprout },
   { href: "/discussions", label: "Discussions", icon: MessagesSquare },
   { href: "/events", label: "Events", icon: CalendarDays },
+  { href: "/inspire", label: "Inspire", icon: Lightbulb, tabBar: false },
+  { href: "/officials", label: "Officials", icon: Landmark, tabBar: false },
   { href: "/guide", label: "Guide", icon: Sparkles },
   { href: "/portal", label: "Portal", icon: Building2 },
-  // On phones Settings lives in the account menu in the header, so the bar stays five wide.
+  // On phones Settings lives in the account menu in the header, so the bar stays five wide. Inspire and Officials are sidebar-only for the same reason.
   { href: "/settings", label: "Settings", icon: Settings, tabBar: false },
 ];
 
