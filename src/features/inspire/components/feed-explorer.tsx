@@ -68,11 +68,19 @@ export function FeedExplorer({ filters, initialPage, groups, initialSearches }: 
       const shownIds = new Set(posts.map((post) => post.id));
       const fresh = new Map(initialPage.posts.map((post) => [post.id, post]));
       const canQueue = filters.sort === "newest" && filters.tab === "all";
+      // A post that is gone (unshared, hidden after reports) must leave the list too. The refresh
+      // only holds the newest page, so only posts it should have covered are dropped.
+      const oldestFresh = initialPage.posts.at(-1)?.createdAt ?? null;
+      const covered = (post: InspirePost) =>
+        initialPage.nextCursor === null ||
+        (filters.sort === "newest" && oldestFresh !== null && post.createdAt >= oldestFresh);
       setPosts(
-        posts.map((post) => {
-          const latest = fresh.get(post.id);
-          return latest ? { ...post, inspiredCount: latest.inspiredCount } : post;
-        }),
+        posts
+          .filter((post) => fresh.has(post.id) || !covered(post))
+          .map((post) => {
+            const latest = fresh.get(post.id);
+            return latest ? { ...post, inspiredCount: latest.inspiredCount } : post;
+          }),
       );
       setPending(canQueue ? initialPage.posts.filter((post) => !shownIds.has(post.id)) : []);
     }

@@ -50,7 +50,8 @@ export function ShareToggle({ completionId, initial, compact = false }: ShareTog
       {compact ? null : (
         <p className="pl-6 text-muted">
           People will see the step, the group, the minutes and your first name with your last
-          initial (like Maya R.). Your note is never shown. Turn it off any time.
+          initial (like Maya R.) and your profile photo if you have one. Your note is never shown.
+          Turn it off any time.
         </p>
       )}
       {value.sharePublicly ? (

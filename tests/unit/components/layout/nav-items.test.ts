@@ -18,6 +18,7 @@ describe("nav items", () => {
       "Events",
       "Inspire",
       "Officials",
+      "Impact",
       "Guide",
       "Portal",
       "Settings",
@@ -29,7 +30,7 @@ describe("nav items", () => {
 
   it("keeps the tab bar to six columns, with Settings, Inspire and Officials in the sidebar only", () => {
     expect(TAB_BAR_ITEMS).toHaveLength(6);
-    for (const href of ["/settings", "/inspire", "/officials"]) {
+    for (const href of ["/settings", "/inspire", "/officials", "/impact"]) {
       expect(TAB_BAR_ITEMS.some((item) => item.href === href)).toBe(false);
     }
   });
@@ -42,6 +43,7 @@ describe("nav items", () => {
       "/events",
       "/inspire",
       "/officials",
+      "/impact",
       "/guide",
       "/portal",
       "/settings",

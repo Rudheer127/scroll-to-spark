@@ -6,6 +6,8 @@ const state = vi.hoisted(() => ({
   userId: "user-1" as string | null,
   calls: [] as Call[],
   error: null as { code: string } | null,
+  /** Rows an update reports back. Empty means nothing changed. */
+  changed: [{ id: "row" }] as { id: string }[],
 }));
 
 function builder(table: string) {
@@ -13,7 +15,7 @@ function builder(table: string) {
   const chain: Record<string, unknown> = {};
   const finish = () => {
     state.calls.push(call);
-    return { error: state.error, data: [] };
+    return { error: state.error, data: state.changed };
   };
   chain.insert = (payload: unknown) => {
     call.op = "insert";
@@ -25,6 +27,7 @@ function builder(table: string) {
     call.payload = payload;
     return chain;
   };
+  chain.select = () => chain;
   chain.delete = () => {
     call.op = "delete";
     return chain;
@@ -56,6 +59,7 @@ beforeEach(() => {
   state.userId = "user-1";
   state.calls = [];
   state.error = null;
+  state.changed = [{ id: "row" }];
 });
 
 describe("setSharing", () => {
@@ -97,6 +101,16 @@ describe("setSharing", () => {
     });
     expect(result.ok).toBe(false);
     expect(state.calls).toHaveLength(0);
+  });
+
+  it("fails when no row was changed, instead of reporting a save that did not happen", async () => {
+    state.changed = [];
+    const result = await setSharing({
+      completionId: ID,
+      sharePublicly: true,
+      shareThankYou: false,
+    });
+    expect(result.ok).toBe(false);
   });
 
   it("reports a database failure", async () => {

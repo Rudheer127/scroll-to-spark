@@ -49,8 +49,8 @@ export default function InspirePage({ searchParams }: SearchParamsProp) {
       <header className="flex flex-col gap-1">
         <h1 className="text-4xl font-bold">Get inspired</h1>
         <p className="text-lg text-muted">
-          Small steps other people chose to share. Only the first name and last initial show, and
-          you decide what you share from My steps.
+          Small steps other people chose to share. Only a first name, a last initial and your
+          profile photo show, and you decide what you share from My steps.
         </p>
       </header>
       <Suspense fallback={<InspireSkeleton />}>

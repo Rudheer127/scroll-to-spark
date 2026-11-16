@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTransition } from "react";
 import { cn } from "@/lib/cn";
-import { LogOut, Settings, Sprout } from "lucide-react";
+import { Landmark, Lightbulb, LineChart, LogOut, Settings, Sprout } from "lucide-react";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   DropdownMenu,
@@ -80,6 +80,19 @@ export function AccountMenu({
             My steps
           </Link>
         </DropdownMenuItem>
+        {/* On phones these are not in the tab bar, so they live here. The sidebar shows them directly. */}
+        {[
+          { href: "/inspire", label: "Get inspired", Icon: Lightbulb },
+          { href: "/officials", label: "Your officials", Icon: Landmark },
+          { href: "/impact", label: "Your impact", Icon: LineChart },
+        ].map(({ href, label, Icon }) => (
+          <DropdownMenuItem key={href} asChild className="lg:hidden">
+            <Link href={href}>
+              <Icon aria-hidden className="size-4" />
+              {label}
+            </Link>
+          </DropdownMenuItem>
+        ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="danger" onSelect={() => startTransition(() => signOut())}>
           <LogOut aria-hidden className="size-4" />

@@ -33,15 +33,17 @@ export async function setSharing(input: unknown): Promise<ActionResult> {
   if (!parsed.success) return fail("We could not change sharing for that step.");
 
   const { completionId, sharePublicly } = parsed.data;
-  const { error } = await loose(supabase)
+  const { data, error } = await loose(supabase)
     .from("task_completions")
     .update({
       share_publicly: sharePublicly,
       share_thank_you: sharePublicly && parsed.data.shareThankYou,
     })
     .eq("id", completionId)
-    .eq("user_id", userId);
-  if (error) return fail("We could not change sharing. Try again.");
+    .eq("user_id", userId)
+    .select("id");
+  // Zero rows changed means it did not save, so say so instead of showing a tick that is not true.
+  if (error || !data || data.length === 0) return fail("We could not change sharing. Try again.");
 
   revalidatePath("/inspire");
   revalidatePath("/steps");
