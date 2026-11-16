@@ -174,3 +174,53 @@ describe("mapEmbedUrl", () => {
     expect(mapEmbedUrl(33.4, -111.9)).toContain("output=embed");
   });
 });
+
+describe("toSummary markdown", () => {
+  it("strips bold markers", () => {
+    expect(toSummary("**Join us** for a call about the vote.")).toBe(
+      "Join us for a call about the vote.",
+    );
+  });
+
+  it("strips heading hashes and keeps the words", () => {
+    expect(toSummary("### \u{1F6A8}Protest at the capitol\n\nBring a sign.")).toBe(
+      "\u{1F6A8}Protest at the capitol Bring a sign.",
+    );
+  });
+
+  it("keeps link text and drops the address", () => {
+    expect(toSummary("Hosted by [Indivisible Mesa](https://example.com/mesa) this week.")).toBe(
+      "Hosted by Indivisible Mesa this week.",
+    );
+  });
+
+  it("drops list bullets and italics", () => {
+    expect(toSummary("- First thing\n- *Second* thing\n1. Third thing")).toBe(
+      "First thing Second thing Third thing",
+    );
+  });
+
+  it("leaves plain text alone", () => {
+    expect(toSummary("Meet at 6:30 (rain or shine).")).toBe("Meet at 6:30 (rain or shine).");
+  });
+});
+
+describe("normalizeMobilizeEvents repeats", () => {
+  it("keeps one of two listings with the same title and start time", () => {
+    const a = raw({ id: 1, title: "LD 14 Democrats Monthly Meeting" });
+    const b = raw({
+      id: 2,
+      title: "LD 14 Democrats  monthly meeting!",
+      browser_url: "https://www.mobilize.us/other/event/2/",
+    });
+    const events = normalizeMobilizeEvents([a, b], NOW);
+    expect(events).toHaveLength(1);
+    expect(events[0].key).toBe("mobilize:1:7");
+  });
+
+  it("keeps events at different times", () => {
+    const a = raw({ id: 1, title: "Meeting" });
+    const b = raw({ id: 2, title: "Meeting", timeslots: [{ id: 8, start_date: inDays(4) }] });
+    expect(normalizeMobilizeEvents([a, b], NOW)).toHaveLength(2);
+  });
+});

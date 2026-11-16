@@ -59,10 +59,29 @@ export function kindLabel(type: string | null | undefined): string {
 
 const SUMMARY_MAX = 240;
 
+/** Turns Markdown (as organizers often write it) into plain words. */
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1") // images keep their alt text
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1") // links keep their text
+    .replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1")
+    .replace(/<https?:\/\/[^>\s]+>/g, " ")
+    .replace(/^\s{0,3}#{1,6}\s*/gm, "") // headings
+    .replace(/^\s{0,3}>\s?/gm, "") // quotes
+    .replace(/^\s*[-*+]\s+/gm, "") // bullets
+    .replace(/^\s*\d+[.)]\s+/gm, "") // numbered lists
+    .replace(/(\*\*|__)(.+?)\1/g, "$2") // bold
+    .replace(/(^|[\s(])[*_]([^*_\n]+)[*_](?=$|[\s).,;:!?])/g, "$1$2") // italics
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/~~(.+?)~~/g, "$1")
+    .replace(/\*\*|__/g, "") // stray markers left over from broken pairs
+    .replace(/^\s*([-*_])(\s*\1){2,}\s*$/gm, " "); // rules
+}
+
 /** Plain text, one paragraph, cut at a word and ended with an ellipsis if it was long. */
 export function toSummary(text: string | null | undefined): string {
-  const plain = (text ?? "")
-    .replace(/<[^>]*>/g, " ")
+  const plain = stripMarkdown((text ?? "").replace(/<[^>]*>/g, " "))
     .replace(/\s+/g, " ")
     .trim();
   if (plain.length <= SUMMARY_MAX) return plain;
@@ -156,16 +175,36 @@ export function normalizeMobilizeEvent(raw: unknown, now: Date = new Date()): Ci
   };
 }
 
-/** Normalizes a page of results, drops what cannot be shown, removes repeats and sorts by start time. */
+/** A title and start time with case, spacing and punctuation ignored, so look-alikes match. */
+function sameEventKey(event: CivicEvent): string {
+  const title = event.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  return `${title}|${event.startsAt}`;
+}
+
+/**
+ * Normalizes a page of results, drops what cannot be shown, removes repeats and sorts by start time.
+ * Two listings with the same title and start time (often one event posted by two organizers) count
+ * as one: the first stays, unless a later one has a picture and the first does not.
+ */
 export function normalizeMobilizeEvents(rows: unknown, now: Date = new Date()): CivicEvent[] {
   if (!Array.isArray(rows)) return [];
   const seen = new Set<string>();
+  const byLook = new Map<string, number>();
   const events: CivicEvent[] = [];
   for (const row of rows) {
     const event = normalizeMobilizeEvent(row, now);
-    if (event && !seen.has(event.key)) {
-      seen.add(event.key);
+    if (!event || seen.has(event.key)) continue;
+    seen.add(event.key);
+    const look = sameEventKey(event);
+    const at = byLook.get(look);
+    if (at === undefined) {
+      byLook.set(look, events.length);
       events.push(event);
+    } else if (!events[at].imageUrl && event.imageUrl) {
+      events[at] = event;
     }
   }
   return events.sort((a, b) => a.startsAt.localeCompare(b.startsAt));

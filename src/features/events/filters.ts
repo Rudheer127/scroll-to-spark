@@ -11,6 +11,26 @@ export const WHEN_OPTIONS = [
 ] as const;
 export type EventWhen = (typeof WHEN_OPTIONS)[number]["value"];
 
+/**
+ * Kinds that are campaign work (asking people for votes, calls, doors or money) rather than civic
+ * life. They are hidden unless the person turns them on. Fundraisers never reach the list at all.
+ */
+export const CAMPAIGN_KINDS: readonly string[] = [
+  "Door knocking",
+  "Phone bank",
+  "Text bank",
+  "Rally",
+  "Visibility event",
+  "Canvass",
+  "Fundraiser",
+  "Advocacy call",
+  "Poll watching",
+];
+
+export function isCampaignEvent(event: CivicEvent): boolean {
+  return CAMPAIGN_KINDS.includes(event.kind);
+}
+
 export const RADIUS_OPTIONS = [10, 25, 50] as const;
 
 export const SORT_OPTIONS = [
@@ -36,6 +56,8 @@ export type EventFilters = {
   when?: EventWhen;
   /** Only events of this kind (an exact label from `eventKinds`). Leave out for every kind. */
   kind?: string;
+  /** Show campaign-work events too. Off unless set to true. */
+  includeCampaign?: boolean;
   now?: Date;
 };
 
@@ -94,6 +116,7 @@ export function filterEvents(events: CivicEvent[], filters: EventFilters): Civic
   return events.filter((event) => {
     if (!matchesQuery(event, filters.query)) return false;
     if (filters.kind && event.kind !== filters.kind) return false;
+    if (!filters.includeCampaign && isCampaignEvent(event)) return false;
     if (!withinWhen(event, filters.when ?? "any", filters.now ?? new Date())) return false;
     switch (filters.mode) {
       case "online":

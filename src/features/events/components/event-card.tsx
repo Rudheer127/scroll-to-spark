@@ -171,16 +171,31 @@ export function EventCard({
                 </a>
               ) : null}
               {status ? (
-                <Button variant="outline" onClick={remove} disabled={pending}>
+                <Button
+                  variant="outline"
+                  onClick={remove}
+                  disabled={pending}
+                  aria-label={`Remove ${event.title} from my list`}
+                >
                   Remove from my list
                 </Button>
               ) : (
-                <Button variant="outline" onClick={() => save("going")} disabled={pending}>
+                <Button
+                  variant="outline"
+                  onClick={() => save("going")}
+                  disabled={pending}
+                  aria-label={`I'm going to ${event.title}`}
+                >
                   I&apos;m going
                 </Button>
               )}
               {status === "going" && started ? (
-                <Button variant="outline" onClick={() => save("attended")} disabled={pending}>
+                <Button
+                  variant="outline"
+                  onClick={() => save("attended")}
+                  disabled={pending}
+                  aria-label={`I went to ${event.title}`}
+                >
                   I went
                 </Button>
               ) : null}

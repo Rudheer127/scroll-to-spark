@@ -3,6 +3,7 @@ import {
   distanceMiles,
   eventDistance,
   eventKinds,
+  isCampaignEvent,
   filterEvents,
   isEventMode,
   sortEvents,
@@ -148,7 +149,11 @@ describe("filterEvents by date", () => {
 });
 
 describe("kind, today and sort", () => {
-  const rally = event({ key: "mobilize:5:5", kind: "Rally", startsAt: "2026-12-03T00:00:00.000Z" });
+  const rally = event({
+    key: "mobilize:5:5",
+    kind: "Training",
+    startsAt: "2026-12-03T00:00:00.000Z",
+  });
   const meeting = event({
     key: "mobilize:6:6",
     kind: "Meeting",
@@ -157,11 +162,11 @@ describe("kind, today and sort", () => {
   const base = { mode: "all" as const, query: "", center: null, radiusMiles: 25 };
 
   it("lists each kind once, alphabetically", () => {
-    expect(eventKinds([rally, meeting, rally])).toEqual(["Meeting", "Rally"]);
+    expect(eventKinds([rally, meeting, rally])).toEqual(["Meeting", "Training"]);
   });
 
   it("keeps only the chosen kind", () => {
-    expect(filterEvents([rally, meeting], { ...base, kind: "Rally" })).toEqual([rally]);
+    expect(filterEvents([rally, meeting], { ...base, kind: "Training" })).toEqual([rally]);
   });
 
   it("limits to the next day for 'today'", () => {
@@ -178,5 +183,30 @@ describe("kind, today and sort", () => {
     const far = event({ key: "mobilize:8:8", lat: 34.5, lng: -112.5 });
     const web = event({ key: "mobilize:9:9", isVirtual: true });
     expect(sortEvents([web, far, near], "nearest", TEMPE)).toEqual([near, far, web]);
+  });
+});
+
+describe("campaign events", () => {
+  const base = { mode: "all" as const, query: "", center: null, radiusMiles: 25 };
+  const phone = event({ key: "mobilize:10:10", kind: "Phone bank" });
+  const rally = event({ key: "mobilize:11:11", kind: "Rally" });
+  const meeting = event({ key: "mobilize:12:12", kind: "Meeting" });
+
+  it("recognises campaign-work kinds", () => {
+    expect(isCampaignEvent(phone)).toBe(true);
+    expect(isCampaignEvent(rally)).toBe(true);
+    expect(isCampaignEvent(meeting)).toBe(false);
+  });
+
+  it("hides them by default", () => {
+    expect(filterEvents([phone, rally, meeting], base)).toEqual([meeting]);
+  });
+
+  it("shows them when asked", () => {
+    expect(filterEvents([phone, rally, meeting], { ...base, includeCampaign: true })).toEqual([
+      phone,
+      rally,
+      meeting,
+    ]);
   });
 });

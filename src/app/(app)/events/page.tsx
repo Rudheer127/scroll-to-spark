@@ -46,7 +46,9 @@ export default function EventsPage() {
         <h1 className="text-4xl font-bold">Events</h1>
         <p className="text-lg text-muted">
           Ways to show up for your community, near you and online. Listings come from Mobilize and
-          each one links to the organizer. We do not check or endorse any organizer.
+          each one links to the organizer. We do not check or endorse any organizer. Campaign work
+          such as phone banks, door knocking and rallies is hidden by default, and you can turn it
+          on in the filters.
         </p>
       </header>
       <Suspense fallback={<EventsSkeleton />}>

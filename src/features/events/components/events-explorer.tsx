@@ -2,14 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
-import { ChevronDown, ExternalLink, LocateFixed, MapPin, Search, X } from "lucide-react";
+import { ChevronDown, LocateFixed, MapPin, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
 import { SearchHistory } from "@/components/shared/search-history";
 import { findNearby, forgetSearches, rememberSearch } from "@/features/events/actions";
 import { EventCard } from "@/features/events/components/event-card";
-import { formatEventTime } from "@/features/events/components/format";
+import { MyEventRow } from "@/features/events/components/my-event-row";
 import {
   RADIUS_OPTIONS,
   WHEN_OPTIONS,
@@ -17,6 +17,7 @@ import {
   type EventSort,
   type EventWhen,
   eventDistance,
+  CAMPAIGN_KINDS,
   eventKinds,
   filterEvents,
   isEventMode,
@@ -87,6 +88,14 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
     ),
   );
   const [kind, setKind] = useState(() => params.get("type") ?? "");
+  const [includeCampaign, setIncludeCampaign] = useState(
+    () => params.get("campaign") === "1" || CAMPAIGN_KINDS.includes(params.get("type") ?? ""),
+  );
+  // A ZIP in the address (a shared link, a reload) is looked up once, and kept in the address meanwhile.
+  const [urlZip, setUrlZip] = useState<string | null>(() => {
+    const value = params.get("zip");
+    return value && /^\d{5}$/.test(value) ? value : null;
+  });
   const [sort, setSort] = useState<EventSort>(() =>
     oneOf(
       params.get("sort"),
@@ -111,6 +120,7 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
       if (id !== lookupId.current) return; // cancelled or replaced by a newer search
       if (!result.ok) {
         setLocationError(result.error);
+        setUrlZip(null);
         return;
       }
       setLocation(result.data.location);
@@ -130,7 +140,16 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
 
   // A ZIP the person chose to remember on this device is used again on the next visit.
   useEffect(() => {
+    const fromAddress = urlZip;
     const saved = readSavedZip();
+    if (fromAddress) {
+      const timer = setTimeout(() => {
+        setZipInput(fromAddress);
+        setRemember(saved === fromAddress);
+        lookup({ zip: fromAddress }, saved === fromAddress);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
     if (!saved) return;
     const timer = setTimeout(() => restoreSavedZip(saved), 0);
     return () => clearTimeout(timer);
@@ -172,6 +191,7 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
   }
 
   function clearLocation() {
+    setUrlZip(null);
     setLocation(null);
     setZipInput("");
     setRemember(false);
@@ -205,7 +225,15 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
   }
 
   const center = location ? { lat: location.lat, lng: location.lng } : null;
-  const kinds = useMemo(() => eventKinds(feed.events), [feed.events]);
+  const kinds = useMemo(() => {
+    const names = eventKinds(
+      feed.events.filter((e) => includeCampaign || !CAMPAIGN_KINDS.includes(e.kind)),
+    );
+    // A kind from the address stays selectable even before the list has an event of that kind.
+    return kind && !names.includes(kind)
+      ? [...names, kind].sort((a, b) => a.localeCompare(b))
+      : names;
+  }, [feed.events, includeCampaign, kind]);
   const visible = useMemo(
     () =>
       sortEvents(
@@ -216,15 +244,28 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
           radiusMiles: radius,
           when,
           kind: kind || undefined,
+          includeCampaign,
         }),
         sort,
         center,
       ),
     // center is rebuilt from location each render, so depend on location itself
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [feed.events, mode, query, location, radius, when, kind, sort],
+    [feed.events, mode, query, location, radius, when, kind, sort, includeCampaign],
   );
-  const filtersActive = mode !== "all" || query !== "" || when !== "any" || kind !== "";
+  const filtersActive =
+    mode !== "all" || query !== "" || when !== "any" || kind !== "" || includeCampaign;
+  const hiddenCampaign = includeCampaign
+    ? 0
+    : filterEvents(feed.events, {
+        mode,
+        query,
+        center,
+        radiusMiles: radius,
+        when,
+        kind: kind || undefined,
+        includeCampaign: true,
+      }).length - visible.length;
 
   // Keep the address bar in step with the filters, so a reload or a shared link shows the same list.
   useEffect(() => {
@@ -234,15 +275,19 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
     if (when !== "any") next.set("when", when);
     if (kind) next.set("type", kind);
     if (sort !== "soonest") next.set("sort", sort);
+    if (includeCampaign) next.set("campaign", "1");
+    const zip = location?.zip ?? urlZip;
+    if (zip) next.set("zip", zip);
     const text = next.toString();
     window.history.replaceState(null, "", text ? `?${text}` : window.location.pathname);
-  }, [query, mode, when, kind, sort]);
+  }, [query, mode, when, kind, sort, includeCampaign, location, urlZip]);
 
   function clearFilters() {
     setMode("all");
     setQuery("");
     setWhen("any");
     setKind("");
+    setIncludeCampaign(false);
     setShown(PAGE_SIZE);
   }
 
@@ -487,6 +532,20 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
               </select>
             </label>
           ) : null}
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={includeCampaign}
+              onChange={(e) => changeFilter(() => setIncludeCampaign(e.target.checked))}
+              className="mt-0.5 size-4"
+            />
+            <span>
+              <span className="font-semibold">Include campaign events</span>
+              <span className="block text-xs text-muted">
+                Phone banks, door knocking, rallies and similar. Hidden unless you turn this on.
+              </span>
+            </span>
+          </label>
           <label className="flex flex-col gap-1.5 text-sm font-semibold">
             Sort by
             <select
@@ -533,7 +592,7 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
           <p role="status" className="text-sm text-muted">
             {needsPlace
               ? "Add your location above to see events near you."
-              : `${visible.length} ${visible.length === 1 ? "event" : "events"}${feed.kind === "sample" ? " (samples)" : ""}`}
+              : `${visible.length} ${visible.length === 1 ? "event" : "events"}${feed.kind === "sample" ? " (samples)" : ""}${hiddenCampaign > 0 ? `, plus ${hiddenCampaign} campaign ${hiddenCampaign === 1 ? "event" : "events"} hidden` : ""}`}
           </p>
 
           {needsPlace ? null : visible.length === 0 ? (
@@ -604,26 +663,12 @@ export function EventsExplorer({ initialFeed, initialRsvps, initialSearches = []
               ) : (
                 <ul className="flex flex-col gap-1.5 text-sm">
                   {listFor[tab].map((item) => (
-                    <li
+                    <MyEventRow
                       key={item.eventKey}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-(--radius-input) bg-chip px-3.5 py-2.5"
-                    >
-                      <span className="font-semibold">{item.title}</span>
-                      <span className="flex items-center gap-2 text-muted">
-                        {formatEventTime(item)}
-                        {item.url ? (
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={`Open ${item.title} with the organizer`}
-                            className="text-action"
-                          >
-                            <ExternalLink aria-hidden className="size-4" />
-                          </a>
-                        ) : null}
-                      </span>
-                    </li>
+                      item={item}
+                      started={new Date(item.startsAt).getTime() <= nowMs}
+                      onStatusChange={changeStatus}
+                    />
                   ))}
                 </ul>
               )}
