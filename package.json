@@ -1,6 +1,7 @@
 {
   "name": "scroll-to-spark",
   "version": "0.1.0",
+  "author": "Rudheer Reddy Chintakuntla",
   "private": true,
   "scripts": {
     "dev": "next dev",

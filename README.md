@@ -257,6 +257,8 @@ Listings come from third parties and the app does not endorse any organizer.
 
 **Group 14, ASU Principled Innovation Academy**
 
-Angelika Minoli, Imonuil, Taylor Fabiano and Rudheer Reddy Chintakuntla.
+Rudheer Reddy Chintakuntla, Angelika Minoli, Taylor Fabiano and Imonuil.
 
 Questions or feedback: <scrolltospark@gmail.com>
+
+<sub>Developed by Rudheer Reddy Chintakuntla.</sub>
