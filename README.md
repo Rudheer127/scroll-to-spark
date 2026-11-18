@@ -1,104 +1,262 @@
-# Scroll to Spark
+<div align="center">
 
-A web app that turns a moment of feeling helpless while scrolling into one small, real thing a person can do for their community, followed by a real thank-you from the group they helped.
+<h1>Scroll to Spark</h1>
 
-Built for the Principled Innovation Academy challenge:
+<p><strong>When the news feels heavy, one small, real thing to do.</strong><br/>
+Pick a size, take a step, and see who wrote the thank-you back.</p>
+
+<p>
+  <a href="https://scroll-to-spark.vercel.app"><strong>Live site</strong></a>
+  &nbsp;|&nbsp;
+  <a href="https://scroll-to-spark.vercel.app/demo.mp4"><strong>Watch the 2-minute demo</strong></a>
+  &nbsp;|&nbsp;
+  <a href="https://scroll-to-spark.vercel.app/try"><strong>Try it without signing up</strong></a>
+</p>
+
+<a href="https://scroll-to-spark.vercel.app/demo.mp4">
+  <img src="public/demo-poster.jpg" alt="Scroll to Spark demo video. Click to watch." width="720" />
+</a>
+
+<p><sub>Working prototype by Group 14, ASU Principled Innovation Academy. Works in any browser and on your phone.</sub></p>
+
+</div>
+
+---
+
+## Table of contents
+
+1. [Overview](#overview)
+2. [The problem](#the-problem)
+3. [How it works](#how-it-works)
+4. [Features](#features)
+5. [Screenshots](#screenshots)
+6. [Responsible by design](#responsible-by-design)
+7. [Tech stack](#tech-stack)
+8. [Getting started](#getting-started)
+9. [Environment variables](#environment-variables)
+10. [Project structure](#project-structure)
+11. [Quality and testing](#quality-and-testing)
+12. [Data sources](#data-sources)
+13. [Documentation](#documentation)
+14. [Status and roadmap](#status-and-roadmap)
+15. [Team](#team)
+
+---
+
+## Overview
+
+Scroll to Spark turns a heavy scrolling moment into one small action for your community, then shows you a real thank-you from the group you helped.
+
+It was built for the Principled Innovation Academy challenge:
 
 > How might we help people recognize the ways they contribute, find new avenues to participate, and forge meaningful paths for change within the communities they care about?
 
-## Status
+| For                            | What they get                                                                                  |
+| ------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **People who care but scroll** | One small step at a time, sized to the time they have, with who it helps stated up front       |
+| **Community groups**           | A portal to post small tasks and send thank-yous back to the people who showed up              |
+| **Everyone**                   | Representatives, events, discussions and shared ideas in one place, in a browser or on a phone |
 
-Early build. What works today: email sign-up and log-in, groups (create, edit, join, leave, delete), threads with up and down votes, nested comments with emoji reactions, deleting your own threads and comments, small steps with a note and a real reply, the partner portal for posting tasks and sending thank-yous, and a private demo account. The Spark Guide chat is built in two views that share one conversation, always labeled AI: a mini chat popup (slim header with New chat, Expand and Close, the messages, and the composer pinned to the bottom) and the full `/guide` page; Expand goes to `/guide`. On the full page, when empty, it shows one headline, a composer card and four task pills; after the first message the thread scrolls above the composer. Chats are saved to your account: every turn belongs to a saved chat titled from its first message, the sidebar lists recent chats (open one at `/guide?chat=<id>`, or delete it after a confirmation, which cannot be undone), and the open chat is remembered on the device per account, so a reload, the popup and other tabs continue it. Reopened chats show text only: cards, verdict chips and proposals are built at answer time and are not stored. Crisis messages are never saved. Chat saving needs the migration `supabase/migrations/20261114190000_guide_conversations.sql` applied first; until then every guide turn fails closed with the "not available" answer. The desktop sidebar can be collapsed to an icon rail (remembered on the device) that opens over the page on hover. It runs on OpenRouter free models by default (cost $0, capped at about 20 requests a minute and 50 a day; a message uses 2 model calls, 3 when a repair is needed, plus 1 for an image), with Cerebras and Groq as failover. Free model providers may log or train on prompts, so treat this as a demo setup. Voice input uses the browser's own speech recognition and shows only where the browser supports it. Image reading is on with OpenRouter (a free vision model) and otherwise needs `GUIDE_VISION_MODEL`. A red team test (72 attack and benign prompts, run in CI with a scripted model that obeys every attack) passes. Four small live checks of the free models (three structured replies and one image description) passed, but a full guide turn has NOT been run against a live provider, and the live eval has NOT been run. The guide also needs the migration `supabase/migrations/20261114160000_guide_harness.sql` applied before it can answer. Image uploads and GIFs are not built yet. The list below describes the full plan, not only what exists today.
+Adults aged 18 and over. The target audience is ages 18 to 24.
 
-## Running the live eval
+## The problem
 
-The red team test in `npm test` uses a scripted model. The live eval sends a 37 prompt subset of the same corpus (`tests/evals/injection-corpus.json`) to the real provider, with fake database rows and no Supabase, and writes nothing to disk. It skips itself when no key is set.
+Many people care about their community, and most never act on it through an organization.
 
-```bash
-export CEREBRAS_API_KEY=...   # or GROQ_API_KEY=...
-export LLM_PROVIDER=cerebras  # optional: cerebras (default) or groq
-npm run eval:live
-```
+In 2023, 54.2% of Americans helped or exchanged favors with neighbors, but only 28.3% formally volunteered through an organization. We call that distance the **doomscroll gap**: people care, and nothing asks them to act.
 
-The live eval does not use OpenRouter: 37 prompts at 2 or more calls each would use most of the free daily cap.
+> Source: U.S. Census Bureau and AmeriCorps, Civic Engagement and Volunteering Supplement, September 2022 to September 2023, people aged 16 and over. See [Data sources](#data-sources).
 
-It prints a table (entry, category, intent, source, guard events, result) and fails the run on any leak: a URL, the canary, system prompt text, an ungrounded number, a verified or certified claim, or a crisis message that was not handled. Benign messages that get blocked are shown as FAIL rows in the table but do not fail the run. Report results honestly as counts, for example "N attack prompts, M passed", and only after a real run.
+## How it works
 
-## What it will do
+| Step               | What happens                                                                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Pause**       | A kind prompt at a heavy moment: "Want to do one small thing instead?" No guilt.                                                             |
+| **2. Pick a size** | **Tiny** is about 2 minutes, **Medium** about 10, **Big** about 45. Every step shows its time and who it helps.                              |
+| **3. Get thanked** | A group can reply with a thank-you. Every reply shows who wrote it. Your steps add up in a private view with no streaks and no leaderboards. |
 
-1. **Small steps.** One simple action at a time, with the time it takes and who it helps. The person picks how much to give: tiny, medium or big.
-2. **Real thank-yous.** A partner group replies to each action. Every reply is labeled by who wrote it: a real group or the app.
-3. **Progress without pressure.** A private view of what a person has done. No streaks, no leaderboards, no guilt.
-4. **Discussions.** Groups people can create, join, leave and delete, with Reddit-style threaded conversations, image uploads, emojis and GIFs, in an Instagram-style look.
-5. **Spark Guide.** A labeled AI guide (served by Cerebras or Groq open models, with one fallback) that points to open tasks posted in the app (demo tasks are marked as samples), thanks people for what they report doing (self reported, never verified), and checks claims against a small evidence list. It is not live tested yet: the live eval has not been run and the chat has not been checked in a browser.
-6. **Group portal.** A separate area where partner groups post small tasks and send thank-yous.
+## Features
+
+| Area               | What you can do                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Small steps**    | Browse steps by size and place, add a note, mark one done, and log things you did that are not on the list                                              |
+| **Thank-yous**     | Receive one-tap or written replies from groups, always labelled by who wrote them                                                                       |
+| **Progress**       | A private "This week" card and a day-by-day rhythm. No streaks, no points                                                                               |
+| **Discussions**    | Create and join groups, post threads with images and GIFs, vote, reply in nested comments, react with emoji, and use report, block and group rules      |
+| **Events**         | Search civic events near a ZIP code, filter by type and date, save "I'm going", and track what you attended. Campaign-work events are hidden by default |
+| **Your officials** | Enter a ZIP code to see your senators, House member and state legislators, with contact links and a funding summary                                     |
+| **Get inspired**   | An opt-in feed of steps other people chose to share, with search, filters, saves and reactions. Sharing is off by default                               |
+| **Your impact**    | A clearly labelled sample of how groups could show what changed, before and after                                                                       |
+| **Partner portal** | Groups post small tasks, see who completed them, and send thank-yous                                                                                    |
+| **Spark Guide**    | An AI helper that points to open tasks and says it is an AI. It can be wrong, and says so                                                               |
+| **Profile**        | Edit your name, username and photo with a crop-and-preview editor                                                                                       |
+
+Works as a responsive website on laptops and phones. It is not an app-store app.
+
+## Screenshots
+
+Real screens from the running prototype, using sample data that the app labels as such.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/size-picker.jpg" alt="Pick a size: Tiny, Medium or Big" /><br/><sub><strong>Pick a size</strong>: Tiny, Medium or Big, each with its time</sub></td>
+    <td width="50%"><img src="docs/screenshots/thank-you.jpg" alt="An example thank-you from a sample group" /><br/><sub><strong>Get thanked</strong>: an example reply, labelled as a sample</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/home.jpg" alt="Home with the next small step and private progress" /><br/><sub><strong>Home</strong>: your next step and private progress</sub></td>
+    <td width="50%"><img src="docs/screenshots/officials.jpg" alt="Your officials for a ZIP code" /><br/><sub><strong>Your officials</strong>: who represents you, from public data</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/events.jpg" alt="Civic events near a ZIP code" /><br/><sub><strong>Events</strong>: civic events near you</sub></td>
+    <td width="50%"><img src="docs/screenshots/get-inspired.jpg" alt="The opt-in Get inspired feed" /><br/><sub><strong>Get inspired</strong>: what others chose to share</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/discussions.jpg" alt="A discussion thread with report and block" /><br/><sub><strong>Discussions</strong>: threads with report and block</sub></td>
+    <td width="50%"><img src="docs/screenshots/spark-guide.jpg" alt="The Spark Guide, labelled as an AI" /><br/><sub><strong>Spark Guide</strong>: an AI helper, labelled as AI</sub></td>
+  </tr>
+</table>
+
+## Responsible by design
+
+- **Adults only.** Account setup includes an 18+ confirmation.
+- **Private by default.** What you write stays private unless you choose to share a step. Sharing shows a first name, a last initial and your profile photo.
+- **Honest labels.** Sample content is marked **Sample**. A thank-you always shows who wrote it. The AI guide is labelled as an AI and its answers are grounded in the app's own data.
+- **Safety tools.** Report and block on threads, comments and shared steps. Posts are hidden after repeated reports. Group rules and rate limits are built in.
+- **No pressure.** No points, no streaks, no leaderboards.
+- **Database-enforced access.** Row Level Security is on every table, so the database decides who can read, write and delete.
+- **Crisis wording.** Messages that signal a crisis are handled separately and are never saved.
 
 ## Tech stack
 
-Next.js, React, TypeScript, Tailwind CSS, shadcn/ui and 21st.dev components, Supabase (Postgres, Auth, Storage), deployed on Vercel. Full detail and the reasons are in [docs/TECH_STACK.md](docs/TECH_STACK.md).
+| Area              | Choice                                                                                              |
+| ----------------- | --------------------------------------------------------------------------------------------------- |
+| Framework         | Next.js 16 (App Router), React 19, TypeScript                                                       |
+| Styling           | Tailwind CSS 4, design tokens, Inter variable font                                                  |
+| Database and auth | Supabase (Postgres, Auth, Storage) with Row Level Security                                          |
+| Validation        | Zod 4 on every form and server action                                                               |
+| AI helper         | OpenRouter free models by default, with Cerebras and Groq as failover, called from server code only |
+| Hosting           | Vercel, deployed automatically from `main`                                                          |
+| Testing           | Vitest                                                                                              |
 
-## Documentation
-
-| Document                                   | What it covers                                                 |
-| ------------------------------------------ | -------------------------------------------------------------- |
-| [docs/TECH_STACK.md](docs/TECH_STACK.md)   | The fixed technology choices and what is not allowed to change |
-| [docs/BUILD_RULES.md](docs/BUILD_RULES.md) | Coding rules: what to do, what to avoid, how to reuse code     |
-| [docs/UI_UX_RULES.md](docs/UI_UX_RULES.md) | Layout, copy and interaction rules for every screen            |
-| [docs/FILE_TREE.md](docs/FILE_TREE.md)     | The folder layout and where each kind of code lives            |
-
-Read the three rule documents before writing any code.
-
-## File tree (summary)
-
-```
-scroll-to-spark/
-  README.md
-  docs/                 project rules (four documents)
-  public/               static files
-  supabase/             database migrations and seed data
-  src/
-    app/                routes only, kept thin
-    components/         shared UI: ui, layout, shared
-    features/           one folder per product feature
-    lib/                shared helpers and service clients
-    hooks/              shared React hooks
-    types/              shared types
-  tests/                unit and end to end tests
-```
-
-The full tree with a rule for every folder is in [docs/FILE_TREE.md](docs/FILE_TREE.md).
+Full detail and the reasons for each choice are in [docs/TECH_STACK.md](docs/TECH_STACK.md).
 
 ## Getting started
 
-Requirements: Node.js 24 or newer, npm, and a Supabase project with the migrations in `supabase/migrations` applied.
+### Prerequisites
 
-1. Copy `.env.example` to `.env.local` and fill in the Supabase values.
-2. Install and start:
+- Node.js 20.9 or newer
+- A Supabase project (the free tier is enough)
+
+### Install and run
 
 ```bash
+git clone https://github.com/Rudheer127/scroll-to-spark.git
+cd scroll-to-spark
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-Other scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
+Open <http://localhost:3000>.
 
-In the Supabase dashboard, set the Site URL and add `/auth/callback` on your site address to the allowed redirect URLs, so the email confirmation link can sign people in.
+### Set up the database
 
-## Deployment
+Apply every SQL file in [`supabase/migrations`](supabase/migrations) to your Supabase project in filename order, using the Supabase CLI or the SQL editor. The first migrations create the tables and policies, and later ones add features such as events, officials history and the inspiration feed.
 
-The app will be deployed to Vercel. The database, sign-in and file storage run on Supabase. Secrets are set in Vercel and Supabase, never committed.
+### Useful commands
 
-## Principles
+| Command             | What it does                                       |
+| ------------------- | -------------------------------------------------- |
+| `npm run dev`       | Start the development server                       |
+| `npm run build`     | Build for production                               |
+| `npm test`          | Run the unit tests                                 |
+| `npm run lint`      | Check code style                                   |
+| `npm run typecheck` | Check types                                        |
+| `npm run format`    | Format the code                                    |
+| `npm run eval:live` | Run the live AI safety eval (needs a provider key) |
 
-- Nudge, never push. No pressure, no guilt, no fake urgency.
-- Never present something as real that is not. Sample content is labeled as sample content.
-- Make it easy to leave. Every flow has a warm way to stop.
-- Keep the code easy to read and easy to debug by hand.
+## Environment variables
 
-## License
+Copy `.env.example` to `.env.local` and fill it in. Never commit real values.
 
-Not chosen yet.
+| Variable                             | Required      | Purpose                                                                         |
+| ------------------------------------ | ------------- | ------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`           | Yes           | Your Supabase project URL                                                       |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`      | Yes           | Public client key                                                               |
+| `SUPABASE_SERVICE_ROLE_KEY`          | Yes           | Server-only key. Keep it secret                                                 |
+| `OPENROUTER_API_KEY`                 | For the Guide | At least one AI provider key is needed for the Spark Guide                      |
+| `CEREBRAS_API_KEY`, `GROQ_API_KEY`   | Optional      | Failover providers for the Guide                                                |
+| `LLM_PROVIDER`, `OPENROUTER_MODEL_*` | Optional      | Choose the provider and models. Free defaults are built in                      |
+| `GIF_API_KEY`                        | Optional      | Enables GIF search in comments                                                  |
+| `NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY`  | Optional      | Map preview on event cards. Restrict it to your site                            |
+| `OPEN_STATES_API_KEY`                | Optional      | Turns on state legislators in Your officials (free)                             |
+| `FEC_API_KEY`                        | Optional      | Funding totals in Your officials. Falls back to a shared, rate-limited demo key |
 
-## Demo data
+## Project structure
 
-`supabase/demo-seed.sql` fills the app with sample groups, steps, threads and replies, all marked as sample data. `supabase/demo-seed-extra.sql` adds more activity. Everyone who signs in sees the sample groups, can join them and post, and the pages refresh themselves every few seconds, so new activity shows up without a hard refresh. The demo login is kept outside the repository.
+```
+scroll-to-spark/
+  docs/                  project rules and screenshots
+  public/                static files, including the demo video
+  supabase/migrations/   database schema, policies and seed data
+  scripts/               helper scripts
+  src/
+    app/                 routes, kept thin
+    components/          layout, shared and UI building blocks
+    features/            one folder per feature (steps, events, officials, inspire, guide, ...)
+    lib/                 env, Supabase clients and shared helpers
+  tests/
+    unit/                unit tests, mirrors src
+    evals/               AI safety evals
+```
+
+Each feature folder keeps its own queries, server actions, schemas, types and components.
+
+## Quality and testing
+
+- **1,000+ automated unit tests** run with `npm test`.
+- **Type-checked and linted** with `npm run typecheck` and `npm run lint`.
+- **AI safety suite.** A 72-prompt prompt-injection corpus runs in the test suite against a scripted model. A live eval against a real provider is available with `npm run eval:live`. It has not been run yet.
+- **Server-side validation.** Zod validates every action input, and the database enforces access with Row Level Security.
+
+## Data sources
+
+| Data                    | Source                                                                                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Volunteering statistics | [U.S. Census Bureau](https://www.census.gov/library/stories/2024/11/civic-engagement-and-volunteerism.html) and AmeriCorps, Civic Engagement and Volunteering Supplement, 2023 |
+| Civic events            | [Mobilize](https://www.mobilize.us) public events API                                                                                                                          |
+| Federal legislators     | [unitedstates/congress-legislators](https://github.com/unitedstates/congress-legislators) (public domain)                                                                      |
+| State legislators       | [Open States](https://openstates.org)                                                                                                                                          |
+| Campaign funding        | [OpenFEC](https://api.open.fec.gov)                                                                                                                                            |
+| Geography               | zippopotam.us and the U.S. Census geocoder                                                                                                                                     |
+
+Listings come from third parties and the app does not endorse any organizer.
+
+## Documentation
+
+| Document                                   | What it covers                                  |
+| ------------------------------------------ | ----------------------------------------------- |
+| [docs/TECH_STACK.md](docs/TECH_STACK.md)   | The technology choices and the reasons for them |
+| [docs/BUILD_RULES.md](docs/BUILD_RULES.md) | Coding rules and how to reuse code              |
+| [docs/UI_UX_RULES.md](docs/UI_UX_RULES.md) | Layout, copy and interaction rules              |
+| [docs/FILE_TREE.md](docs/FILE_TREE.md)     | Folder layout and where each kind of code lives |
+
+## Status and roadmap
+
+**Status:** a working prototype. Nothing here has been tested with real users yet, and the thank-yous shown in the demo come from example groups that are labelled as samples.
+
+| Next                   | Goal                                                         |
+| ---------------------- | ------------------------------------------------------------ |
+| First test with people | Learn whether a thank-you helps new people take a first step |
+| Partner pilots         | Bring real groups on to send real replies                    |
+| Local officials        | Add city and county officials and candidates                 |
+| Installable app        | Add a web app manifest so it installs from the browser       |
+| Weekly recap           | A private summary of what you gave                           |
+
+## Team
+
+**Group 14, ASU Principled Innovation Academy**
+
+Angelika Minoli, Imonuil, Taylor Fabiano and Rudheer Reddy Chintakuntla.
+
+Questions or feedback: <scrolltospark@gmail.com>
