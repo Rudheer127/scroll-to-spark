@@ -381,6 +381,51 @@ export type Database = {
           },
         ];
       };
+      group_verification_requests: {
+        Row: {
+          contact: string;
+          created_at: string;
+          group_id: string;
+          id: string;
+          proof_note: string;
+          requested_by: string;
+          status: string;
+        };
+        Insert: {
+          contact: string;
+          created_at?: string;
+          group_id: string;
+          id?: string;
+          proof_note: string;
+          requested_by: string;
+          status?: string;
+        };
+        Update: {
+          contact?: string;
+          created_at?: string;
+          group_id?: string;
+          id?: string;
+          proof_note?: string;
+          requested_by?: string;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "group_verification_requests_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "group_verification_requests_requested_by_fkey";
+            columns: ["requested_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       groups: {
         Row: {
           color: string;
@@ -392,6 +437,7 @@ export type Database = {
           name: string;
           owner_id: string;
           slug: string;
+          verified: boolean;
         };
         Insert: {
           color?: string;
@@ -403,6 +449,7 @@ export type Database = {
           name: string;
           owner_id: string;
           slug: string;
+          verified?: boolean;
         };
         Update: {
           color?: string;
@@ -414,6 +461,7 @@ export type Database = {
           name?: string;
           owner_id?: string;
           slug?: string;
+          verified?: boolean;
         };
         Relationships: [
           {
@@ -431,27 +479,51 @@ export type Database = {
           avatar_url: string | null;
           created_at: string;
           display_name: string | null;
+          first_name: string | null;
           id: string;
           is_demo: boolean;
+          last_name: string | null;
           username: string;
+          age_confirmed_at: string | null;
+          interests: string[];
+          minutes_per_week: number | null;
+          needs: string | null;
+          onboarded_at: string | null;
+          place_pref: string | null;
         };
         Insert: {
           avatar_color?: string;
           avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
+          first_name?: string | null;
           id: string;
           is_demo?: boolean;
+          last_name?: string | null;
           username: string;
+          age_confirmed_at?: string | null;
+          interests?: string[];
+          minutes_per_week?: number | null;
+          needs?: string | null;
+          onboarded_at?: string | null;
+          place_pref?: string | null;
         };
         Update: {
           avatar_color?: string;
           avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
+          first_name?: string | null;
           id?: string;
           is_demo?: boolean;
+          last_name?: string | null;
           username?: string;
+          age_confirmed_at?: string | null;
+          interests?: string[];
+          minutes_per_week?: number | null;
+          needs?: string | null;
+          onboarded_at?: string | null;
+          place_pref?: string | null;
         };
         Relationships: [];
       };
